@@ -1,0 +1,12 @@
+.vscode
+build
+music
+tiled-maps/tilesets
+tiled-maps/rules.txt
+tileset-converter/obj
+tileset-converter/tileset-converted
+tools/obj
+tools/tools
+tools/pch.hpp.gch
+gba-modern.code-workspace
+gba-modern.*

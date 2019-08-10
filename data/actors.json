@@ -1,0 +1,7 @@
+{
+    "Bumper":
+    {
+        "header": "gameplay/actors/Bumper.hpp",
+        "params": []
+    }
+}
