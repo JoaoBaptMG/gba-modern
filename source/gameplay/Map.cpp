@@ -36,7 +36,7 @@ void Map::loadTileset(const TilesetData* tileset)
     memcpy32(tileFlags, tileset->tileFlags, sizeof(tileFlags) / sizeof(u32));
 
     // Update the control register
-    if (tileset->flags | Flags::Is8bpp) REG_BG0CNT |= BG_8BPP;
+    if (tileset->flags & Flags::Is8bpp) REG_BG0CNT |= BG_8BPP;
     else REG_BG0CNT &= ~BG_8BPP;
 }
 
