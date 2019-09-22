@@ -8,16 +8,21 @@
 #include "graphics.hpp"
 #include "GameScene.hpp"
 
+// constexpr utilities
 constexpr u16 SB = 31;
+constexpr u16 ScreenBlockTiles = 32;
+constexpr SCR_ENTRY* ScreenLocation(int screenDestX, int screenDestY)
+{
+    return &se_mem[SB][ScreenBlockTiles * screenDestY + screenDestX];
+}
 
 // Flags for collision detection and animation
-extern u8 tileFlags[NumTiles] IWRAM_DATA;
-u8 tileFlags[NumTiles];
+u8 tileFlags[NumTiles] IWRAM_DATA;
 
 void Map::init()
 {
-    // Configure the background, put it in medium priority, and separate
-    // two screen blocks for it
+    // Configure the background, put it in medium prioritileY, and separate
+    // one screen block for it
     REG_BG0CNT = BG_PRIO(1) | BG_CBB(0) | BG_4BPP | BG_SBB(SB) | BG_REG_32x32;
 }
 
@@ -52,49 +57,49 @@ void Map::loadActors()
 }
 
 // A single tile
-static inline void transferTile(const MapData& map, u16 tx, u16 ty, u16 svx, u16 svy)
+static inline void transferTile(const MapData& map, u16 tileX, u16 tileY, u16 screenDestX, u16 screenDestY)
 {
-    const auto& tile = map.tileGraphics(tx, ty);
-    se_mem[SB][32*svy + svx] = tile.topLeft;
-    se_mem[SB][32*svy + svx+1] = tile.topRight;
-    se_mem[SB][32*(svy+1) + svx] = tile.bottomLeft;
-    se_mem[SB][32*(svy+1) + svx+1] = tile.bottomRight;
+    const Tile& tile = map.tileGraphics(tileX, tileY);
+    *ScreenLocation(screenDestX, screenDestY) = tile.topLeft;
+    *ScreenLocation(screenDestX + 1, screenDestY) = tile.topRight;
+    *ScreenLocation(screenDestX, screenDestY + 1) = tile.bottomLeft;
+    *ScreenLocation(screenDestX + 1, screenDestY + 1) = tile.bottomRight;
 }
 
 // Copy a single fullscreen area of the map
 void Map::copyFullScreen()
 {
     // Get the actual tile indices
-    u16 tx = gameScene().cameraX / 16;
-    u16 ty = gameScene().cameraY / 16;
+    u16 tileX = gameScene().cameraX / TileSize;
+    u16 tileY = gameScene().cameraY / TileSize;
 
     // Update the "previous" values
-    prevtx = tx;
-    prevty = ty;
+    prevTileX = tileX;
+    prevTileY = tileY;
 
     // Get the screenblock indices
-    u16 svx = this->svx = (tx % 16) * 2;
-    u16 svy = this->svy = (ty % 16) * 2;
+    u16 screenDestX = (2 * tileX) % ScreenBlockTiles;
+    u16 screenDestY = (2 * tileY) % ScreenBlockTiles;
 
     // Now, transfer the data
     for (u16 j = 0; j < 11; j++)
     {
         // If the screen fits in a single screenblock, do it
-        if (svx == 0) for (u16 i = 0; i < 16; i++)
-            transferTile(curMap, tx+i, ty, svx+2*i, svy);
+        if (screenDestX == 0) for (u16 i = 0; i < 16; i++)
+            transferTile(curMap, tileX+i, tileY, screenDestX+2*i, screenDestY);
         // Else, do it in two runs
         else
         {
-            auto size = 16 - svx/2;
+            auto size = 16 - screenDestX/2;
             for (u16 i = 0; i < size; i++) // In the first screenblock
-                transferTile(curMap, tx+i, ty, svx + 2*i, svy);
+                transferTile(curMap, tileX+i, tileY, screenDestX + 2*i, screenDestY);
             for (u16 i = size; i < 16; i++) // In the second screenblock
-                transferTile(curMap, tx+i, ty, svx + 2*i - 32, svy);
+                transferTile(curMap, tileX+i, tileY, screenDestX + 2*i - ScreenBlockTiles, screenDestY);
         }
 
-        svy += 2;
-        svy %= 32;
-        ty++;
+        screenDestY += 2;
+        screenDestY %= ScreenBlockTiles;
+        tileY++;
     }
 }
 
@@ -106,82 +111,87 @@ void Map::vblank()
 }
 
 // Schedules to copy a horizontal stripe of the map
-static inline void scheduleHorizontal(const MapData& map, u16 tx, u16 ty, u16 svx, u16 svy)
+static inline void scheduleHorizontal(const MapData& map, u16 tileX, u16 tileY)
 {
+    u16 screenDestX = (2 * tileX) % ScreenBlockTiles;
+    u16 screenDestY = (2 * tileY) % ScreenBlockTiles;
+    constexpr int NumTiles = SCREEN_WIDTH / TileSize + 1;
+
     // The maximum number of tiles we can transfer before reaching the edge of the screen
-    auto size = 16 - svx/2;
-    int dsvx = svx;
+    u16 size = NumTiles - screenDestX / 2;
 
     // Transfer the tiles to the bank
-    auto horTileBank = (u16*)graphics::newCopyCommand32(&se_mem[SB][32*svy], 32);
-    for (u16 i = 0; i < 16; i++)
+    u16* command = (u16*)graphics::newCopyCommand32(ScreenLocation(0, screenDestY), 32);
+    for (u16 i = 0; i < NumTiles; i++)
     {
         // If we reach the edge, go back to the beginning
-        if (i == size) dsvx -= 32;
+        if (i == size) screenDestX -= ScreenBlockTiles;
 
-        const auto& tile = map.tileGraphics(tx+i, ty);
-        horTileBank[dsvx+2*i] = tile.topLeft;
-        horTileBank[dsvx+2*i+1] = tile.topRight;
-        horTileBank[dsvx+2*i+32] = tile.bottomLeft;
-        horTileBank[dsvx+2*i+33] = tile.bottomRight;
+        const Tile& tile = map.tileGraphics(tileX+i, tileY);
+        command[screenDestX + 2*i] = tile.topLeft;
+        command[screenDestX + 2*i+1] = tile.topRight;
+        command[screenDestX + 2*i+32] = tile.bottomLeft;
+        command[screenDestX + 2*i+33] = tile.bottomRight;
     }
 }
 
 // Schedules to copy a vertical stripe of the map
-static inline void scheduleVertical(const MapData& map, u16 tx, u16 ty, u16 svx, u16 svy)
+static inline void scheduleVertical(const MapData &map, u16 tileX, u16 tileY)
 {
+    // Compute the destination of the tiles
+    u16 screenDestX = (2 * tileX) % ScreenBlockTiles;
+    u16 screenDestY = (2 * tileY) % ScreenBlockTiles;
+    constexpr int NumTiles = SCREEN_HEIGHT / TileSize + 1;
+
     // The maximum number of tiles we can transfer before reaching the edge of the screen
-    auto size = std::min(11, 16 - svy/2);
+    u16 size = std::min(NumTiles, (ScreenBlockTiles - screenDestY) / 2);
 
     // Transfer the tiles to the bank
-    auto vertTileBank = (u16*)graphics::newVerticalCopyCommand32(&se_mem[SB][32*svy + svx], 2*size);
-    for (u16 j = 0; j < 11; j++)
+    auto command = (u16*)graphics::newVerticalCopyCommand32(ScreenLocation(screenDestX, screenDestY), 2*size);
+    for (u16 j = 0; j < NumTiles; j++)
     {
         // Pick a new copy command if we reach the edge of the screen 
-        if (j == size) vertTileBank = (u16*)graphics::newVerticalCopyCommand32(&se_mem[SB][svx], 22-2*size);
+        if (j == size) command = (u16*)graphics::newVerticalCopyCommand32(ScreenLocation(screenDestX, 0), 2*(NumTiles-size));
 
         // Fill in the tiles in the right order, since the vertical command
         // copies two tiles per line
-        const auto& tile = map.tileGraphics(tx, ty+j);
-        *vertTileBank++ = tile.topLeft;
-        *vertTileBank++ = tile.topRight;
-        *vertTileBank++ = tile.bottomLeft;
-        *vertTileBank++ = tile.bottomRight;
+        const Tile& tile = map.tileGraphics(tileX, tileY + j);
+        command[0] = tile.topLeft;
+        command[1] = tile.topRight;
+        command[2] = tile.bottomLeft;
+        command[3] = tile.bottomRight;
+        command += 4;
     }
 }
 
 void Map::update()
 {
-    u16 tx = gameScene().cameraX / TileSize;
-    u16 ty = gameScene().cameraY / TileSize;
+    u16 tileX = gameScene().cameraX / TileSize;
+    u16 tileY = gameScene().cameraY / TileSize;
 
     // Update the screenblock according to the offset positions
     // First in X - using the previous Y to avoid seams
-    while (tx > prevtx)
+    while (tileX > prevTileX)
     {
-        prevtx++;
-        svx = (svx + 2u) & 31;
-        scheduleVertical(curMap, prevtx+15, prevty, (svx + 30) & 31, svy);
+        prevTileX++;
+        scheduleVertical(curMap, prevTileX+15, prevTileY);
     }
-    while (tx < prevtx)
+    while (tileX < prevTileX)
     {
-        prevtx--;
-        svx = (svx + 30u) & 31;     // aka (svx-2) & 31, I'm worrying about signedness issues here
-        scheduleVertical(curMap, prevtx, prevty, svx, svy);
+        prevTileX--;
+        scheduleVertical(curMap, prevTileX, prevTileY);
     }
 
     // Then in Y - using the new X
-    while (ty > prevty)
+    while (tileY > prevTileY)
     {
-        prevty++;
-        svy = (svy + 2u) & 31;
-        scheduleHorizontal(curMap, prevtx, prevty+10, svx, (svy + 20) & 31);
+        prevTileY++;
+        scheduleHorizontal(curMap, prevTileX, prevTileY+10);
     }
-    while (ty < prevty)
+    while (tileY < prevTileY)
     {
-        prevty--;
-        svy = (svy + 30u) & 31;
-        scheduleHorizontal(curMap, prevtx, prevty, svx, svy);
+        prevTileY--;
+        scheduleHorizontal(curMap, prevTileX, prevTileY);
     }
 }
 

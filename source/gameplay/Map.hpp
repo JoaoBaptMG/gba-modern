@@ -21,8 +21,7 @@ FLAGS_ENUM(CollisionResult)
 class Map final
 {
     MapData curMap;
-    u16 prevtx, prevty;
-    u16 svx, svy;
+    u16 prevTileX, prevTileY;
 
     void loadTileset(const TilesetData* tileset);
     GameScene& gameScene();
