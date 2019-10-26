@@ -24,6 +24,8 @@ static u32 verticalBuffer[MaxVerticalWords] IWRAM_DATA;
 static u32 objCount IWRAM_DATA, copyCount IWRAM_DATA, verticalCount IWRAM_DATA;
 static u32 tileCount EWRAM_BSS, palettesUsed EWRAM_BSS;
 
+static BuddyObjectAllocator buddy EWRAM_BSS;
+
 void graphics::init()
 {
     objCount = 0;
@@ -108,12 +110,14 @@ void graphics::resetObjectsAndPalettes()
     palettesUsed = 0;
 }
 
-u32 graphics::allocateObjTiles(u32 numTiles)
+u16 graphics::allocateObjTiles(SpriteSize size)
 {
-    ASSERT(tileCount + numTiles <= MaxObjTiles);
-    auto oldTileCount = tileCount;
-    tileCount += numTiles;
-    return oldTileCount;
+    return buddy.allocBlock(size);
+}
+
+void graphics::freeObjTiles(u16 blocks)
+{
+    buddy.freeBlock(blocks);
 }
 
 void graphics::allocateObjPalettes(u32 numPalettes, u32* indices)

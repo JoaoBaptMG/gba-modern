@@ -9,6 +9,8 @@
 #include <tonc.h>
 #include <array>
 
+#include "BuddyObjectAllocator.hpp"
+
 namespace graphics
 {
     // Initialize the graphics module
@@ -30,8 +32,11 @@ namespace graphics
     // Resets the object allocation stack
     void resetObjectsAndPalettes();
 
-    // Grabs a new place in the object allocation stack
-    u32 allocateObjTiles(u32 numTiles);
+    // Allocates a new object with the buddy allocator
+    u16 allocateObjTiles(SpriteSize size);
+
+    // Frees the object
+    void freeObjTiles(u16 blocks);
 
     // Grabs new palette entries
     void allocateObjPalettes(u32 numPalettes, u32* indices);

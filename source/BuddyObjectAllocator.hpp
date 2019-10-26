@@ -8,10 +8,6 @@
 
 #include <tonc.h>
 
-// Log 2 of the number of tiles that can be allocated
-constexpr u32 LogNumTiles = 10;
-constexpr u32 NumTiles = 1 << LogNumTiles;
-
 // Sprite size enum
 enum class SpriteSize : u32
 {
@@ -30,6 +26,9 @@ constexpr u16 NoTile = 0xFFFF;
 
 class BuddyObjectAllocator final
 {
+    // Log 2 of the number of tiles that can be allocated
+    enum : u32 { LogNumTiles = 10, NumTiles = 1 << LogNumTiles };
+
     // The block metadata: the linked list and the free list
     struct Block { u16 prev, next; };
     Block blocks[NumTiles];

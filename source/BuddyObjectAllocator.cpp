@@ -4,7 +4,7 @@
 // Provide a tile memory allocator for the VRAM, for the object tiles
 //--------------------------------------------------------------------------------
 
-#include "BuddyObjAlloc.hpp"
+#include "BuddyObjectAllocator.hpp"
 #include "util/gba-assert.hpp"
 
 // In use flag
