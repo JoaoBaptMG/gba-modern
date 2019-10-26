@@ -15,7 +15,7 @@ constexpr s32f8 BumperHeight = 16;
 
 void Bumper::loadGraphics()
 {
-    tileId = graphics::allocateObjTiles(sizeof(bumper_png_tiles) / sizeof(TILE));
+    tileId = graphics::allocateObjTiles(SpriteSize::_16x16_4bpp);
     graphics::allocateObjPalettes(1, &paletteId);
 
     memcpy32(&tile_mem_obj[0][tileId], bumper_png_tiles, sizeof(bumper_png_tiles) / sizeof(u32));

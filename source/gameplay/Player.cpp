@@ -15,7 +15,7 @@ constexpr auto DecaySpeed = JumpSpeed / 2;
 
 void Player::init(s32f8 x, s32f8 y)
 {
-    tileId = graphics::allocateObjTiles(sizeof(player_png_tiles) / sizeof(TILE));
+    tileId = graphics::allocateObjTiles(SpriteSize::_16x32_4bpp);
     graphics::allocateObjPalettes(1, &paletteId);
 
     // Copy the player's data to the main palette
