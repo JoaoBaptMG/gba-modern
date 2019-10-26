@@ -67,11 +67,11 @@ u16 BuddyObjectAllocator::allocBlock(SpriteSize size)
     return NoTile;
 }
 
+// Free a block, possibly getting its order
 void BuddyObjectAllocator::freeBlock(u16 tile)
 {
     // Bail out if somehow we have been fed an already free block
-    if (blocks[tile].prev == NoTile || !(blocks[tile].prev & InUse) ||
-        blocks[tile].next == NoTile || !(blocks[tile].next & InUse)) return;
+    if (blocks[tile].prev == NoTile || !(blocks[tile].prev & InUse)) return;
 
     // Get the order and assure it is valid
     uint order = blocks[tile].prev &~ InUse;
