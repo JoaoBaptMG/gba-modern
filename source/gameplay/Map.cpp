@@ -9,8 +9,8 @@
 #include "GameScene.hpp"
 
 // constexpr utilities
-constexpr u16 SB = 31;
-constexpr u16 ScreenBlockTiles = 32;
+constexpr uint SB = 31;
+constexpr uint ScreenBlockTiles = 32;
 constexpr SCR_ENTRY* ScreenLocation(int screenDestX, int screenDestY)
 {
     return &se_mem[SB][ScreenBlockTiles * screenDestY + screenDestX];
@@ -70,16 +70,16 @@ static inline void transferTile(const MapData& map, u16 tileX, u16 tileY, u16 sc
 void Map::copyFullScreen()
 {
     // Get the actual tile indices
-    u16 tileX = gameScene().cameraX / TileSize;
-    u16 tileY = gameScene().cameraY / TileSize;
+    uint tileX = gameScene().cameraX / TileSize;
+    uint tileY = gameScene().cameraY / TileSize;
 
     // Update the "previous" values
     prevTileX = tileX;
     prevTileY = tileY;
 
     // Get the screenblock indices
-    u16 screenDestX = (2 * tileX) % ScreenBlockTiles;
-    u16 screenDestY = (2 * tileY) % ScreenBlockTiles;
+    uint screenDestX = (2 * tileX) % ScreenBlockTiles;
+    uint screenDestY = (2 * tileY) % ScreenBlockTiles;
 
     // Now, transfer the data
     for (u16 j = 0; j < 11; j++)
@@ -113,16 +113,16 @@ void Map::vblank()
 // Schedules to copy a horizontal stripe of the map
 static inline void scheduleHorizontal(const MapData& map, u16 tileX, u16 tileY)
 {
-    u16 screenDestX = (2 * tileX) % ScreenBlockTiles;
-    u16 screenDestY = (2 * tileY) % ScreenBlockTiles;
-    constexpr int NumTiles = SCREEN_WIDTH / TileSize + 1;
+    uint screenDestX = (2 * tileX) % ScreenBlockTiles;
+    uint screenDestY = (2 * tileY) % ScreenBlockTiles;
+    constexpr uint NumTiles = SCREEN_WIDTH / TileSize + 1;
 
     // The maximum number of tiles we can transfer before reaching the edge of the screen
-    u16 size = NumTiles - screenDestX / 2;
+    uint size = NumTiles - screenDestX / 2;
 
     // Transfer the tiles to the bank
     u16* command = (u16*)graphics::newCopyCommand32(ScreenLocation(0, screenDestY), 32);
-    for (u16 i = 0; i < NumTiles; i++)
+    for (uint i = 0; i < NumTiles; i++)
     {
         // If we reach the edge, go back to the beginning
         if (i == size) screenDestX -= ScreenBlockTiles;
@@ -139,16 +139,16 @@ static inline void scheduleHorizontal(const MapData& map, u16 tileX, u16 tileY)
 static inline void scheduleVertical(const MapData &map, u16 tileX, u16 tileY)
 {
     // Compute the destination of the tiles
-    u16 screenDestX = (2 * tileX) % ScreenBlockTiles;
-    u16 screenDestY = (2 * tileY) % ScreenBlockTiles;
-    constexpr int NumTiles = SCREEN_HEIGHT / TileSize + 1;
+    uint screenDestX = (2 * tileX) % ScreenBlockTiles;
+    uint screenDestY = (2 * tileY) % ScreenBlockTiles;
+    constexpr uint NumTiles = SCREEN_HEIGHT / TileSize + 1;
 
     // The maximum number of tiles we can transfer before reaching the edge of the screen
-    u16 size = std::min(NumTiles, (ScreenBlockTiles - screenDestY) / 2);
+    uint size = std::min(NumTiles, (ScreenBlockTiles - screenDestY) / (uint)2);
 
     // Transfer the tiles to the bank
     auto command = (u16*)graphics::newVerticalCopyCommand32(ScreenLocation(screenDestX, screenDestY), 2*size);
-    for (u16 j = 0; j < NumTiles; j++)
+    for (uint j = 0; j < NumTiles; j++)
     {
         // Pick a new copy command if we reach the edge of the screen 
         if (j == size) command = (u16*)graphics::newVerticalCopyCommand32(ScreenLocation(screenDestX, 0), 2*(NumTiles-size));
@@ -166,8 +166,8 @@ static inline void scheduleVertical(const MapData &map, u16 tileX, u16 tileY)
 
 void Map::update()
 {
-    u16 tileX = gameScene().cameraX / TileSize;
-    u16 tileY = gameScene().cameraY / TileSize;
+    uint tileX = gameScene().cameraX / TileSize;
+    uint tileY = gameScene().cameraY / TileSize;
 
     // Update the screenblock according to the offset positions
     // First in X - using the previous Y to avoid seams
