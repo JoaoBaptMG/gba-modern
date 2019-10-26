@@ -9,7 +9,7 @@
 #include <tonc.h>
 #include <array>
 
-#include "BuddyObjectAllocator.hpp"
+#include "graphics/BuddyObjectAllocator.hpp"
 
 namespace graphics
 {
