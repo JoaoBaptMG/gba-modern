@@ -7,10 +7,25 @@ struct State
     std::size_t groupWidth, groupHeight;
 };
 
+struct AnimationPose
+{
+    std::size_t init, repeat, end;
+};
+
+void from_json(const nlohmann::json& j, AnimationPose& af)
+{
+    j.at(0).get_to(af.init);
+    j.at(1).get_to(af.repeat);
+    j.at(2).get_to(af.end);
+}
+
 template <typename T>
 void writeCharData(std::ostream& of, const State& state, const T& charData);
 template <typename T>
 void writeHeaderData(std::ostream& hof, const State& state, const T& charData);
+
+using AnimationData = std::map<std::string, AnimationPose>;
+void writeAnimationData(std::ostream &hof, const State &state, const AnimationData &animations, std::size_t frameStep);
 
 int spriteExport(int argc, char **argv)
 {
@@ -26,6 +41,9 @@ int spriteExport(int argc, char **argv)
     std::ifstream mdin(in + ".json");
     std::size_t maxColors = 16;
     bool preserveOrder = false;
+    bool exportAnimation = false;
+    AnimationData animations;
+    std::size_t frameStep;
     if (mdin.good())
     {
         nlohmann::json j;
@@ -36,6 +54,12 @@ int spriteExport(int argc, char **argv)
         if (j.contains("group-height")) state.groupHeight = j.at("group-height").get<std::size_t>();
         if (j.contains("max-colors")) maxColors = j.at("max-colors").get<std::size_t>();
         preserveOrder = j.contains("preserve-order") && j.at("preserve-order").get<bool>();
+        if (j.contains("animation-poses") && j.contains("animation-frames"))
+        {
+            exportAnimation = true;
+            animations = j.at("animation-poses").get<AnimationData>();
+            frameStep = j.at("animation-frames").get<std::size_t>();
+        }
     }
 
     std::ofstream of;
@@ -52,7 +76,10 @@ int spriteExport(int argc, char **argv)
     hof << "// " << outh << std::endl;
     hof << "// " << std::endl;
     hof << "#pragma once" << std::endl << std::endl;
-    hof << "#include <cstdint>" << std::endl << std::endl;
+    hof << "#include <cstdint>" << std::endl;
+    if (exportAnimation)
+        hof << "#include \"graphics/AnimationPose.hpp\"" << std::endl;
+    hof << std::endl;
 
     if (!is8bpp)
     {
@@ -68,6 +95,9 @@ int spriteExport(int argc, char **argv)
         writeCharData(of, state, charData);
         writeHeaderData(hof, state, charData);
     }
+
+    if (exportAnimation)
+        writeAnimationData(hof, state, animations, frameStep);
 
     of.close();
     hof.close();
@@ -128,4 +158,18 @@ void writeHeaderData(std::ostream& hof, const State& state, const T& charData)
 
     hof << "extern const std::uint16_t " << state.inlabel << "_palette[";
     hof << charData.palette.size() << "];" << std::endl;
+}
+
+void writeAnimationData(std::ostream &hof, const State &state, const AnimationData &animations, std::size_t frameStep)
+{
+    hof << std::endl;
+    hof << "namespace " << state.inlabel << "_animation" << std::endl;
+    hof << '{' << std::endl;
+    hof << "    constexpr std::size_t FrameStep = " << frameStep << ';' << std::endl;
+    for (const auto& p : animations)
+    {
+        hof << "    constexpr AnimationPose Animation_" << p.first << " = { ";
+        hof << p.second.init << ", " << p.second.repeat << ", " << p.second.end << " };" << std::endl;
+    }
+    hof << '}' << std::endl;
 }

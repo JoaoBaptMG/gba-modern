@@ -9,16 +9,18 @@
 #include <tonc.h>
 #include <array>
 
-#include "graphics/BuddyObjectAllocator.hpp"
+#include "graphics/SpriteSize.hpp"
 
 namespace graphics
 {
+    // No tile marker
+    constexpr u16 NoTile = 0xFFFF;
+
     // Initialize the graphics module
     void init();
 
-    // Updates the graphics module - it is put in IWRAM
-    // to improve the speed
-    void update() IWRAM_CODE;
+    // Updates the graphics module
+    void update();
 
     // Push a sprite to the shadow OAM
     void pushOAM(u16 attr0, u16 attr1, u16 attr2);
@@ -28,6 +30,9 @@ namespace graphics
 
     // Schedule a vertical copy (copy two tiles every line)
     void* newVerticalCopyCommand32(void* dst, u16 count);
+
+    // Schedule a DMA copy from the ROM
+    void romCopyCommand32(void* dst, const void* src, u16 count);
 
     // Resets the object allocation stack
     void resetObjectsAndPalettes();

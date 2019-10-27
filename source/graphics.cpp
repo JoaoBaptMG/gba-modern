@@ -5,24 +5,23 @@
 //--------------------------------------------------------------------------------
 
 #include "graphics.hpp"
+#include "graphics/BuddyObjectAllocator.hpp"
 #include "util/gba-assert.hpp"
 
 constexpr auto MaxObjs = 128;
-constexpr auto MaxCopies = 32;
-constexpr auto MaxVerticals = 8;
+constexpr u32 MaxCopyWords = 256;
+constexpr u32 MaxVerticalWords = 64;
+constexpr u32 MaxRomCopies = 32;
 
 static OBJ_ATTR shadowOAM[MaxObjs] ALIGN4;
 
-constexpr u32 MaxCopyWords = 256;
-constexpr u32 MaxVerticalWords = 64;
-
-constexpr u32 MaxObjTiles = 1024;
-
 static u32 copyBuffer[MaxCopyWords] IWRAM_DATA;
 static u32 verticalBuffer[MaxVerticalWords] IWRAM_DATA;
+struct RomCopy { const void* src; void* dst; u32 countCtl; };
+static RomCopy romCopyBuffer[MaxRomCopies] IWRAM_DATA;
 
-static u32 objCount IWRAM_DATA, copyCount IWRAM_DATA, verticalCount IWRAM_DATA;
-static u32 tileCount EWRAM_BSS, palettesUsed EWRAM_BSS;
+static u32 objCount IWRAM_DATA, copyCount IWRAM_DATA, verticalCount IWRAM_DATA, romCopyCount IWRAM_DATA;
+static u32 palettesUsed EWRAM_BSS;
 
 static BuddyObjectAllocator buddy EWRAM_BSS;
 
@@ -31,7 +30,7 @@ void graphics::init()
     objCount = 0;
     copyCount = 0;
     verticalCount = 0;
-    tileCount = 0;
+    romCopyCount = 0;
     palettesUsed = 0;
 
     oam_init(shadowOAM, MaxObjs);
@@ -65,6 +64,15 @@ void graphics::update()
         }
     }
     verticalCount = 0;
+
+    // Do all the copy commands
+    for (uint i = 0; i < romCopyCount; i++)
+    {
+        REG_DMA3SAD = (u32)romCopyBuffer[i].src;
+        REG_DMA3DAD = (u32)romCopyBuffer[i].dst;
+        REG_DMA3CNT = romCopyBuffer[i].countCtl;
+    }
+    romCopyCount = 0;
 
     // Copy the shadow OAM
     oam_copy(oam_mem, shadowOAM, MaxObjs);
@@ -104,9 +112,17 @@ void* graphics::newVerticalCopyCommand32(void* dst, u16 count)
     return verticalBuffer + (verticalCount-count);
 }
 
+void graphics::romCopyCommand32(void* dst, const void* src, u16 count)
+{
+    ASSERT(romCopyCount < MaxCopyWords);
+    romCopyBuffer[romCopyCount].dst = dst;
+    romCopyBuffer[romCopyCount].src = src;
+    romCopyBuffer[romCopyCount].countCtl = count | DMA_32NOW | DMA_ENABLE;
+    romCopyCount++;
+}
+
 void graphics::resetObjectsAndPalettes()
 {
-    tileCount = 0;
     palettesUsed = 0;
 }
 
