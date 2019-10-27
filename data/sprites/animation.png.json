@@ -1,0 +1,10 @@
+{
+    "group-width": 2,
+    "group-height": 2,
+
+    "animation-frames": 30,
+    "animation-poses":
+    {
+        "Default": [0, 0, 5]
+    }
+}

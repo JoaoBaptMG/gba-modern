@@ -8,10 +8,12 @@
 #include "IActor.hpp"
 #include "math/stdfixed.hpp"
 #include "gameplay/Position.hpp"
+#include "graphics/StreamAnimator.hpp"
 
 class Bumper final : public IActor
 {
     Position pos;
+    StreamAnimator animator;
 
     void pushGraphics(u16 cameraX, u16 cameraY);
 
