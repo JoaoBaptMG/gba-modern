@@ -9,7 +9,7 @@
 
 // Initializes all the variables
 StreamAnimator::StreamAnimator(const void *animationFrames, SpriteSize spriteSize, u16 frameTime)
-    : animationFrames(animationFrames), spriteSize(spriteSize), frameTime(frameTime),
+    : animationFrames((const TILE*)animationFrames), spriteSize(spriteSize), frameTime(frameTime),
       frameCount(0), curFrame(0), repeatFrame(0), endFrame(0), tilePointer() {}
 
 void StreamAnimator::setAnimationPose(const AnimationPose &pose)
@@ -46,7 +46,7 @@ void StreamAnimator::sendNewFrame()
 
     // Send the new frame size
     auto size = (uint)spriteSize;
-    auto frame = (TILE*)animationFrames + (curFrame << size);
+    auto frame = animationFrames + (curFrame << size);
     auto dest = &tile_mem_obj[0][getTileId()];
     graphics::romCopyCommand32(dest, frame, (sizeof(TILE)/sizeof(u32)) << size);
 }

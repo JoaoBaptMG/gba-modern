@@ -12,10 +12,11 @@
 #include "graphics/AnimationPose.hpp"
 #include "graphics/ObjectTilePointer.hpp"
 
+// The StreamAnimator starts as invisible
 class StreamAnimator final
 {
     // The pointer to the frame data
-    const void* animationFrames;
+    const TILE* animationFrames;
     // The size of the sprite requested, used in the calculations
     SpriteSize spriteSize;
     // The number of GBA frames to wait between each animation frame
