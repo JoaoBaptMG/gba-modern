@@ -7,9 +7,11 @@
 #include "graphics.hpp"
 
 #include "gameplay/GameScene.hpp"
-#include "data/sprites/animation.hpp"
 
 static SinglePaletteAllocator palette EWRAM_BSS (animation_png_palette);
+
+static FrameStore<animation_png_animation::AllocationBlocks, SpriteSize::_16x16_4bpp>
+    frameStore EWRAM_BSS (animation_png_tiles);
 
 constexpr s32f8 BumperWidth = 16;
 constexpr s32f8 BumperHeight = 16;
@@ -27,7 +29,7 @@ void Bumper::loadGraphics()
 }
 
 Bumper::Bumper(s32f8 x, s32f8 y)
-    : animator(animation_png_tiles, SpriteSize::_16x16_4bpp, animation_png_animation::FrameStep + 2 * getRandom(this) - 8)
+    : animator(frameStore, animation_png_animation::FrameStep + 2 * getRandom(this) - 8)
 {
     pos.x = x;
     pos.y = y;

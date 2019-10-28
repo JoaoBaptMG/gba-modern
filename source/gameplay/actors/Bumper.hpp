@@ -8,13 +8,17 @@
 #include "IActor.hpp"
 #include "math/stdfixed.hpp"
 #include "gameplay/Position.hpp"
-#include "graphics/StreamAnimator.hpp"
+#include "graphics/FrameAnimator.hpp"
 #include "graphics/PalettePointer.hpp"
+
+#include "data/sprites/animation.hpp"
+
+using Animator = FrameAnimator<animation_png_animation::AllocationBlocks, SpriteSize::_16x16_4bpp>;
 
 class Bumper final : public IActor
 {
     Position pos;
-    StreamAnimator animator;
+    Animator animator;
     SinglePalettePointer palettePtr;
 
     void pushGraphics(u16 cameraX, u16 cameraY);

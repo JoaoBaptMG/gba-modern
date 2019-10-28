@@ -25,7 +25,8 @@ template <typename T>
 void writeHeaderData(std::ostream& hof, const State& state, const T& charData);
 
 using AnimationData = std::map<std::string, AnimationPose>;
-void writeAnimationData(std::ostream &hof, const State &state, const AnimationData &animations, std::size_t frameStep);
+void writeAnimationData(std::ostream &hof, const State &state, const AnimationData &animations, std::size_t frameStep,
+    std::size_t totalNumFrames);
 
 int spriteExport(int argc, char **argv)
 {
@@ -78,26 +79,37 @@ int spriteExport(int argc, char **argv)
     hof << "#pragma once" << std::endl << std::endl;
     hof << "#include <cstdint>" << std::endl;
     if (exportAnimation)
+    {
+        hof << "#include <utility>" << std::endl;
         hof << "#include \"graphics/AnimationPose.hpp\"" << std::endl;
+    }
     hof << std::endl;
 
+    std::size_t numFrames;
     if (!is8bpp)
     {
         auto charData = convertPngToCharacters4bpp(in, maxColors, preserveOrder);
         charData.palette[0] = 0;
         writeCharData(of, state, charData);
         writeHeaderData(hof, state, charData);
+
+        auto framesX = (charData.chars.width() + state.groupWidth - 1) / state.groupWidth;
+        auto framesY = (charData.chars.height() + state.groupHeight - 1) / state.groupHeight;
+        numFrames = framesX * framesY;
     }
     else
     {
-        auto charData = convertPngToCharacters4bpp(in, maxColors, preserveOrder);
+        auto charData = convertPngToCharacters8bpp(in, maxColors, preserveOrder);
         charData.palette[0] = 0;
         writeCharData(of, state, charData);
         writeHeaderData(hof, state, charData);
+
+        auto framesX = (charData.chars.width() + state.groupWidth - 1) / state.groupWidth;
+        auto framesY = (charData.chars.height() + state.groupHeight - 1) / state.groupHeight;
+        numFrames = framesX * framesY;
     }
 
-    if (exportAnimation)
-        writeAnimationData(hof, state, animations, frameStep);
+    if (exportAnimation) writeAnimationData(hof, state, animations, frameStep, numFrames);
 
     of.close();
     hof.close();
@@ -160,12 +172,40 @@ void writeHeaderData(std::ostream& hof, const State& state, const T& charData)
     hof << charData.palette.size() << "];" << std::endl;
 }
 
-void writeAnimationData(std::ostream &hof, const State &state, const AnimationData &animations, std::size_t frameStep)
+std::vector<std::size_t> powersOfTwo(std::size_t k)
+{
+    std::size_t pot = 8*sizeof(std::size_t) - 1;
+    std::size_t bit = (std::size_t)1 << pot;
+
+    std::vector<std::size_t> bits;
+    while (bit)
+    {
+        if (k & bit) bits.push_back(pot);
+        bit >>= 1;
+        pot--;
+    }
+
+    return bits;
+}
+
+void writeAnimationData(std::ostream &hof, const State &state, const AnimationData &animations, std::size_t frameStep,
+    std::size_t totalNumFrames)
 {
     hof << std::endl;
     hof << "namespace " << state.inlabel << "_animation" << std::endl;
     hof << '{' << std::endl;
     hof << "    constexpr std::size_t FrameStep = " << frameStep << ';' << std::endl;
+    hof << "    using AllocationBlocks = std::index_sequence<";
+
+    bool nf = false;
+    for (auto b : powersOfTwo(totalNumFrames))
+    {
+        if (nf) hof << ", ";
+        nf = true;
+        hof << b;
+    }
+
+    hof << ">;" << std::endl << std::endl;
     for (const auto& p : animations)
     {
         hof << "    constexpr AnimationPose Animation_" << p.first << " = { ";
