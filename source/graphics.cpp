@@ -136,7 +136,7 @@ void graphics::freeObjTiles(u16 blocks)
     buddy.freeBlock(blocks);
 }
 
-void graphics::allocateObjPalettes(u32 numPalettes, u32* indices)
+void graphics::allocateObjPalettes(u32 numPalettes, u16* indices)
 {
     // Allocate a single palette at a time
     for (u32 i = 0; i < 16; i++)
@@ -151,7 +151,7 @@ void graphics::allocateObjPalettes(u32 numPalettes, u32* indices)
     ASSERT(false);
 }
 
-void graphics::freeObjPalettes(u32 numPalettes, const u32* indices)
+void graphics::freeObjPalettes(u32 numPalettes, const u16* indices)
 {
     // Free all palettes
     for (u32 j = 0; j < numPalettes; j++)

@@ -44,8 +44,8 @@ namespace graphics
     void freeObjTiles(u16 blocks);
 
     // Grabs new palette entries
-    void allocateObjPalettes(u32 numPalettes, u32* indices);
+    void allocateObjPalettes(u32 numPalettes, u16* indices);
 
     // Return the palette space allocated for the palette
-    void freeObjPalettes(u32 numPalettes, const u32* indices);
+    void freeObjPalettes(u32 numPalettes, const u16* indices);
 }

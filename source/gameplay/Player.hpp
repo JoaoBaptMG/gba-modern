@@ -18,7 +18,7 @@ class Player final
     void listenToCommands();
     GameScene& gameScene();
 
-    u32 tileId, paletteId;
+    u16 tileId, paletteId;
 
 public:
     Player() {}
