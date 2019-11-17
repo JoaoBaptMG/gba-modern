@@ -187,9 +187,6 @@ int mapExport(int argc, char **argv)
         cof << std::endl;
         cof << "extern \"C\" void map_" << inlabel << "_init(GameScene& scene)" << std::endl;
         cof << "{" << std::endl;
-        for (const auto& type : occurences)
-            cof << "    " << type << "::loadGraphics();" << std::endl;
-        cof << std::endl;
 
         std::size_t i = 0;
         for (const auto& actor : actors)

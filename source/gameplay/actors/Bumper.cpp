@@ -24,10 +24,6 @@ u16 getRandom(void* thisptr)
     return num & 7;
 }
 
-void Bumper::loadGraphics()
-{
-}
-
 Bumper::Bumper(s32f8 x, s32f8 y)
     : animator(frameStore, animation_png_animation::FrameStep + 2 * getRandom(this) - 8),
     palettePtr(palette, false)

@@ -28,6 +28,4 @@ public:
     Bumper(s32f8 x, s32f8 y);
     virtual void update(GameScene& scene) override;
     virtual ~Bumper() {}
-
-    static void loadGraphics();
 };
