@@ -29,7 +29,8 @@ void Bumper::loadGraphics()
 }
 
 Bumper::Bumper(s32f8 x, s32f8 y)
-    : animator(frameStore, animation_png_animation::FrameStep + 2 * getRandom(this) - 8)
+    : animator(frameStore, animation_png_animation::FrameStep + 2 * getRandom(this) - 8),
+    palettePtr(palette, false)
 {
     pos.x = x;
     pos.y = y;
@@ -54,15 +55,9 @@ void Bumper::update(GameScene& scene)
 
 bool Bumper::updateVisibility(bool visible)
 {
-    // Use the animator's visibility to update or not the palette pointer
-    if (!animator.isVisible() && visible)
-        palettePtr = SinglePalettePointer(palette);
-    else if (animator.isVisible() && !visible)
-        palettePtr = SinglePalettePointer();
-
-    // Set the animator's visibility
+    // Set the visibilities
+    palettePtr.setActive(visible);
     animator.setVisible(visible);
-
     return visible;
 }
 

@@ -124,17 +124,15 @@ public:
 template <typename T, SpriteSize Size>
 class FrameAnimator
 {
-    FrameStore<T, Size>& store;
     FrameStorePointer<T, Size> pointer;
     FrameAnimatorBase base;
 
 public:
     FrameAnimator(FrameStore<T, Size>& store, u16 frameTime)
-        : store(store), base(store.getFrameStore(), frameTime) {}
+        : pointer(store, false), base(store.getFrameStore(), frameTime) {}
 
     // Sets an animation pose
-    void setAnimationPose(const AnimationPose& pose)
-    { base.setAnimationPose(pose); }
+    void setAnimationPose(const AnimationPose& pose) { base.setAnimationPose(pose); }
 
     // Update the animation
     void update() { base.update(); }
@@ -143,12 +141,5 @@ public:
     u16 getTileId() const { return base.getTileId(); }
 
     bool isVisible() const { return (bool)pointer; }
-    void setVisible(bool visible)
-    {
-        // Check state changes
-        if (!isVisible() && visible) // Retain a frame of the sprite
-            pointer = FrameStorePointer<T, Size>(store);
-        else if (isVisible() && !visible) // Release a frame
-            pointer = FrameStorePointer<T, Size>();
-    }
+    void setVisible(bool visible) { pointer.setActive(visible); }
 };

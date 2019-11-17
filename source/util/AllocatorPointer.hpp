@@ -6,6 +6,9 @@
 
 #pragma once
 
+#include <type_traits>
+#include "bit-pointers.hpp"
+
 // An allocator class that uses CRTP to access its derived type
 template <typename T>
 class Allocator
@@ -16,8 +19,7 @@ protected:
     // Increases the reference counter
     void retain()
     {
-        if (refs == 0)
-            static_cast<T*>(this)->alloc();
+        if (refs == 0) static_cast<T*>(this)->alloc();
         refs++;
     }
 
@@ -25,8 +27,7 @@ protected:
     void release()
     {
         refs--;
-        if (refs == 0)
-            static_cast<T*>(this)->clear();
+        if (refs == 0) static_cast<T*>(this)->clear();
     }
 
 public:
@@ -40,27 +41,33 @@ public:
 template <typename T>
 class AllocatorPointer
 {
+    static_assert(std::is_base_of_v<Allocator<T>, T>, "The allocator type must be derived from Allocator!");
+
+    // Since the address space of the GBA has only 28 bits, this is safe to do
+    constexpr static std::uintptr_t InactiveBit = 1 << 31;
+
 protected:
     T *allocator;
 
 public:
     AllocatorPointer() : allocator(nullptr) {}
 
-    AllocatorPointer(T& allocator) : allocator(&allocator)
+    AllocatorPointer(T& allocator, bool active = true) : allocator(&allocator)
     {
-        allocator.retain();
+        if (active) allocator.retain();
+        else setBits(this->allocator, InactiveBit);
     }
 
     AllocatorPointer(const AllocatorPointer& o) : allocator(o.allocator)
     {
-        if (allocator) allocator->retain();
+        if (o.active()) allocator->retain();
     }
 
     AllocatorPointer& operator=(const AllocatorPointer& o)
     {
-        if (allocator) allocator->release();
+        if (active()) allocator->release();
         allocator = o.allocator;
-        if (allocator) allocator->retain();
+        if (active()) allocator->retain();
         return *this;
     }
 
@@ -77,26 +84,43 @@ public:
 
     ~AllocatorPointer()
     {
-        if (allocator) allocator->release();
+        if (active()) allocator->release();
     }
 
-    explicit operator bool() const { return allocator; }
+    void setActive(bool act)
+    {
+        // Two cases
+        if (active() && !act)
+        {
+            allocator->release();
+            setBits(allocator, InactiveBit);
+        }
+        else if (!active() && act)
+        {
+            resetBits(allocator, InactiveBit);
+            allocator->retain();
+        }
+    }
+
+    explicit operator bool() const { return active(); }
+    bool active() const { return allocator && !hasOneOf(allocator, InactiveBit); }
 };
 
-#define INHERIT_ALLOCATOR_CTORS(Derived, ...)                                     \
-    Derived() : AllocatorPointer<__VA_ARGS__>() {}                                \
-    Derived(__VA_ARGS__ &allocator) : AllocatorPointer<__VA_ARGS__>(allocator) {} \
-    Derived(const Derived &o) : AllocatorPointer<__VA_ARGS__>(o) {}               \
-    Derived &operator=(const Derived &o)                                          \
-    {                                                                             \
-        if (this->allocator) this->allocator->release();                          \
-        this->allocator = o.allocator;                                            \
-        if (this->allocator) this->allocator->retain();                           \
-        return *this;                                                             \
-    }                                                                             \
-    Derived(Derived &&o) : AllocatorPointer<__VA_ARGS__>(o) {}                    \
-    Derived &operator=(Derived &&o)                                               \
-    {                                                                             \
-        std::swap(this->allocator, o.allocator);                                  \
-        return *this;                                                             \
+#define INHERIT_ALLOCATOR_CTORS(Derived, ...)                       \
+    Derived() : AllocatorPointer<__VA_ARGS__>() {}                  \
+    Derived(__VA_ARGS__ &allocator, bool active = true)             \
+        : AllocatorPointer<__VA_ARGS__>(allocator, active) {}       \
+    Derived(const Derived &o) : AllocatorPointer<__VA_ARGS__>(o) {} \
+    Derived &operator=(const Derived &o)                            \
+    {                                                               \
+        if (this->active()) this->allocator->release();             \
+        this->allocator = o.allocator;                              \
+        if (this->active()) this->allocator->retain();              \
+        return *this;                                               \
+    }                                                               \
+    Derived(Derived &&o) : AllocatorPointer<__VA_ARGS__>(o) {}      \
+    Derived &operator=(Derived &&o)                                 \
+    {                                                               \
+        std::swap(this->allocator, o.allocator);                    \
+        return *this;                                               \
     }
