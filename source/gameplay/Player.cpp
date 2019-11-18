@@ -85,6 +85,7 @@ GameScene& Player::gameScene()
     // Don't worry, I know what I'm doing
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
-    return *(GameScene*)((std::byte*)this - offsetof(GameScene, player));
+    return *reinterpret_cast<GameScene*>(
+        reinterpret_cast<std::byte*>(this) - offsetof(GameScene, player));
 #pragma GCC diagnostic pop
 }
