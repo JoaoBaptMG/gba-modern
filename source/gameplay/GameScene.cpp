@@ -31,6 +31,9 @@ GameScene::GameScene()
     map.copyFullScreen();
     map.loadActors();
 
+    // Initialize the HUD
+    hud.init();
+
     // A dark-ish purple color
     pal_bg_mem[0] = RGB15(14, 0, 14);
 }
@@ -49,8 +52,9 @@ void GameScene::update()
     cameraX = calculateCameraX();
     cameraY = calculateCameraY();
 
-    player.pushGraphics();
+    hud.pushGraphics();
     map.update();
+    player.pushGraphics();
 
     // Finally update the actors
     for (auto& actor : actors)

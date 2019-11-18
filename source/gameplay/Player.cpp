@@ -13,18 +13,25 @@
 constexpr s32f8 JumpSpeed = -3.5;
 constexpr auto DecaySpeed = JumpSpeed / 2;
 
+static SinglePaletteAllocator palette(player_png_palette);
+
 void Player::init(s32f8 x, s32f8 y)
 {
-    tileId = graphics::allocateObjTiles(SpriteSize::_16x32_4bpp);
-    graphics::allocateObjPalettes(1, &paletteId);
+    playerPtr = ObjectTilePointer(SpriteSize::_16x32_4bpp);
 
     // Copy the player's data to the main palette
-    memcpy32(&tile_mem_obj[0][tileId], player_png_tiles, sizeof(player_png_tiles) / sizeof(u32));
-    memcpy32(&pal_obj_mem[16*paletteId], player_png_palette, sizeof(player_png_palette) / sizeof(u32));
+    playerPtr.setData(player_png_tiles);
+
+    // Allocate to the palette
+    palPtr = SinglePalettePointer(palette);
 
     // Initialize the position
     pos.x = x;
     pos.y = y;
+
+    // Initialize the health
+    health = maxHealth = 8;
+    health = 5;
 
     inAir = false;
 }
@@ -77,7 +84,7 @@ void Player::pushGraphics()
         graphics::pushOAM(
             ATTR0_Y(dy & 255) | ATTR0_REG | ATTR0_4BPP | ATTR0_TALL,
             ATTR1_X(dx & 511) | ATTR1_SIZE_16x32,
-            ATTR2_ID(tileId) | ATTR2_PRIO(0) | ATTR2_PALBANK(paletteId));
+            ATTR2_ID(playerPtr.getTileId()) | ATTR2_PRIO(0) | ATTR2_PALBANK(palPtr.getPalette()));
 }
 
 GameScene& Player::gameScene()

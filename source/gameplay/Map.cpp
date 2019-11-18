@@ -200,6 +200,7 @@ GameScene& Map::gameScene()
     // Don't worry, I know what I'm doing
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
-    return *reinterpret_cast<GameScene*>(reinterpret_cast<std::byte*>(this) - offsetof(GameScene, map));
+    return *reinterpret_cast<GameScene*>(
+        reinterpret_cast<std::byte*>(this) - offsetof(GameScene, map));
 #pragma GCC diagnostic pop
 }

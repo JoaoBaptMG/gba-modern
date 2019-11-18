@@ -47,4 +47,14 @@ public:
 
     // gets the tile ID
     u16 getTileId() const { return tileId; }
+
+    // copy a tile to the id
+    void setData(const void* data, u32 size)
+    {
+        memcpy32(&tile_mem_obj[0][tileId], data, size / sizeof(u32));
+    }
+
+    // special templated overload
+    template <typename T, std::size_t N>
+    void setData(const T (&data)[N]) { setData(data, sizeof(T)*N); }
 };

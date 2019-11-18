@@ -10,6 +10,7 @@
 #include "actors/IActor.hpp"
 #include "Player.hpp"
 #include "Map.hpp"
+#include "Hud.hpp"
 
 constexpr u32 NumActors = 64;
 constexpr u32 ActorSize = 64;
@@ -27,6 +28,7 @@ public:
 
     Map map;
     Player player;
+    Hud hud;
     u16 cameraX, cameraY;
     PointerInterfaceContainer<IActor, ActorSize> actors[NumActors];
 };
