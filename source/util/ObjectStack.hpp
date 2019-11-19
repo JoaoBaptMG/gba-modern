@@ -41,9 +41,10 @@ public:
 
     // Push an object to stack
     template <typename Derived, typename... Args>
-    std::enable_if_t<std::is_base_of_v<Base, Derived>>
-    push(Args&&... args)
+    void push(Args&&... args)
     {
+        static_assert(std::is_base_of_v<Base, Derived>,
+            "The Derived class must be derived from Base!");
         static_assert(!is_virtual_base_of_v<Base, Derived>,
             "Virtual bases do not work with ObjectStack!");
 

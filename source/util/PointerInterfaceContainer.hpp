@@ -28,9 +28,10 @@ public:
     }
 
     template <typename Derived, typename... Ts>
-    std::enable_if_t<std::is_base_of_v<Base, Derived>>
-    assign(Ts&&... ts)
+    void assign(Ts&&... ts)
     {
+        static_assert(std::is_base_of_v<Base, Derived>,
+            "The Derived class must be derived from Base!");
         static_assert(sizeof(Derived) <= Size,
             "The Derived class is too big to fit in that PointerInterfaceContainer");
         static_assert(!is_virtual_base_of_v<Base, Derived>,

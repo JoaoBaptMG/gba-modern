@@ -41,13 +41,14 @@ public:
     }
 
     template <typename Derived, typename... Ts>
-    std::enable_if_t<std::is_base_of_v<Base, Derived>>
-    add(Ts &&... ts)
+    void add(Ts &&... ts)
     {
+        static_assert(std::is_base_of_v<Base, Derived>,
+            "The Derived class must be derived from Base!");
         static_assert(sizeof(Derived) <= CellSize,
-                      "The Derived class is too big to fit in that UnorderedPolymorphicList");
+            "The Derived class is too big to fit in that UnorderedPolymorphicList");
         static_assert(!is_virtual_base_of_v<Base, Derived>,
-                      "UnorderedPolymorphicList does not work properly with virtual base classes!");
+            "UnorderedPolymorphicList does not work properly with virtual base classes!");
 
         ASSERT(firstFreeCell);
         if (firstFreeCell)
