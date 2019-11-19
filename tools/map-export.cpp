@@ -191,7 +191,7 @@ int mapExport(int argc, char **argv)
         std::size_t i = 0;
         for (const auto& actor : actors)
         {
-            cof << "    scene.actors[" << i << "].assign<" << actor.type << ">(";
+            cof << "    scene.actors.add<" << actor.type << ">(";
             bool nf = false;
             for (const auto& param : actor.insertedParams)
             {

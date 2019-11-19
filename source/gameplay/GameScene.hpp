@@ -7,6 +7,7 @@
 
 #include "scenes/IScene.hpp"
 #include "util/PointerInterfaceContainer.hpp"
+#include "util/UnorderedPolymorphicList.hpp"
 #include "actors/IActor.hpp"
 #include "Player.hpp"
 #include "Map.hpp"
@@ -30,5 +31,5 @@ public:
     Player player;
     Hud hud;
     u16 cameraX, cameraY;
-    PointerInterfaceContainer<IActor, ActorSize> actors[NumActors];
+    UnorderedPolymorphicList<IActor, ActorSize, NumActors> actors;
 };

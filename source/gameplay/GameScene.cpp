@@ -57,8 +57,7 @@ void GameScene::update()
     player.pushGraphics();
 
     // Finally update the actors
-    for (auto& actor : actors)
-        if (actor) actor->update(*this);
+    for (auto& actor : actors) actor.update(*this);
 }
 
 s16 GameScene::calculateCameraX() const
