@@ -7,35 +7,42 @@
 
 #include <type_traits>
 
-#define FLAGS_ENUM(T) \
-inline static constexpr T operator|(T a, T b) \
-{\
-    return static_cast<T>(static_cast<std::underlying_type_t<T>>(a) | static_cast<std::underlying_type_t<T>>(b));\
-}\
-inline static constexpr T operator&(T a, T b) \
-{\
-    return static_cast<T>(static_cast<std::underlying_type_t<T>>(a) & static_cast<std::underlying_type_t<T>>(b));\
-}\
-inline static constexpr T operator^(T a, T b) \
-{\
-    return static_cast<T>(static_cast<std::underlying_type_t<T>>(a) ^ static_cast<std::underlying_type_t<T>>(b));\
-}\
-inline static constexpr T operator~(T x) \
-{\
-    return static_cast<T>(~static_cast<std::underlying_type_t<T>>(x));\
-}\
-inline static constexpr T& operator|=(T& a, T b) \
-{\
-    a = static_cast<T>(static_cast<std::underlying_type_t<T>>(a) | static_cast<std::underlying_type_t<T>>(b));\
-    return a;\
-}\
-inline static constexpr T& operator&=(T& a, T b) \
-{\
-    a = static_cast<T>(static_cast<std::underlying_type_t<T>>(a) & static_cast<std::underlying_type_t<T>>(b));\
-    return a;\
-}\
-inline static constexpr T& operator^=(T& a, T b) \
-{\
-    a = static_cast<T>(static_cast<std::underlying_type_t<T>>(a) ^ static_cast<std::underlying_type_t<T>>(b));\
-    return a;\
-}
+#define FLAGS_ENUM(T)                                                   \
+    inline static constexpr T operator|(T a, T b)                       \
+    {                                                                   \
+        using UT = std::underlying_type_t<T>;                           \
+        return static_cast<T>(static_cast<UT>(a) | static_cast<UT>(b)); \
+    }                                                                   \
+    inline static constexpr T operator&(T a, T b)                       \
+    {                                                                   \
+        using UT = std::underlying_type_t<T>;                           \
+        return static_cast<T>(static_cast<UT>(a) & static_cast<UT>(b)); \
+    }                                                                   \
+    inline static constexpr T operator^(T a, T b)                       \
+    {                                                                   \
+        using UT = std::underlying_type_t<T>;                           \
+        return static_cast<T>(static_cast<UT>(a) ^ static_cast<UT>(b)); \
+    }                                                                   \
+    inline static constexpr T operator~(T x)                            \
+    {                                                                   \
+        using UT = std::underlying_type_t<T>;                           \
+        return static_cast<T>(~static_cast<UT>(x));                     \
+    }                                                                   \
+    inline static constexpr T& operator|=(T& a, T b)                    \
+    {                                                                   \
+        using UT = std::underlying_type_t<T>;                           \
+        a = static_cast<T>(static_cast<UT>(a) | static_cast<UT>(b));    \
+        return a;                                                       \
+    }                                                                   \
+    inline static constexpr T& operator&=(T& a, T b)                    \
+    {                                                                   \
+        using UT = std::underlying_type_t<T>;                           \
+        a = static_cast<T>(static_cast<UT>(a) & static_cast<UT>(b));    \
+        return a;                                                       \
+    }                                                                   \
+    inline static constexpr T& operator^=(T& a, T b)                    \
+    {                                                                   \
+        using UT = std::underlying_type_t<T>;                           \
+        a = static_cast<T>(static_cast<UT>(a) ^ static_cast<UT>(b));    \
+        return a;                                                       \
+    }
