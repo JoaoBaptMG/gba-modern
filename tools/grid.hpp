@@ -305,8 +305,7 @@ namespace util
     };
 
     template <typename T, bool Const>
-    typename grid<T>::view::template iterator_detail<Const>& operator+(std::intmax_t val,
-        typename grid<T>::view::template iterator_detail<Const> &it)
+    auto operator+(std::intmax_t val, const typename grid<T>::view::template iterator_detail<Const>& it)
     {
         return it + val;
     }
