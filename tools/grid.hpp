@@ -28,6 +28,15 @@
 #include <stdexcept>
 #include <type_traits>
 
+inline static constexpr std::pair<std::intmax_t,std::intmax_t>
+divmod(std::intmax_t a, std::intmax_t b)
+{
+    auto d = a / b;
+    auto m = a % b;
+    if (m < 0) m += b, d--;
+    return std::make_pair(d, m);
+}
+
 namespace util
 {
     template <typename T>
@@ -35,37 +44,38 @@ namespace util
     {
         class view final
         {
-            class iterator final
+            template <bool Const>
+            class iterator_detail final
             {
-                view* ref;
+                std::conditional_t<Const, const view*, view*> ref;
                 std::size_t i, j;
 
-                iterator(view *ref, std::size_t i, std::size_t j) : ref(ref), i(i), j(j) {}
+                iterator_detail(decltype(ref) ref, std::size_t i, std::size_t j) : ref(ref), i(i), j(j) {}
 
             public:
                 using difference_type = std::intmax_t;
-                using value_type = T;
-                using pointer = T*;
-                using reference = T&;
+                using value_type = std::conditional_t<Const, const T, T>;
+                using pointer = std::conditional_t<Const, const T*, T*>;
+                using reference = std::conditional_t<Const, const T&, T&>;
                 using iterator_category = std::random_access_iterator_tag;
 
-                iterator() : ref(nullptr), i(0), j(0) {}
+                iterator_detail() : ref(nullptr), i(0), j(0) {}
 
-                iterator& operator++()
+                iterator_detail &operator++()
                 {
                     i++;
                     if (i >= ref->_width) { i = 0; j++; }
                     return *this;
                 }
 
-                iterator operator++(int)
+                iterator_detail operator++(int)
                 {
                     iterator it(*this);
                     ++(*this);
                     return it;
                 }
 
-                iterator& operator--()
+                iterator_detail& operator--()
                 {
                     if (i == 0)
                     {
@@ -75,37 +85,37 @@ namespace util
                     return *this;
                 }
 
-                iterator operator--(int)
+                iterator_detail operator--(int)
                 {
                     iterator it(*this);
                     --(*this);
                     return it;
                 }
 
-                bool operator==(const iterator &other) const
+                bool operator==(const iterator_detail &other) const
                 {
                     return ref == other.ref && i == other.i && j == other.j;
                 }
-                bool operator!=(const iterator &other) const { return !(*this == other); }
+                bool operator!=(const iterator_detail &other) const { return !(*this == other); }
 
-                iterator operator+(std::intmax_t val) const
+                iterator_detail operator+(std::intmax_t val) const
                 {
-                    std::size_t offset = i + val;
-                    return iterator(ref, offset % ref->_width, j + offset / ref->_width);
+                    auto dm = divmod(i + val, ref->_width);
+                    return iterator(ref, dm.first, j + dm.second);
                 }
 
-                iterator& operator+=(std::intmax_t val)
+                iterator_detail& operator+=(std::intmax_t val)
                 {
-                    std::size_t offset = i + val;
-                    i = offset % ref->_width;
-                    j += offset / ref->_width;
+                    auto dm = divmod(i + val, ref->_width);
+                    i = dm.first;
+                    j += dm.second;
                     return *this;
                 }
 
-                iterator operator-(std::intmax_t val) const { return *this + (-val); }
-                iterator& operator-=(std::intmax_t val) { return *this += (-val); }
+                iterator_detail operator-(std::intmax_t val) const { return *this + (-val); }
+                iterator_detail& operator-=(std::intmax_t val) { return *this += (-val); }
 
-                std::intmax_t operator-(const iterator& other) const
+                std::intmax_t operator-(const iterator_detail& other) const
                 {
                     if (ref != other.ref) return 0;
 
@@ -115,24 +125,22 @@ namespace util
                     return ofs1 - ofs2;
                 }
 
-                T& operator*() { return (*ref)(i,j); }
-                const T& operator*() const { return (*ref)(i,j); }
+                reference operator*() { return (*ref)(i,j); }
+                const reference operator*() const { return (*ref)(i,j); }
 
-                T* operator->() { return &(*ref)(i,j); }
-                const T* operator->() const { return &(*ref)(i,j); }
+                pointer operator->() { return &(*ref)(i,j); }
+                const pointer operator->() const { return &(*ref)(i,j); }
 
-                T& operator[](std::intmax_t ind) { return *(*this + ind); }
-                const T& operator[](std::intmax_t ind) const { return *(*this + ind); }
+                reference operator[](std::intmax_t ind) { return *(*this + ind); }
+                const reference operator[](std::intmax_t ind) const { return *(*this + ind); }
 
-                bool operator<(const iterator& other) const { return other - *this > 0; }
-                bool operator>(const iterator& other) const { return other < *this; }
-                bool operator>=(const iterator& other) const { return !(*this < other); }
-                bool operator<=(const iterator& other) const { return !(*this > other); }
+                bool operator<(const iterator_detail& other) const { return other - *this > 0; }
+                bool operator>(const iterator_detail& other) const { return other < *this; }
+                bool operator>=(const iterator_detail& other) const { return !(*this < other); }
+                bool operator<=(const iterator_detail& other) const { return !(*this > other); }
 
                 friend class grid<T>::view;
             };
-
-            using const_iterator = const iterator;
 
             grid* ref;
             std::size_t x, y, _width, _height;
@@ -141,6 +149,9 @@ namespace util
             : ref(ref), x(x), y(y), _width(w), _height(h) {}
 
         public:
+            using iterator = iterator_detail<false>;
+            using const_iterator = iterator_detail<true>;
+
             T& operator()(std::size_t i, std::size_t j) { return (*ref)(x+i, y+j); }
             const T& operator()(std::size_t i, std::size_t j) const { return (*ref)(x+i, y+j); }
 
@@ -158,8 +169,8 @@ namespace util
                 return operator()(i, j);
             }
 
-            const_iterator cbegin() const { return iterator(const_cast<view*>(this), 0, 0); }
-            const_iterator cend() const { return iterator(const_cast<view*>(this), 0, _height); }
+            const_iterator cbegin() const { return const_iterator(this, 0, 0); }
+            const_iterator cend() const { return const_iterator(this, 0, _height); }
 
             const_iterator begin() const { return cbegin(); }
             const_iterator end() const { return cend(); };
@@ -294,8 +305,8 @@ namespace util
     };
 
     template <typename T, bool Const>
-    typename grid<T>::view::iterator& operator+(std::intmax_t val,
-        typename grid<T>::view::iterator &it)
+    typename grid<T>::view::template iterator_detail<Const>& operator+(std::intmax_t val,
+        typename grid<T>::view::template iterator_detail<Const> &it)
     {
         return it + val;
     }
