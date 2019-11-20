@@ -145,7 +145,7 @@ private:
         }
 
         // Post-increment (input iterator)
-        IteratorDetail& operator++(int)
+        IteratorDetail operator++(int)
         {
             IteratorDetail it(*this);
             operator++();
