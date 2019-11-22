@@ -58,7 +58,7 @@ bool Bumper::updateVisibility(bool visible)
 
 void Bumper::pushGraphics(vec2<s16> camera)
 {
-    auto dp = vec2<s16>(pos) - camera;
+    auto dp = vec2<int>(pos) - camera;
 
     // Set the animator's visibility
     bool visible = updateVisibility(dp.x > -16 && dp.x < 240 && dp.y > -16 && dp.y < 160);

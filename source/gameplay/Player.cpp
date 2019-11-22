@@ -77,7 +77,7 @@ void Player::listenToCommands()
 
 void Player::pushGraphics()
 {
-    auto dp = vec2<s16>(pos) - gameScene().camera;
+    auto dp = vec2<int>(pos) - gameScene().camera;
 
     // Push the sprite, but only if it's not offscreen
     if (dp.x > -16 && dp.x < 240 && dp.y > -32 && dp.y < 160)

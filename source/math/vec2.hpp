@@ -25,15 +25,23 @@ struct vec2 final
     vec2(T x, T y) : x(x), y(y) {}
 
     // Assignment operators
-    vec2& operator+=(vec2 o) { x += o.x; y += o.y; return *this; }
-    vec2& operator-=(vec2 o) { x -= o.x; y -= o.y; return *this; }
-    vec2& operator&=(vec2 o) { x &= o.x; y &= o.y; return *this; }
-    vec2& operator|=(vec2 o) { x |= o.x; y |= o.y; return *this; }
-    vec2& operator^=(vec2 o) { x ^= o.x; y ^= o.y; return *this; }
+    template <typename U>
+    vec2& operator+=(vec2<U> o) { x += o.x; y += o.y; return *this; }
+    template <typename U>
+    vec2& operator-=(vec2<U> o) { x -= o.x; y -= o.y; return *this; }
+    template <typename U>
+    vec2& operator&=(vec2<U> o) { x &= o.x; y &= o.y; return *this; }
+    template <typename U>
+    vec2& operator|=(vec2<U> o) { x |= o.x; y |= o.y; return *this; }
+    template <typename U>
+    vec2& operator^=(vec2<U> o) { x ^= o.x; y ^= o.y; return *this; }
 
-    vec2& operator*=(T v) { x *= v; y *= v; return *this; }
-    vec2& operator/=(T v) { x /= v; y /= v; return *this; }
-    vec2& operator%=(T v) { x %= v; y %= v; return *this; }
+    template <typename U>
+    vec2& operator*=(U v) { x *= v; y *= v; return *this; }
+    template <typename U>
+    vec2& operator/=(U v) { x /= v; y /= v; return *this; }
+    template <typename U>
+    vec2& operator%=(U v) { x %= v; y %= v; return *this; }
 
     vec2& operator<<=(int n) { x <<= n; y <<= n; return *this; }
     vec2& operator>>=(int n) { x >>= n; y >>= n; return *this; }
@@ -57,25 +65,25 @@ struct vec2 final
 template <typename Ty> vec2(Ty x, Ty y) -> vec2<Ty>;
 
 // Free function operators
-template <typename T>
-auto operator+(vec2<T> a, vec2<T> b) { return vec2(a.x + b.x, a.y + b.y); }
-template <typename T>
-auto operator-(vec2<T> a, vec2<T> b) { return vec2(a.x - b.x, a.y - b.y); }
-template <typename T>
-auto operator&(vec2<T> a, vec2<T> b) { return vec2(a.x & b.x, a.y & b.y); }
-template <typename T>
-auto operator|(vec2<T> a, vec2<T> b) { return vec2(a.x | b.x, a.y | b.y); }
-template <typename T>
-auto operator^(vec2<T> a, vec2<T> b) { return vec2(a.x ^ b.x, a.y ^ b.y); }
+template <typename T, typename U>
+auto operator+(vec2<T> a, vec2<U> b) { return vec2(a.x + b.x, a.y + b.y); }
+template <typename T, typename U>
+auto operator-(vec2<T> a, vec2<U> b) { return vec2(a.x - b.x, a.y - b.y); }
+template <typename T, typename U>
+auto operator&(vec2<T> a, vec2<U> b) { return vec2(a.x & b.x, a.y & b.y); }
+template <typename T, typename U>
+auto operator|(vec2<T> a, vec2<U> b) { return vec2(a.x | b.x, a.y | b.y); }
+template <typename T, typename U>
+auto operator^(vec2<T> a, vec2<U> b) { return vec2(a.x ^ b.x, a.y ^ b.y); }
 
-template <typename T>
-auto operator*(vec2<T> v, T s) { return vec2(v.x * s, v.y * s); }
-template <typename T>
-auto operator*(T s, vec2<T> v) { return vec2(s * v.x, s * v.y); }
-template <typename T>
-auto operator/(vec2<T> v, T s) { return vec2(v.x / s, v.y / s); }
-template <typename T>
-auto operator%(vec2<T> v, T s) { return vec2(v.x % s, v.y % s); }
+template <typename T, typename U>
+auto operator*(vec2<T> v, U s) { return vec2(v.x * s, v.y * s); }
+template <typename T, typename U>
+auto operator*(T s, vec2<U> v) { return vec2(s * v.x, s * v.y); }
+template <typename T, typename U>
+auto operator/(vec2<T> v, U s) { return vec2(v.x / s, v.y / s); }
+template <typename T, typename U>
+auto operator%(vec2<T> v, U s) { return vec2(v.x % s, v.y % s); }
 
 template <typename T>
 auto operator<<(vec2<T> v, int n) { return vec2(v.x << n, v.y << n); }
