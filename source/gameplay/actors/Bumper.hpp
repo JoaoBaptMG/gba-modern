@@ -22,7 +22,7 @@ class Bumper final : public IActor
     Animator animator;
     SinglePalettePointer palettePtr;
 
-    void pushGraphics(u16 cameraX, u16 cameraY);
+    void pushGraphics(vec2<s16> camera);
     bool updateVisibility(bool visible);
 
 public:

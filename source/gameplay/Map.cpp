@@ -70,8 +70,8 @@ static inline void transferTile(const MapData& map, u16 tileX, u16 tileY, u16 sc
 void Map::copyFullScreen()
 {
     // Get the actual tile indices
-    uint tileX = gameScene().cameraX / TileSize;
-    uint tileY = gameScene().cameraY / TileSize;
+    uint tileX = gameScene().camera.x / TileSize;
+    uint tileY = gameScene().camera.y / TileSize;
 
     // Update the "previous" values
     prevTileX = tileX;
@@ -106,8 +106,8 @@ void Map::copyFullScreen()
 void Map::vblank()
 {
     // Transfer the camera values to the background registers
-    REG_BG0HOFS = gameScene().cameraX;
-    REG_BG0VOFS = gameScene().cameraY;
+    REG_BG0HOFS = gameScene().camera.x;
+    REG_BG0VOFS = gameScene().camera.y;
 }
 
 // Schedules to copy a horizontal stripe of the map
@@ -166,8 +166,8 @@ static inline void scheduleVertical(const MapData &map, u16 tileX, u16 tileY)
 
 void Map::update()
 {
-    uint tileX = gameScene().cameraX / TileSize;
-    uint tileY = gameScene().cameraY / TileSize;
+    uint tileX = gameScene().camera.x / TileSize;
+    uint tileY = gameScene().camera.y / TileSize;
 
     // Update the screenblock according to the offset positions
     // First in X - using the previous Y to avoid seams

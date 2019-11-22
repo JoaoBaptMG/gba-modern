@@ -25,8 +25,7 @@ GameScene::GameScene()
     // Initialize the player
     player.init(4 * TileSize, 40 * TileSize);
 
-    cameraX = calculateCameraX();
-    cameraY = calculateCameraY();
+    camera = calculateCameraVector();
     // Copy a single screen
     map.copyFullScreen();
     map.loadActors();
@@ -49,8 +48,7 @@ void GameScene::update()
     player.update();
 
     // Calculate the camera
-    cameraX = calculateCameraX();
-    cameraY = calculateCameraY();
+    camera = calculateCameraVector();
 
     hud.pushGraphics();
     map.update();
@@ -60,14 +58,9 @@ void GameScene::update()
     for (auto& actor : actors) actor.update(*this);
 }
 
-s16 GameScene::calculateCameraX() const
+vec2<s16> GameScene::calculateCameraVector() const
 {
     // The objective is to always let the player in the middle of the camera
-    return clamp(s16(player.pos.x) - 120 + PlayerWidth/2, 0, TileSize * map.width() - 240);
-}
-
-s16 GameScene::calculateCameraY() const
-{
-    // Same here
-    return clamp(s16(player.pos.y) - 80 + PlayerHeight/2, 0, TileSize * map.height() - 160);
+    return vec2<s16>(clamp(s16(player.pos.x) - 120 + PlayerWidth/2, 0, TileSize * map.width() - 240),
+        clamp(s16(player.pos.y) - 80 + PlayerHeight/2, 0, TileSize * map.height() - 160));
 }

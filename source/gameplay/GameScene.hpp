@@ -12,14 +12,14 @@
 #include "Player.hpp"
 #include "Map.hpp"
 #include "Hud.hpp"
+#include "math/vec2.hpp"
 
 constexpr u32 NumActors = 64;
 constexpr u32 ActorSize = 64;
 
 class GameScene final : public IScene
 {
-    s16 calculateCameraX() const;
-    s16 calculateCameraY() const;
+    vec2<s16> calculateCameraVector() const;
 
 public:
     GameScene();
@@ -30,6 +30,6 @@ public:
     Map map;
     Player player;
     Hud hud;
-    u16 cameraX, cameraY;
+    vec2<s16> camera;
     UnorderedPolymorphicList<IActor, ActorSize, NumActors> actors;
 };

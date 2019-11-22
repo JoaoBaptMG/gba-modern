@@ -77,14 +77,13 @@ void Player::listenToCommands()
 
 void Player::pushGraphics()
 {
-    auto dx = s16(pos.x) - gameScene().cameraX;
-    auto dy = s16(pos.y) - gameScene().cameraY;
+    auto dp = vec2<s16>(pos) - gameScene().camera;
 
     // Push the sprite, but only if it's not offscreen
-    if (dx > -16 && dx < 240 && dy > -32 && dy < 160)
+    if (dp.x > -16 && dp.x < 240 && dp.y > -32 && dp.y < 160)
         graphics::pushOAM(
-            ATTR0_Y(dy & 255) | ATTR0_REG | ATTR0_4BPP | ATTR0_TALL,
-            ATTR1_X(dx & 511) | ATTR1_SIZE_16x32,
+            ATTR0_Y(dp.y & 255) | ATTR0_REG | ATTR0_4BPP | ATTR0_TALL,
+            ATTR1_X(dp.x & 511) | ATTR1_SIZE_16x32,
             ATTR2_ID(playerPtr.getTileId()) | ATTR2_PRIO(0) | ATTR2_PALBANK(palPtr.getPalette()));
 }
 

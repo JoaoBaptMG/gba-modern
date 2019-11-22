@@ -45,7 +45,7 @@ void Bumper::update(GameScene& scene)
     // Update the animator
     animator.update();
 
-    pushGraphics(scene.cameraX, scene.cameraY);
+    pushGraphics(scene.camera);
 }
 
 bool Bumper::updateVisibility(bool visible)
@@ -56,18 +56,17 @@ bool Bumper::updateVisibility(bool visible)
     return visible;
 }
 
-void Bumper::pushGraphics(u16 cameraX, u16 cameraY)
+void Bumper::pushGraphics(vec2<s16> camera)
 {
-    auto dx = s16(pos.x) - cameraX;
-    auto dy = s16(pos.y) - cameraY;
+    auto dp = vec2<s16>(pos) - camera;
 
     // Set the animator's visibility
-    bool visible = updateVisibility(dx > -16 && dx < 240 && dy > -16 && dy < 160);
+    bool visible = updateVisibility(dp.x > -16 && dp.x < 240 && dp.y > -16 && dp.y < 160);
 
     // Push the sprite, but only if it's not offscreen
     if (visible)
         graphics::pushOAM(
-            ATTR0_Y(dy & 255) | ATTR0_REG | ATTR0_4BPP | ATTR0_SQUARE,
-            ATTR1_X(dx & 511) | ATTR1_SIZE_16x16,
+            ATTR0_Y(dp.y & 255) | ATTR0_REG | ATTR0_4BPP | ATTR0_SQUARE,
+            ATTR1_X(dp.x & 511) | ATTR1_SIZE_16x16,
             ATTR2_ID(animator.getTileId()) | ATTR2_PRIO(0) | ATTR2_PALBANK(palettePtr.getPalette()));
 }
