@@ -38,7 +38,7 @@ namespace graphics
     void resetObjectsAndPalettes();
 
     // Allocates a new object with the buddy allocator
-    u16 allocateObjTiles(SpriteSize size);
+    u16 allocateObjTiles(int logBlocks);
 
     // Frees the object
     void freeObjTiles(u16 blocks);

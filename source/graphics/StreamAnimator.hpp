@@ -18,7 +18,7 @@ class StreamAnimator final
     // The pointer to the frame data
     const TILE* animationFrames;
     // The size of the sprite requested, used in the calculations
-    SpriteSize spriteSize;
+    u16 logNumBlocks;
     // The number of GBA frames to wait between each animation frame
     u16 frameTime;
     // The GBA count, and important properties of the animation

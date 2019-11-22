@@ -25,6 +25,6 @@ public:
     ~BuddyObjectAllocator() {}
 
     // Allocators and deleters
-    u16 allocBlock(SpriteSize size);
+    u16 allocBlock(uint order);
     void freeBlock(u16 tile);
 };

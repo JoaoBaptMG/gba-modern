@@ -19,8 +19,10 @@ public:
     ObjectTilePointer() : tileId(graphics::NoTile) {}
 
     // Allocates a new block
-    ObjectTilePointer(SpriteSize size)
-        : tileId(graphics::allocateObjTiles(size)) {}
+    ObjectTilePointer(SpriteSize size) : ObjectTilePointer(SizeUtils::logBlocks(size)) {}
+
+    ObjectTilePointer(int logNumBlocks)
+        : tileId(graphics::allocateObjTiles(logNumBlocks)) {}
 
     // Frees the block with it
     ~ObjectTilePointer()

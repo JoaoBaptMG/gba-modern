@@ -9,7 +9,7 @@
 
 // Initializes all the variables
 StreamAnimator::StreamAnimator(const void *animationFrames, SpriteSize spriteSize, u16 frameTime)
-    : animationFrames((const TILE*)animationFrames), spriteSize(spriteSize), frameTime(frameTime),
+    : animationFrames((const TILE*)animationFrames), logNumBlocks(SizeUtils::logBlocks(spriteSize)), frameTime(frameTime),
       frameCount(0), curFrame(0), repeatFrame(0), endFrame(0), tilePointer() {}
 
 void StreamAnimator::setAnimationPose(const AnimationPose &pose)
@@ -45,10 +45,9 @@ void StreamAnimator::sendNewFrame()
     if (!isVisible()) return;
 
     // Send the new frame size
-    auto size = (uint)spriteSize;
-    auto frame = animationFrames + (curFrame << size);
+    auto frame = animationFrames + (curFrame << logNumBlocks);
     auto dest = &tile_mem_obj[0][getTileId()];
-    graphics::romCopyCommand32(dest, frame, (sizeof(TILE)/sizeof(u32)) << size);
+    graphics::romCopyCommand32(dest, frame, (sizeof(TILE)/sizeof(u32)) << logNumBlocks);
 }
 
 void StreamAnimator::setVisible(bool visible)
@@ -56,7 +55,7 @@ void StreamAnimator::setVisible(bool visible)
     // Check state changes
     if (!isVisible() && visible) // Allocate a new place
     {
-        tilePointer = ObjectTilePointer(spriteSize);
+        tilePointer = ObjectTilePointer(logNumBlocks);
         sendNewFrame();
     }
     else if (isVisible() && !visible) // Free the place

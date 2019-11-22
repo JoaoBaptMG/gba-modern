@@ -126,9 +126,9 @@ void graphics::resetObjectsAndPalettes()
     palettesUsed = 0;
 }
 
-u16 graphics::allocateObjTiles(SpriteSize size)
+u16 graphics::allocateObjTiles(int blocks)
 {
-    return buddy.allocBlock(size);
+    return buddy.allocBlock(blocks);
 }
 
 void graphics::freeObjTiles(u16 blocks)

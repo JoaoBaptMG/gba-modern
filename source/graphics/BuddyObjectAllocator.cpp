@@ -25,10 +25,8 @@ BuddyObjectAllocator::BuddyObjectAllocator()
 }
 
 // Allocate a block with a tile order
-u16 BuddyObjectAllocator::allocBlock(SpriteSize size)
+u16 BuddyObjectAllocator::allocBlock(uint order)
 {
-    uint order = (uint)size;
-
     // Find the same (or next superior) order block
     uint foundOrder;
     for (foundOrder = order; foundOrder <= LogNumTiles; foundOrder++)

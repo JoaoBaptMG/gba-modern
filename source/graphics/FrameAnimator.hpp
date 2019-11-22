@@ -75,16 +75,16 @@ class FrameStore<std::index_sequence<Szs...>, Size>
     void allocSingle()
     {
         // Set the allocation function
-        constexpr auto SprSize = (std::size_t)Size;
-        constexpr auto BlockSize = SprSize + Order;
-        tileIndices[N] = graphics::allocateObjTiles((SpriteSize)BlockSize);
+        constexpr auto SprSize = SizeUtils::logBlocks(Size);
+        constexpr auto LogBlocks = SprSize + Order;
+        tileIndices[N] = graphics::allocateObjTiles(LogBlocks);
         for (uint i = 1; i < (1 << Order); i++)
             tileIndices[N+i] = tileIndices[N] + (i << SprSize);
 
         // Transfer the data
         auto frame = animationFrames + (N << SprSize);
         auto dest = &tile_mem_obj[0][tileIndices[N]];
-        memcpy32(dest, frame, (sizeof(TILE)/sizeof(u32)) << BlockSize);
+        memcpy32(dest, frame, (sizeof(TILE)/sizeof(u32)) << LogBlocks);
     }
 
     template <std::size_t... Orders, std::size_t... Ns>
@@ -95,8 +95,8 @@ class FrameStore<std::index_sequence<Szs...>, Size>
     void alloc() { allocUtil(dummy<Indices>{}, dummy<PrefixSizes>{}); }
 
 public:
-    FrameStore(const void *animationFrames)
-        : animationFrames((const TILE *)animationFrames), tileIndices(){};
+    FrameStore(const void* animationFrames)
+        : animationFrames((const TILE*)animationFrames), tileIndices() {};
     ~FrameStore() {}
 
     const u16* getFrameStore() const { return tileIndices; }
