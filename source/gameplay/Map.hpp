@@ -7,7 +7,8 @@
 
 #include "tonc.h"
 #include "data/MapData.hpp"
-#include "Position.hpp"
+#include "math/stdfixed.hpp"
+#include "math/vec2.hpp"
 #include "util/flags-enum.hpp"
 
 constexpr u32 TileSize = 16;
@@ -40,7 +41,7 @@ public:
     auto height() const { return curMap.height; }
 
     // Collision routines
-    CollisionResult movementSimulation(Position& pos, s32f8 width, s32f8 height) const;
+    vec2<s32f8> movementSimulation(vec2<s32f8> pos, vec2<s32f8> vel, s32f8 width, s32f8 height) const;
     bool horizontalStripeCollision(s32f8 x, s32f8 y, s32f8 width) const;
     bool verticalStripeCollision(s32f8 x, s32f8 y, s32f8 height) const;
 };

@@ -9,65 +9,51 @@
 // we might have to check 40 or so of those per second
 extern u8 tileFlags[NumTiles] IWRAM_DATA;
 
-CollisionResult Map::movementSimulation(Position& pos, s32f8 width, s32f8 height) const
+vec2<s32f8> Map::movementSimulation(vec2<s32f8> pos, vec2<s32f8> vel, s32f8 width, s32f8 height) const
 {
-    CollisionResult res = CollisionResult::None;
-
     // Update movement in Y
-    if (pos.vy != 0)
+    auto py = pos.y + vel.y;
+    auto ny = py;
+    if (vel.y != 0)
     {
-        pos.y += pos.vy;
-
-        if (pos.vy > 0)
+        if (vel.y > 0)
         {
             // If there is a collision on the bottom side
-            if (horizontalStripeCollision(pos.x, pos.y+height, width))
-            {
-                // Reposition the player so the bottom is pushed upwards
-                pos.y = ((pos.y + height) & ~(TileSize-1)) - height;
-                res |= CollisionResult::Bottom;
-            }
+            if (horizontalStripeCollision(pos.x, py + height, width))
+                // Calculate the response vector
+                ny = ((py + height) & ~(TileSize-1)) - height;
         }
-        else if (pos.vy < 0)
+        else if (vel.y < 0)
         {
             // If there is a collision on the top side
-            if (horizontalStripeCollision(pos.x, pos.y, width))
-            {
+            if (horizontalStripeCollision(pos.x, py, width))
                 // Reposition the player so the touch is pushed downards
-                pos.y = (pos.y + TileSize - s32f8::epsilon) & ~(TileSize-1);
-                res |= CollisionResult::Top;
-            }
+                ny = (py + TileSize - s32f8::epsilon) & ~(TileSize-1);
         }
     }
 
     // Update movement in X
-    if (pos.vx != 0)
+    auto px = pos.x + vel.x;
+    auto nx = px;
+    if (vel.x != 0)
     {
-        pos.x += pos.vx;
-
-        if (pos.vx > 0)
+        if (vel.x > 0)
         {
             // If there is a collision on the right side
-            if (verticalStripeCollision(pos.x+width, pos.y, height))
-            {
+            if (verticalStripeCollision(nx + width, ny, height))
                 // Reposition the player to touch the right side of the tile
-                pos.x = ((pos.x + width) & ~(TileSize-1)) - width;
-                res |= CollisionResult::Right;
-            }
+                nx = ((px + width) & ~(TileSize-1)) - width;
         }
-        else if (pos.vx < 0)
+        else if (vel.x < 0)
         {
             // If there is a collision on the left side  
-            if (verticalStripeCollision(pos.x, pos.y, height))
-            {
+            if (verticalStripeCollision(nx, ny, height))
                 // Reposition the player to touch the left side
-                pos.x = (pos.x + TileSize - s32f8::epsilon) & ~(TileSize-1);
-                res |= CollisionResult::Left;
-            }
+                nx = (px + TileSize - s32f8::epsilon) & ~(TileSize-1);
         }
     }
 
-    return res;
+    return vec2(nx - px, ny - py);
 }
 
 bool Map::horizontalStripeCollision(s32f8 x, s32f8 y, s32f8 width) const

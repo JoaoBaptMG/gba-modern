@@ -7,9 +7,10 @@
 
 #include "IActor.hpp"
 #include "math/stdfixed.hpp"
-#include "gameplay/Position.hpp"
 #include "graphics/FrameAnimator.hpp"
 #include "graphics/PalettePointer.hpp"
+#include "math/stdfixed.hpp"
+#include "math/vec2.hpp"
 
 #include "data/sprites/animation.hpp"
 
@@ -17,7 +18,7 @@ using Animator = FrameAnimator<animation_png_animation::AllocationBlocks, Sprite
 
 class Bumper final : public IActor
 {
-    Position pos;
+    vec2<s32f8> pos, vel;
     Animator animator;
     SinglePalettePointer palettePtr;
 

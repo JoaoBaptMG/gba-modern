@@ -28,10 +28,8 @@ Bumper::Bumper(s32f8 x, s32f8 y)
     : animator(frameStore, animation_png_animation::FrameStep + 2 * getRandom(this) - 8),
     palettePtr(palette, false)
 {
-    pos.x = x;
-    pos.y = y;
-    pos.vx = -1;
-    pos.vy = 1;
+    pos = vec2(x, y);
+    vel = vec2(-1, 1);
 
     animator.setAnimationPose(animation_png_animation::Animation_Default);
 }
@@ -39,9 +37,10 @@ Bumper::Bumper(s32f8 x, s32f8 y)
 void Bumper::update(GameScene& scene)
 {
     // Bounce into the map depending on the result
-    auto result = scene.map.movementSimulation(pos, BumperWidth, BumperHeight);
-    if (result & (CollisionResult::Left | CollisionResult::Right)) pos.vx = -pos.vx;
-    if (result & (CollisionResult::Top | CollisionResult::Bottom)) pos.vy = -pos.vy;
+    auto res = scene.map.movementSimulation(pos, vel, BumperWidth, BumperHeight);
+    pos += vel + res;
+    if (res.x != 0) vel.x = -vel.x;
+    if (res.y != 0) vel.y = -vel.y;
 
     // Update the animator
     animator.update();

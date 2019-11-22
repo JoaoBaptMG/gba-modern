@@ -38,40 +38,41 @@ void Player::init(s32f8 x, s32f8 y)
 
 void Player::update()
 {
-    pos.vy += Gravity;
-    if (pos.vy > 16)
-        pos.vy = 16;
+    vel.y += Gravity;
+    if (vel.y > 16)
+        vel.y = 16;
 
     listenToCommands();
 
-    auto result = gameScene().map.movementSimulation(pos, PlayerWidth, PlayerHeight);
-    if (result & CollisionResult::Bottom)
+    auto res = gameScene().map.movementSimulation(pos, vel, PlayerWidth, PlayerHeight);
+    pos += vel + res;
+    if (res.y < 0)
     {
-        pos.vy = 0;
+        vel.y = 0;
         inAir = false;
     }
-    else if (inAir && (result & CollisionResult::Top)) pos.vy = 0;
+    else if (inAir && res.y > 0) vel.y = 0;
 }
 
 void Player::listenToCommands()
 {
     if (inAir)
     {
-        if (key_released(KEY_A) && pos.vy < DecaySpeed)
-            pos.vy = DecaySpeed;
+        if (key_released(KEY_A) && vel.y < DecaySpeed)
+            vel.y = DecaySpeed;
     }
     else
     {
         if (key_hit(KEY_A))
         {
             inAir = true;
-            pos.vy = JumpSpeed;
+            vel.y = JumpSpeed;
         }
     }
     
-    if (key_is_down(KEY_LEFT)) pos.vx = -1;
-    else if (key_is_down(KEY_RIGHT)) pos.vx = 1;
-    else pos.vx = 0;
+    if (key_is_down(KEY_LEFT)) vel.x = -1;
+    else if (key_is_down(KEY_RIGHT)) vel.x = 1;
+    else vel.x = 0;
 }
 
 void Player::pushGraphics()

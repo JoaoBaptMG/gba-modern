@@ -6,9 +6,10 @@
 #pragma once
 
 #include <tonc.h>
-#include "Position.hpp"
 #include "graphics/ObjectTilePointer.hpp"
 #include "graphics/PalettePointer.hpp"
+#include "math/stdfixed.hpp"
+#include "math/vec2.hpp"
 
 class GameScene;
 
@@ -33,6 +34,6 @@ public:
     u16 getHealth() const { return health; }
     u16 getMaxHealth() const { return maxHealth; }
 
-    Position pos;
+    vec2<s32f8> pos, vel;
     bool inAir;
 };
