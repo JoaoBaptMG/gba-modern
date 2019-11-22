@@ -8,9 +8,6 @@
 
 #include <utility>
 
-// Calculates the sum of all elements in the sequence
-
-
 // Calculates 2^x for each x in the sequence
 template <typename T> struct exp2_seq;
 template <typename T, T... Nums>
@@ -20,6 +17,7 @@ struct exp2_seq<std::integer_sequence<T, Nums...>>
 };
 template <typename T> using exp2_seq_t = typename exp2_seq<T>::type;
 
+// Calculates the sum of all elements in the sequence
 template <typename T> struct seq_sum;
 template <typename T, T... Nums>
 struct seq_sum<std::integer_sequence<T, Nums...>>
