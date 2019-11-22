@@ -26,7 +26,7 @@ struct vec2 final
 
     // Assignment operators
     template <typename U>
-    constexpr vec2& operator+=(vec2<auto> o) { x += o.x; y += o.y; return *this; }
+    constexpr vec2& operator+=(vec2<U> o) { x += o.x; y += o.y; return *this; }
     template <typename U>
     constexpr vec2& operator-=(vec2<U> o) { x -= o.x; y -= o.y; return *this; }
     template <typename U>
