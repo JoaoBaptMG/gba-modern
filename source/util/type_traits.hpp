@@ -43,3 +43,11 @@ struct is_virtual_base_of : public std::bool_constant<
 
 template <typename Base, typename Derived>
 constexpr bool is_virtual_base_of_v = is_virtual_base_of<Base, Derived>::value;
+
+// Another important trait
+template <typename U, typename T>
+struct is_explicitly_convertible
+    : std::bool_constant<std::is_constructible_v<T, U> && !std::is_convertible_v<U, T>> {};
+
+template <typename U, typename T>
+static constexpr bool is_explicitly_convertible_v = is_explicitly_convertible<U, T>::value;

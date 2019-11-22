@@ -548,3 +548,13 @@ operator>=(U b, fixed<Ty, N> a)
 {
     return (b << N) >= a.raw();
 }
+
+// Template specializations
+namespace std
+{
+    template <typename Ty, std::size_t N>
+    struct is_arithmetic<fixed<Ty, N>> : std::true_type {};
+
+    template <typename Ty, std::size_t N>
+    struct is_integral<fixed<Ty, N>> : std::true_type {};
+}
