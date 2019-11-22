@@ -81,10 +81,7 @@ void Player::pushGraphics()
 
     // Push the sprite, but only if it's not offscreen
     if (dp.x > -16 && dp.x < 240 && dp.y > -32 && dp.y < 160)
-        graphics::pushOAM(
-            ATTR0_Y(dp.y & 255) | ATTR0_REG | ATTR0_4BPP | ATTR0_TALL,
-            ATTR1_X(dp.x & 511) | ATTR1_SIZE_16x32,
-            ATTR2_ID(playerPtr.getTileId()) | ATTR2_PRIO(0) | ATTR2_PALBANK(palPtr.getPalette()));
+        graphics::oam.pushRegular(dp, SpriteSize::_16x32_4bpp, playerPtr.getTileId(), palPtr.getPalette(), 0);
 }
 
 GameScene& Player::gameScene()

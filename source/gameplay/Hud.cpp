@@ -29,10 +29,7 @@ void Hud::init()
 void Hud::pushGraphics()
 {
     // Push the icon
-    graphics::pushOAM(
-        ATTR0_Y(8) | ATTR0_REG | ATTR0_4BPP | ATTR0_REG,
-        ATTR1_X(8) | ATTR1_SIZE_16x16,
-        ATTR2_ID(iconPtr.getTileId()) | ATTR2_PRIO(0) | ATTR2_PALBANK(palPtr.getPalette()));
+    graphics::oam.pushRegular(vec2(8, 8), SpriteSize::_16x16_4bpp, iconPtr.getTileId(), palPtr.getPalette(), 0);
 
     const Player& player = gameScene().player;
     int health = player.getHealth(), maxHealth = player.getMaxHealth();
@@ -41,17 +38,11 @@ void Hud::pushGraphics()
     {
         u16 tileId = bitsPtr.getTileId();
         if (i >= health) tileId++;
-        graphics::pushOAM(
-            ATTR0_Y(12) | ATTR0_REG | ATTR0_4BPP | ATTR0_REG,
-            ATTR1_X(24+8*i) | ATTR1_SIZE_8x8,
-            ATTR2_ID(tileId) | ATTR2_PRIO(0) | ATTR2_PALBANK(palPtr.getPalette()));
+        graphics::oam.pushRegular(vec2(24+8*i, 12), SpriteSize::_8x8_4bpp, tileId, palPtr.getPalette(), 0);
     }
 
     // Push the tip
-    graphics::pushOAM(
-        ATTR0_Y(12) | ATTR0_REG | ATTR0_4BPP | ATTR0_REG,
-        ATTR1_X(24 + 8*maxHealth) | ATTR1_SIZE_8x8,
-        ATTR2_ID(bitsPtr.getTileId()+2) | ATTR2_PRIO(0) | ATTR2_PALBANK(palPtr.getPalette()));
+    graphics::oam.pushRegular(vec2(24+8*maxHealth, 12), SpriteSize::_8x8_4bpp, bitsPtr.getTileId()+2, palPtr.getPalette(), 0);
 }
 
 GameScene& Hud::gameScene()

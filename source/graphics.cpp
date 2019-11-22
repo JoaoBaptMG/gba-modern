@@ -8,12 +8,9 @@
 #include "graphics/BuddyObjectAllocator.hpp"
 #include "util/gba-assert.hpp"
 
-constexpr auto MaxObjs = 128;
 constexpr u32 MaxCopyWords = 256;
 constexpr u32 MaxVerticalWords = 64;
 constexpr u32 MaxRomCopies = 32;
-
-static OBJ_ATTR shadowOAM[MaxObjs] ALIGN4;
 
 static u32 copyBuffer[MaxCopyWords] IWRAM_DATA;
 static u32 verticalBuffer[MaxVerticalWords] IWRAM_DATA;
@@ -24,6 +21,7 @@ static u32 objCount IWRAM_DATA, copyCount IWRAM_DATA, verticalCount IWRAM_DATA, 
 static u32 palettesUsed EWRAM_BSS;
 
 static BuddyObjectAllocator buddy EWRAM_BSS;
+OamManager graphics::oam IWRAM_DATA;
 
 void graphics::init()
 {
@@ -32,8 +30,7 @@ void graphics::init()
     verticalCount = 0;
     romCopyCount = 0;
     palettesUsed = 0;
-
-    oam_init(shadowOAM, MaxObjs);
+    oam.init();
 }
 
 void graphics::update()
@@ -74,24 +71,7 @@ void graphics::update()
     }
     romCopyCount = 0;
 
-    // Copy the shadow OAM
-    oam_copy(oam_mem, shadowOAM, MaxObjs);
-
-    // "Reset" the OAM by hiding all objects
-    while (objCount)
-    {
-        objCount--;
-        shadowOAM[objCount].attr0 = ATTR0_HIDE;
-    }
-}
-
-void graphics::pushOAM(u16 attr0, u16 attr1, u16 attr2)
-{
-    ASSERT(objCount < MaxObjs);
-    shadowOAM[objCount].attr0 = attr0;
-    shadowOAM[objCount].attr1 = attr1;
-    shadowOAM[objCount].attr2 = attr2;
-    objCount++;
+    oam.copyToOAM();
 }
 
 void* graphics::newCopyCommand32(void* dst, u16 count)

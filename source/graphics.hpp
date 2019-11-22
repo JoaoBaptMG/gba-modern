@@ -9,6 +9,7 @@
 #include <tonc.h>
 #include <array>
 
+#include "graphics/OamManager.hpp"
 #include "graphics/SpriteSize.hpp"
 
 namespace graphics
@@ -21,9 +22,6 @@ namespace graphics
 
     // Updates the graphics module
     void update();
-
-    // Push a sprite to the shadow OAM
-    void pushOAM(u16 attr0, u16 attr1, u16 attr2);
 
     // Schedule a DMA copy
     void* newCopyCommand32(void* dst, u16 count);
@@ -48,4 +46,7 @@ namespace graphics
 
     // Return the palette space allocated for the palette
     void freeObjPalettes(u32 numPalettes, const u16* indices);
+
+    // The Oam manager
+    extern OamManager oam;
 }
