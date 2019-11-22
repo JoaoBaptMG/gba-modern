@@ -16,8 +16,8 @@ static SinglePaletteAllocator palette(hud_png_palette);
 void Hud::init()
 {
     // Allocate the tiles for icon and the bits
-    iconPtr = ObjectTilePointer(SpriteSize::_16x16_4bpp);
-    bitsPtr = ObjectTilePointer(SpriteSize::_16x16_4bpp);
+    iconPtr = ObjectTilePointer(SpriteSize::s16x16_4bpp);
+    bitsPtr = ObjectTilePointer(SpriteSize::s16x16_4bpp);
 
     // Load the graphics
     iconPtr.setData(hud_png_tiles, sizeof(hud_png_tiles)/2);
@@ -29,7 +29,7 @@ void Hud::init()
 void Hud::pushGraphics()
 {
     // Push the icon
-    graphics::oam.pushRegular(vec2(8, 8), SpriteSize::_16x16_4bpp, iconPtr.getTileId(), palPtr.getPalette(), 0);
+    graphics::oam.pushRegular(vec2(8, 8), SpriteSize::s16x16_4bpp, iconPtr.getTileId(), palPtr.getPalette(), 0);
 
     const Player& player = gameScene().player;
     int health = player.getHealth(), maxHealth = player.getMaxHealth();
@@ -38,11 +38,11 @@ void Hud::pushGraphics()
     {
         u16 tileId = bitsPtr.getTileId();
         if (i >= health) tileId++;
-        graphics::oam.pushRegular(vec2(24+8*i, 12), SpriteSize::_8x8_4bpp, tileId, palPtr.getPalette(), 0);
+        graphics::oam.pushRegular(vec2(24+8*i, 12), SpriteSize::s8x8_4bpp, tileId, palPtr.getPalette(), 0);
     }
 
     // Push the tip
-    graphics::oam.pushRegular(vec2(24+8*maxHealth, 12), SpriteSize::_8x8_4bpp, bitsPtr.getTileId()+2, palPtr.getPalette(), 0);
+    graphics::oam.pushRegular(vec2(24+8*maxHealth, 12), SpriteSize::s8x8_4bpp, bitsPtr.getTileId()+2, palPtr.getPalette(), 0);
 }
 
 GameScene& Hud::gameScene()

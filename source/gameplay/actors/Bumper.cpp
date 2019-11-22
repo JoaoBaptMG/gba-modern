@@ -10,7 +10,7 @@
 
 static SinglePaletteAllocator palette EWRAM_BSS (animation_png_palette);
 
-static FrameStore<animation_png_animation::AllocationBlocks, SpriteSize::_16x16_4bpp>
+static FrameStore<animation_png_animation::AllocationBlocks, SpriteSize::s16x16_4bpp>
     frameStore EWRAM_BSS (animation_png_tiles);
 
 constexpr s32f8 BumperWidth = 16;
@@ -64,5 +64,5 @@ void Bumper::pushGraphics(vec2<s16> camera)
     bool visible = updateVisibility(dp.x > -16 && dp.x < 240 && dp.y > -16 && dp.y < 160);
 
     // Push the sprite, but only if it's not offscreen
-    if (visible) graphics::oam.pushRegular(dp, SpriteSize::_16x16_4bpp, animator.getTileId(), palettePtr.getPalette(), 0);
+    if (visible) graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, animator.getTileId(), palettePtr.getPalette(), 0);
 }

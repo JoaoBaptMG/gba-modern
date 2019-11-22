@@ -14,7 +14,7 @@
 
 #include "data/sprites/animation.hpp"
 
-using Animator = FrameAnimator<animation_png_animation::AllocationBlocks, SpriteSize::_16x16_4bpp>;
+using Animator = FrameAnimator<animation_png_animation::AllocationBlocks, SpriteSize::s16x16_4bpp>;
 
 class Bumper final : public IActor
 {

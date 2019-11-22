@@ -17,7 +17,7 @@ static SinglePaletteAllocator palette(player_png_palette);
 
 void Player::init(s32f8 x, s32f8 y)
 {
-    playerPtr = ObjectTilePointer(SpriteSize::_16x32_4bpp);
+    playerPtr = ObjectTilePointer(SpriteSize::s16x32_4bpp);
 
     // Copy the player's data to the main palette
     playerPtr.setData(player_png_tiles);
@@ -81,7 +81,7 @@ void Player::pushGraphics()
 
     // Push the sprite, but only if it's not offscreen
     if (dp.x > -16 && dp.x < 240 && dp.y > -32 && dp.y < 160)
-        graphics::oam.pushRegular(dp, SpriteSize::_16x32_4bpp, playerPtr.getTileId(), palPtr.getPalette(), 0);
+        graphics::oam.pushRegular(dp, SpriteSize::s16x32_4bpp, playerPtr.getTileId(), palPtr.getPalette(), 0);
 }
 
 GameScene& Player::gameScene()
