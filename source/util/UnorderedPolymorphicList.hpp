@@ -97,7 +97,7 @@ private:
 
     public:
         // Iterator traits
-        using difference_type = std::size_t;
+        using difference_type = std::intmax_t;
         using value_type = std::conditional_t<Const, const Base&, Base&>;
         using pointer = std::remove_reference_t<value_type>*;
         using reference = value_type;
