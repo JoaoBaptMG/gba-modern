@@ -11,6 +11,7 @@ extern "C"
 
 #include <tonc.h>
 u32 isqrt32(u32 x) IWRAM_CODE;
+u32 isqrt64(uint64_t x) IWRAM_CODE;
 u32 gcd(u32 a, u32 b);
 
 #ifdef __cplusplus
