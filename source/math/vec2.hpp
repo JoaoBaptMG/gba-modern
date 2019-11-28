@@ -59,6 +59,9 @@ struct vec2 final
     // Utilities
     constexpr auto dot(vec2 o) const { return x*o.x + y*o.y; }
     constexpr auto cross(vec2 o) const { return x*o.y - y*o.x; }
+
+    constexpr auto lensq() const { return x*x + y*y; }
+    constexpr auto distsq(vec o) const { return (*this - o).lensq(); }
 };
 
 // Template deduction guide
