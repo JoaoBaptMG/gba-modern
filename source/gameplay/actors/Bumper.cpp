@@ -7,14 +7,15 @@
 #include "graphics.hpp"
 
 #include "gameplay/GameScene.hpp"
+#include "gameplay/collision.hpp"
 
 static SinglePaletteAllocator palette EWRAM_BSS (animation_png_palette);
 
 static FrameStore<animation_png_animation::AllocationBlocks, SpriteSize::s16x16_4bpp>
     frameStore EWRAM_BSS (animation_png_tiles);
 
-constexpr s32f8 BumperWidth = 16;
-constexpr s32f8 BumperHeight = 16;
+constexpr s32f8 BumperRadius = 8;
+constexpr vec2 BumperSize(BumperRadius, BumperRadius);
 
 // Quick & dirty way to get a random number (warning: UB)
 u16 getRandom(void* thisptr)
@@ -37,10 +38,24 @@ Bumper::Bumper(s32f8 x, s32f8 y)
 void Bumper::update(GameScene& scene)
 {
     // Bounce into the map depending on the result
-    auto res = scene.map.movementSimulation(pos, vel, BumperWidth, BumperHeight);
+    auto res = scene.map.movementSimulation(pos, vel, 2*BumperRadius, 2*BumperRadius);
     pos += vel + res;
     if (res.x != 0) vel.x = -vel.x;
     if (res.y != 0) vel.y = -vel.y;
+
+    // If the bumper touches the player, damage the player
+    auto& player = scene.player;
+    using namespace collision;
+    res = circleBox<ResponseType::Normal>(pos + BumperSize, BumperRadius, player.pos, PlayerSize);
+    if (res != vec2<s32f8>())
+    {
+        player.damage();
+
+        // Calculate the reflection vector
+        auto n = res.perp();
+        vel = -vel + vec2<s32f8>(2 * vel.dot(n) * n);
+        pos += vel;
+    }
 
     // Update the animator
     animator.update();

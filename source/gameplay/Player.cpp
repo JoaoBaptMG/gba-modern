@@ -26,12 +26,11 @@ void Player::init(s32f8 x, s32f8 y)
     palPtr = SinglePalettePointer(palette);
 
     // Initialize the position
-    pos.x = x;
-    pos.y = y;
+    pos = vec2(x, y);
 
     // Initialize the health
     health = maxHealth = 8;
-    health = 5;
+    invCounter = 0;
 
     inAir = false;
 }
@@ -52,6 +51,8 @@ void Player::update()
         inAir = false;
     }
     else if (inAir && res.y > 0) vel.y = 0;
+
+    if (invCounter > 0) invCounter--;
 }
 
 void Player::listenToCommands()
@@ -79,9 +80,36 @@ void Player::pushGraphics()
 {
     auto dp = vec2<int>(pos) - gameScene().camera;
 
-    // Push the sprite, but only if it's not offscreen
-    if (dp.x > -16 && dp.x < 240 && dp.y > -32 && dp.y < 160)
+    // Push the sprite, but only if it's not offscreen or the invis counter is acting
+    if (!(invCounter & 2) && dp.x > -16 && dp.x < 240 && dp.y > -32 && dp.y < 160)
         graphics::oam.pushRegular(dp, SpriteSize::s16x32_4bpp, playerPtr.getTileId(), palPtr.getPalette(), 0);
+}
+
+void Player::heal(int amount)
+{
+    if (amount == 0) return;
+    if (amount < 0) damage(-amount);
+    health += amount;
+    if (health > maxHealth)
+        health = maxHealth;
+}
+
+void Player::damage(int amount)
+{
+    if (amount == 0) return;
+    if (amount < 0) heal(-amount);
+
+    if (invCounter > 0) return;
+    if (health > amount)
+    {
+        health -= amount;
+        invCounter = 120;
+    }
+    else
+    {
+        // TODO: die
+        for (;;); // Just hang up
+    }
 }
 
 GameScene& Player::gameScene()
