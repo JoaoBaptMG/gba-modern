@@ -60,6 +60,8 @@ struct vec2 final
     constexpr auto dot(vec2 o) const { return x*o.x + y*o.y; }
     constexpr auto cross(vec2 o) const { return x*o.y - y*o.x; }
 
+    constexpr auto perp() const { return vec2(y, -x); }
+
     constexpr auto lensq() const { return x*x + y*y; }
     constexpr auto distsq(vec2 o) const { return (*this - o).lensq(); }
 };
@@ -92,3 +94,9 @@ template <typename T>
 constexpr auto operator<<(vec2<T> v, int n) { return vec2(v.x << n, v.y << n); }
 template <typename T>
 constexpr auto operator>>(vec2<T> v, int n) { return vec2(v.x >> n, v.y >> n); }
+
+// Equality operators
+template <typename T, typename U>
+constexpr bool operator==(vec2<T> a, vec2<U> b) { return a.x == b.x && a.y == b.y; }
+template <typename T, typename U>
+constexpr bool operator!=(vec2<T> a, vec2<U> b) { return !(a == b); }

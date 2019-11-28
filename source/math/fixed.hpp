@@ -549,6 +549,9 @@ operator>=(U b, fixed<Ty, N> a)
     return (b << N) >= a.raw();
 }
 
+template <typename Ty, std::size_t N>
+constexpr fixed<Ty,N> abs(fixed<Ty,N> v) { return v < 0 ? -v : v; }
+
 // Template specializations
 namespace std
 {
