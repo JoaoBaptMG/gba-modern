@@ -4,7 +4,6 @@
 // Provides a convenient way to push sprites into the drawing queue, as well
 // as sorting them
 //--------------------------------------------------------------------------------
-
 #pragma once
 
 #include <tonc.h>

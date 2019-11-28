@@ -4,7 +4,6 @@
 // Provides overload "new" and "delete" methods to prevent malloc and friends
 // from appearing in the final executable
 //--------------------------------------------------------------------------------
-
 #include <cstdint>
 #include "gba-assert.hpp"
 

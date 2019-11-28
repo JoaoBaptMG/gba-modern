@@ -3,7 +3,6 @@
 //--------------------------------------------------------------------------------
 // Provides functions to isolate the graphics operations
 //--------------------------------------------------------------------------------
-
 #include "graphics.hpp"
 #include "graphics/BuddyObjectAllocator.hpp"
 #include "util/gba-assert.hpp"

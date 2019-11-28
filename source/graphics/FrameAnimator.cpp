@@ -4,7 +4,6 @@
 // An animator that places all the frames in the VRAM and changes the tile
 // IDs to do the animation
 //--------------------------------------------------------------------------------
-
 #include "FrameAnimator.hpp"
 
 FrameAnimatorBase::FrameAnimatorBase(const u16* frameTileIndices, u16 frameTime)

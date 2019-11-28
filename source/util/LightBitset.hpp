@@ -3,7 +3,6 @@
 //--------------------------------------------------------------------------------
 // Provides a lightweight bitset that does not do memory allocation
 //--------------------------------------------------------------------------------
-
 #pragma once
 
 #include <cstdint>

@@ -3,7 +3,6 @@
 //--------------------------------------------------------------------------------
 // RAII wrapper over any object that implements a simple allocator pattern
 //--------------------------------------------------------------------------------
-
 #pragma once
 
 #include <type_traits>

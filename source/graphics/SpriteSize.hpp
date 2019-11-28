@@ -4,7 +4,6 @@
 // An enum for the sprite size, used in the buddy object allocator and in the
 // animator classes
 //--------------------------------------------------------------------------------
-
 #pragma once
 
 #include <tonc.h>

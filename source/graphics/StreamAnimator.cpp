@@ -4,7 +4,6 @@
 // A class that animates a sprite by DMA'ing the next frame into the sprite's
 // tile slot after each animation
 //--------------------------------------------------------------------------------
-
 #include "StreamAnimator.hpp"
 
 // Initializes all the variables

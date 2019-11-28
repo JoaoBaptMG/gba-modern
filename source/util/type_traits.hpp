@@ -4,7 +4,6 @@
 // Provides the original type_traits header, plus some traits copied from
 // boost, since I do not want to include boost in a GBA project
 //--------------------------------------------------------------------------------
-
 #pragma once
 
 #include <type_traits>

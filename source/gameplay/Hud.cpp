@@ -3,7 +3,6 @@
 //--------------------------------------------------------------------------------
 // The class that shows the player's health meter and the boss meter
 //--------------------------------------------------------------------------------
-
 #include "Hud.hpp"
 
 #include "graphics.hpp"

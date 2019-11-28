@@ -3,7 +3,6 @@
 //--------------------------------------------------------------------------------
 // Provides functions to enable bit-arithmetic operation in pointers
 //--------------------------------------------------------------------------------
-
 #pragma once
 
 #include <cstdint>
