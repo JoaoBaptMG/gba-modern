@@ -8,6 +8,7 @@
 #include "data/sprites/player.hpp"
 #include "graphics.hpp"
 #include "GameScene.hpp"
+#include "math/movetowards.hpp"
 
 // Don't worry, this is safe
 constexpr s32f8 JumpSpeed = -3.5;
@@ -72,9 +73,8 @@ void Player::listenToCommands()
         }
     }
     
-    if (key_is_down(KEY_LEFT)) vel.x = -1;
-    else if (key_is_down(KEY_RIGHT)) vel.x = 1;
-    else vel.x = 0;
+    // Move according to the directional keys
+    moveTowards(vel.x, s32f8(key_tri_horz()), s32f8(1.5 / 16));
 }
 
 void Player::pushGraphics()
