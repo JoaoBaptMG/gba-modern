@@ -39,7 +39,8 @@ __aeabi_idiv:
     orrlt   r12, #1 << 31
 
     @ Call the unsigned division
-    bl      __aeabi_uidivmod
+    .extern udiv32pastzero
+    bl      udiv32pastzero
 
     @ Test the old sign bits
     tst     r12, #1 << 30

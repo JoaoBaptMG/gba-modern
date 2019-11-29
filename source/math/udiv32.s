@@ -25,6 +25,8 @@ __aeabi_uidiv:
     cmp     r1, #0
     bxeq    lr
 
+    .global udiv32pastzero
+udiv32pastzero:
     @ If n < d, just bail out as well
     cmp     r0, r1      @ n, d
     movlo   r1, r0    @ mod = n
