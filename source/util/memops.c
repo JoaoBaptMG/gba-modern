@@ -85,7 +85,7 @@ void* memmove(void* dst, const void* src, size_t cnt)
     // Call memcpy if the regions only overlap in the "good sense"
     if (dst8 <= src8 || dst8 >= src8+cnt) return memcpy(dst, src, cnt);
 
-    // Do a very dumb copy
+    // Do a very dumb backwards copy
     dst8 += cnt;
     src8 += cnt;
     while (cnt--) *dst8-- = *src8--;
