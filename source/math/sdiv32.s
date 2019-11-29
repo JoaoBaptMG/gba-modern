@@ -27,7 +27,7 @@ __aeabi_idiv:
     cmp     r1, #0
     bxeq    lr
 
-    @ Move the lr to r12 and "positivate" the bits
+    @ Move the lr to r12 and make the numbers positive
     mov     r12, lr
 
     cmp     r0, #0
