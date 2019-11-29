@@ -122,17 +122,20 @@ private:
         pointer operator->() { return &operator*(); }
         const pointer operator->() const { return &operator*(); }
 
+        // Check if the iterator is an end iterator
+        bool isEnd() const { return list == nullptr || id == Count; }
+
         // Equality operation (input iterator)
-        // The null iterator is equal to the end iterator
-        bool operator==(const IteratorDetail& o)
+        // All the end iterators compare equal
+        bool operator==(const IteratorDetail& o) const
         {
-            if (o.list == nullptr && id == Count) return true;
-            if (list == nullptr && o.id == Count) return true;
+            if (isEnd() || o.isEnd())
+                return isEnd() && o.isEnd();
             return list == o.list && id == o.id;
         }
 
         // Inequality operation (input iterator)
-        bool operator!=(const IteratorDetail& o) { return !(*this == o); }
+        bool operator!=(const IteratorDetail& o) const { return !(*this == o); }
 
         // Pre-increment (input iterator)
         IteratorDetail& operator++()
