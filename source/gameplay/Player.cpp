@@ -50,7 +50,8 @@ void Player::update()
         vel.y = 0;
         inAir = false;
     }
-    else if (inAir && res.y > 0) vel.y = 0;
+    else if (res.y == 0) inAir = true;
+    if (inAir && res.y > 0) vel.y = 0;
 
     if (invCounter > 0) invCounter--;
 }
