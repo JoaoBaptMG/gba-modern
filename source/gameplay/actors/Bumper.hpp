@@ -26,7 +26,7 @@ class Bumper final : public IActor
     bool updateVisibility(bool visible);
 
 public:
-    Bumper(s32f8 x, s32f8 y);
+    Bumper(s32f8 x, s32f8 y, bool dir);
     virtual void update(GameScene& scene) override;
     virtual ~Bumper() {}
 

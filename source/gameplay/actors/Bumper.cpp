@@ -26,13 +26,14 @@ u16 getRandom(void* thisptr)
     return num & 7;
 }
 
-Bumper::Bumper(s32f8 x, s32f8 y)
+Bumper::Bumper(s32f8 x, s32f8 y, bool dir)
     : animator(frameStore, animation_png_animation::FrameStep + 2 * getRandom(this) - 8),
     palettePtr(palette, false)
 {
     pos = vec2(x, y);
     size = BumperSize;
     vel = vec2(-1, 1);
+    if (dir) vel = -vel;
 
     animator.setAnimationPose(animation_png_animation::Animation_Default);
 }

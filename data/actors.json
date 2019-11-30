@@ -2,6 +2,9 @@
     "Bumper":
     {
         "header": "gameplay/actors/Bumper.hpp",
-        "params": []
+        "params":
+        [
+            { "name": "dir", "type": "literal" }
+        ]
     }
 }
