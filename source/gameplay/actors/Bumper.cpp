@@ -30,6 +30,7 @@ Bumper::Bumper(s32f8 x, s32f8 y)
     palettePtr(palette, false)
 {
     pos = vec2(x, y);
+    size = BumperSize;
     vel = vec2(-1, 1);
 
     animator.setAnimationPose(animation_png_animation::Animation_Default);

@@ -18,7 +18,7 @@ using Animator = FrameAnimator<animation_png_animation::AllocationBlocks, Sprite
 
 class Bumper final : public IActor
 {
-    vec2<s32f8> pos, vel;
+    vec2<s32f8> vel;
     Animator animator;
     SinglePalettePointer palettePtr;
 
