@@ -8,8 +8,9 @@
 
 // Initializes all the variables
 StreamAnimator::StreamAnimator(const void *animationFrames, SpriteSize spriteSize, u16 frameTime)
-    : animationFrames((const TILE*)animationFrames), logNumBlocks(SizeUtils::logBlocks(spriteSize)), frameTime(frameTime),
-      frameCount(0), curFrame(0), repeatFrame(0), endFrame(0), tilePointer() {}
+    : animationFrames((const TILE*)animationFrames), logNumBlocks(SizeUtils::logBlocks(spriteSize)),
+      clearAnimation(false), frameTime(frameTime), frameCount(0), curFrame(0), repeatFrame(0), endFrame(0),
+      tilePointer() {}
 
 void StreamAnimator::setAnimationPose(const AnimationPose &pose, bool clearAnim)
 {
@@ -28,6 +29,7 @@ void StreamAnimator::clearAnimationPose()
 {
     // Set all the variables to default ones
     curFrame = repeatFrame = endFrame = frameCount = 0;
+    clearAnimation = false;
     tilePointer = ObjectTilePointer();
 }
 
