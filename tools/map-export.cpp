@@ -354,7 +354,7 @@ ActorReturn getActorsFromMap(tinyxml2::XMLHandle map, const std::map<std::string
                     default: break;
                 }
 
-                providedParameters[2+ofs] = true;
+                providedParameters[ofs] = true;
             }
 
             if (std::any_of(providedParameters.begin(), providedParameters.end(), std::logical_not<bool>()))
