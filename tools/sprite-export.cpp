@@ -51,15 +51,15 @@ int spriteExport(int argc, char **argv)
         mdin >> j;
         is8bpp = j.contains("is8bpp") && j.at("is8bpp").get<bool>();
         if (is8bpp) maxColors = 256;
-        if (j.contains("group-width")) state.groupWidth = j.at("group-width").get<std::size_t>();
-        if (j.contains("group-height")) state.groupHeight = j.at("group-height").get<std::size_t>();
-        if (j.contains("max-colors")) maxColors = j.at("max-colors").get<std::size_t>();
-        preserveOrder = j.contains("preserve-order") && j.at("preserve-order").get<bool>();
+        if (j.contains("group-width")) j.at("group-width").get_to(state.groupWidth);
+        if (j.contains("group-height")) j.at("group-height").get_to(state.groupHeight);
+        if (j.contains("max-colors")) j.at("max-colors").get_to(maxColors);
+        if (j.contains("preserve-order")) j.at("preserve-order").get_to(preserveOrder);
         if (j.contains("animation-poses") && j.contains("animation-frames"))
         {
             exportAnimation = true;
-            animations = j.at("animation-poses").get<AnimationData>();
-            frameStep = j.at("animation-frames").get<std::size_t>();
+            j.at("animation-poses").get_to(animations);
+            j.at("animation-frames").get_to(frameStep);
         }
     }
 

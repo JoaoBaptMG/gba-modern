@@ -43,8 +43,8 @@ int tilesetExport(int argc, char **argv)
 
     std::size_t numAutotiles = 0;
     std::vector<bool> autotilesSolid;
-    if (j.contains("num-autotiles")) numAutotiles = j.at("num-autotiles").get<std::size_t>();
-    if (j.contains("autotiles-solid")) autotilesSolid = j.at("autotiles-solid").get<std::vector<bool>>();
+    if (j.contains("num-autotiles")) j.at("num-autotiles").get_to(numAutotiles);
+    if (j.contains("autotiles-solid")) j.at("autotiles-solid").get_to(autotilesSolid);
 
     if (numAutotiles != autotilesSolid.size())
         throw std::domain_error("The size the 'autotiles-solid' array must be equal to 'num-autotiles'!");
