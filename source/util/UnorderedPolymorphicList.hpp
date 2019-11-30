@@ -92,6 +92,7 @@ public:
     }
 
 private:
+    // Implementation trick based on https://stackoverflow.com/a/41306206/
     // It is a forward iterator
     template <bool Const>
     class IteratorDetail final
