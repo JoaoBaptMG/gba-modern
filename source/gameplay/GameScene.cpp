@@ -56,6 +56,11 @@ void GameScene::update()
 
     // Finally update the actors
     for (auto& actor : actors) actor.update(*this);
+
+    // And remove them
+    for (std::size_t i = 0; i < NumActors; i++)
+        if (actorsToRemove.test(i)) actors.removeIndex(i);
+    actorsToRemove.resetAll();
 }
 
 vec2<s16> GameScene::calculateCameraVector() const

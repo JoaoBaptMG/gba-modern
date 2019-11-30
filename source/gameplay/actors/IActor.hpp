@@ -18,5 +18,8 @@ public:
     virtual ~IActor() {}
 
     vec2<s32f8> pos, size;
+
+    // Actions
+    virtual void respondToMelee(GameScene& scene) {}
 };
 

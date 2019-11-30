@@ -29,4 +29,21 @@ public:
     Bumper(s32f8 x, s32f8 y);
     virtual void update(GameScene& scene) override;
     virtual ~Bumper() {}
+
+    // Actions
+    void respondToMelee(GameScene& scene) override;
+};
+
+class BumperDeath final : public IActor
+{
+    Animator::Pointer framePointer;
+    SinglePalettePointer palettePtr;
+    u16 deathCounter, tileId;
+
+    void pushGraphics(vec2<s16> camera);
+
+public:
+    BumperDeath(vec2<s32f8> pos, u16 tileId);
+    virtual void update(GameScene& scene) override;
+    virtual ~BumperDeath() {}
 };

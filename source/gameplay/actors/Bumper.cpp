@@ -16,6 +16,7 @@ static FrameStore<animation_png_animation::AllocationBlocks, SpriteSize::s16x16_
 
 constexpr s32f8 BumperRadius = 8;
 constexpr vec2 BumperSize(BumperRadius, BumperRadius);
+constexpr auto BumperDeathCounter = 32;
 
 // Quick & dirty way to get a random number (warning: UB)
 u16 getRandom(void* thisptr)
@@ -64,6 +65,17 @@ void Bumper::update(GameScene& scene)
     pushGraphics(scene.camera);
 }
 
+void Bumper::respondToMelee(GameScene& scene)
+{
+    // check the collision and remove the bumper
+    auto& player = scene.player;
+    if (collision::box<>(pos, BumperSize, player.getMeleePos(), player.getMeleeSize()))
+    {
+        scene.removeActor(*this);
+        scene.actors.add<BumperDeath>(pos, animator.getTileId());
+    }
+}
+
 bool Bumper::updateVisibility(bool visible)
 {
     // Set the visibilities
@@ -82,3 +94,38 @@ void Bumper::pushGraphics(vec2<s16> camera)
     // Push the sprite, but only if it's not offscreen
     if (visible) graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, animator.getTileId(), palettePtr.getPalette(), 0);
 }
+
+// Bumper death
+BumperDeath::BumperDeath(vec2<s32f8> pos, u16 tileId) : framePointer(frameStore, true), palettePtr(palette, true)
+{
+    deathCounter = BumperDeathCounter;
+    this->pos = pos;
+    this->tileId = tileId;
+}
+
+void BumperDeath::update(GameScene& scene)
+{
+    // Delete me when my time is expired
+    if (!(deathCounter--)) scene.removeActor(*this);
+    pushGraphics(scene.camera);
+}
+
+void BumperDeath::pushGraphics(vec2<s16> camera)
+{
+    // Blink the counter periodically
+    if (deathCounter & 2)
+    {
+        auto dp = vec2<int>(pos) - camera;
+        auto offset = BumperDeathCounter - deathCounter;
+        auto rdiag = vec2(offset, offset);
+        auto ldiag = vec2(-offset, offset);
+        constexpr auto Right = vec2((int)BumperRadius, 0);
+        constexpr auto Down = vec2(0, (int)BumperRadius);
+
+        graphics::oam.pushRegular(dp - rdiag, SpriteSize::s8x8_4bpp, tileId, palettePtr.getPalette(), 0);
+        graphics::oam.pushRegular(dp + Right - ldiag, SpriteSize::s8x8_4bpp, tileId + 1, palettePtr.getPalette(), 0);
+        graphics::oam.pushRegular(dp + Down + ldiag, SpriteSize::s8x8_4bpp, tileId + 2, palettePtr.getPalette(), 0);
+        graphics::oam.pushRegular(dp + Right + Down + rdiag, SpriteSize::s8x8_4bpp, tileId + 3, palettePtr.getPalette(), 0);
+    }
+}
+

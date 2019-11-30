@@ -8,6 +8,7 @@
 #include "scenes/IScene.hpp"
 #include "util/PointerInterfaceContainer.hpp"
 #include "util/UnorderedPolymorphicList.hpp"
+#include "util/LightBitset.hpp"
 #include "actors/IActor.hpp"
 #include "Player.hpp"
 #include "Map.hpp"
@@ -20,12 +21,15 @@ constexpr u32 ActorSize = 64;
 class GameScene final : public IScene
 {
     vec2<s16> calculateCameraVector() const;
+    LightBitset<NumActors> actorsToRemove;
 
 public:
     GameScene();
     virtual void vblank() override;
     virtual void update() override;
     virtual ~GameScene() {}
+
+    void removeActor(IActor& actor) { ASSERT(true); actorsToRemove.set(actors.indexOf(&actor)); }
 
     Map map;
     Player player;

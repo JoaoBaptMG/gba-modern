@@ -1,0 +1,11 @@
+{
+    "export-palette": false,
+    "group-width": 2,
+    "group-height": 4,
+
+    "animation-frames": 2,
+    "animation-poses":
+    {
+        "Default": [0, 6]
+    }
+}
