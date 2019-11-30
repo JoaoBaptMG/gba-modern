@@ -127,6 +127,8 @@ class FrameAnimator
     FrameAnimatorBase base;
 
 public:
+    using Pointer = FrameStorePointer<T, Size>;
+
     FrameAnimator(FrameStore<T, Size>& store, u16 frameTime)
         : pointer(store, false), base(store.getFrameStore(), frameTime) {}
 
