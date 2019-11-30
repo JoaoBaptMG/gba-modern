@@ -5,6 +5,7 @@ struct State
 {
     std::string inlabel;
     std::size_t groupWidth, groupHeight;
+    bool exportPalette;
 };
 
 struct AnimationPose
@@ -14,9 +15,17 @@ struct AnimationPose
 
 void from_json(const nlohmann::json& j, AnimationPose& af)
 {
-    j.at(0).get_to(af.init);
-    j.at(1).get_to(af.repeat);
-    j.at(2).get_to(af.end);
+    // This accepts three forms
+    // [x], a single frame that gets animated
+    // [i, e], where the animation loops from i to e
+    // [i, r, e], where the animation executes once from i to e, then loops back from r to e
+    std::size_t iinit = 0;
+    std::size_t irepeat = std::max((int)j.size()-2, 0);
+    std::size_t iend = j.size()-1;
+
+    j.at(iinit).get_to(af.init);
+    j.at(irepeat).get_to(af.repeat);
+    j.at(iend).get_to(af.end);
 }
 
 template <typename T>
@@ -38,7 +47,7 @@ int spriteExport(int argc, char **argv)
 
     // Parameters
     bool is8bpp = false;
-    State state = { labelizeName(in), 1, 1 };
+    State state = { labelizeName(in), 1, 1, true };
     std::ifstream mdin(in + ".json");
     std::size_t maxColors = 16;
     bool preserveOrder = false;
@@ -49,18 +58,25 @@ int spriteExport(int argc, char **argv)
     {
         nlohmann::json j;
         mdin >> j;
-        is8bpp = j.contains("is8bpp") && j.at("is8bpp").get<bool>();
+        if (j.contains("is8bpp")) j.at("is8bpp").get_to(is8bpp);
         if (is8bpp) maxColors = 256;
         if (j.contains("group-width")) j.at("group-width").get_to(state.groupWidth);
         if (j.contains("group-height")) j.at("group-height").get_to(state.groupHeight);
         if (j.contains("max-colors")) j.at("max-colors").get_to(maxColors);
         if (j.contains("preserve-order")) j.at("preserve-order").get_to(preserveOrder);
+        if (j.contains("export-palette")) j.at("export-palette").get_to(state.exportPalette);
         if (j.contains("animation-poses") && j.contains("animation-frames"))
         {
             exportAnimation = true;
             j.at("animation-poses").get_to(animations);
             j.at("animation-frames").get_to(frameStep);
         }
+    }
+
+    if (!state.exportPalette)
+    {
+        preserveOrder = true;
+        maxColors = is8bpp ? 256 : 16;
     }
 
     std::ofstream of;
@@ -120,7 +136,7 @@ int spriteExport(int argc, char **argv)
 template <typename T>
 void writeCharData(std::ostream& of, const State& state, const T& charData)
 {
-    of << "    .section .rodata" << std::endl;
+    of << "    .section .rodata." << state.inlabel << "_tiles" << std::endl;
     of << "    .align 2" << std::endl;
     of << "    .global " << state.inlabel << "_tiles" << std::endl;
     of << "    .hidden " << state.inlabel << "_tiles" << std::endl;
@@ -144,21 +160,25 @@ void writeCharData(std::ostream& of, const State& state, const T& charData)
         }
 
     of << std::endl << std::endl;
-    of << "    .section .rodata" << std::endl;
-    of << "    .align 2" << std::endl;
-    of << "    .global " << state.inlabel << "_palette" << std::endl;
-    of << "    .hidden " << state.inlabel << "_palette" << std::endl;
-    of << state.inlabel << "_palette:";
 
-    std::size_t index = 0;
-    for (Color c : charData.palette)
+    if (state.exportPalette)
     {
-        if (index % 16 == 0) of << std::endl << "    .hword ";
-        else of << ", ";
-        of << toHex(c, 4);
-        index++;
+        of << "    .section .rodata." << state.inlabel << "_palette" << std::endl;
+        of << "    .align 2" << std::endl;
+        of << "    .global " << state.inlabel << "_palette" << std::endl;
+        of << "    .hidden " << state.inlabel << "_palette" << std::endl;
+        of << state.inlabel << "_palette:";
+
+        std::size_t index = 0;
+        for (Color c : charData.palette)
+        {
+            if (index % 16 == 0) of << std::endl << "    .hword ";
+            else of << ", ";
+            of << toHex(c, 4);
+            index++;
+        }
+        of << std::endl << std::endl;
     }
-    of << std::endl << std::endl;
 }
 
 template <typename T>
@@ -168,8 +188,11 @@ void writeHeaderData(std::ostream& hof, const State& state, const T& charData)
     std::size_t size = charData.chars.width() * charData.chars.height() * charData.chars.at(0, 0).size();
     hof << size << "];" << std::endl;
 
-    hof << "extern const std::uint16_t " << state.inlabel << "_palette[";
-    hof << charData.palette.size() << "];" << std::endl;
+    if (state.exportPalette)
+    {
+        hof << "extern const std::uint16_t " << state.inlabel << "_palette[";
+        hof << charData.palette.size() << "];" << std::endl;
+    }
 }
 
 std::vector<std::size_t> powersOfTwo(std::size_t k)
