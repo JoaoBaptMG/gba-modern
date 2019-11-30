@@ -16,7 +16,7 @@ static FrameStore<animation_png_animation::AllocationBlocks, SpriteSize::s16x16_
 
 constexpr s32f8 BumperRadius = 8;
 constexpr vec2 BumperSize(BumperRadius, BumperRadius);
-constexpr auto BumperDeathCounter = 32;
+constexpr auto BumperDeathCounter = 64;
 
 // Quick & dirty way to get a random number (warning: UB)
 u16 getRandom(void* thisptr)
