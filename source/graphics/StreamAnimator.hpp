@@ -36,6 +36,9 @@ public:
     // Sets an animation pose
     void setAnimationPose(const AnimationPose& pose);
 
+    // Clears all animation poses
+    void clearAnimationPose();
+
     // Update the animation
     void update();
 

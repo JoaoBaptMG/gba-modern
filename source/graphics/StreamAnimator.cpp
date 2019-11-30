@@ -23,6 +23,13 @@ void StreamAnimator::setAnimationPose(const AnimationPose &pose)
     sendNewFrame();
 }
 
+void StreamAnimator::clearAnimationPose()
+{
+    // Set all the variables to default ones
+    curFrame = repeatFrame = endFrame = frameCount = 0;
+    tilePointer = ObjectTilePointer();
+}
+
 void StreamAnimator::update()
 {
     // Update the frame count and then the animation frame
