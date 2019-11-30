@@ -60,6 +60,11 @@ public:
         }
     }
 
+    std::size_t indexOf(Base* obj) // TODO: figure out a way of removing UB
+    {
+        return reinterpret_cast<Cell*>(obj) - cells;
+    }
+
     void removeIndex(std::size_t i)
     { 
         reinterpret_cast<Base*>(cells[i].storage)->~Base();

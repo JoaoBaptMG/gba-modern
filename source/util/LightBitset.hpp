@@ -18,4 +18,7 @@ public:
     bool test(std::size_t i) const { return cells[i>>5] & (1 << (i&31)); }
     void set(std::size_t i) { cells[i>>5] |= 1 << (i&31); }
     void reset(std::size_t i) { cells[i>>5] &= ~(1 << (i&31)); }
+
+    void setAll() { for (auto& cell : cells) cell = -1; }
+    void resetAll() { for (auto& cell : cells) cell = 0; }
 };
