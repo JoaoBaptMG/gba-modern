@@ -11,12 +11,13 @@ StreamAnimator::StreamAnimator(const void *animationFrames, SpriteSize spriteSiz
     : animationFrames((const TILE*)animationFrames), logNumBlocks(SizeUtils::logBlocks(spriteSize)), frameTime(frameTime),
       frameCount(0), curFrame(0), repeatFrame(0), endFrame(0), tilePointer() {}
 
-void StreamAnimator::setAnimationPose(const AnimationPose &pose)
+void StreamAnimator::setAnimationPose(const AnimationPose &pose, bool clearAnim)
 {
     // Set all the variables to the pose's parameters
     curFrame = pose.init;
     repeatFrame = pose.repeat;
     endFrame = pose.end;
+    clearAnimation = clearAnim;
 
     // And reset the state
     frameCount = 0;
@@ -40,7 +41,10 @@ void StreamAnimator::update()
 
         curFrame++;
         if (curFrame > endFrame)
-            curFrame = repeatFrame;
+        {
+            if (clearAnimation) clearAnimationPose();
+            else curFrame = repeatFrame;
+        }
         sendNewFrame();
     }
 }

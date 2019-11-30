@@ -17,7 +17,9 @@ class StreamAnimator final
     // The pointer to the frame data
     const TILE* animationFrames;
     // The size of the sprite requested, used in the calculations
-    u16 logNumBlocks;
+    u16 logNumBlocks:15;
+    // Whether it should clear or not the animation at the end
+    u16 clearAnimation:1;
     // The number of GBA frames to wait between each animation frame
     u16 frameTime;
     // The GBA count, and important properties of the animation
@@ -34,7 +36,7 @@ public:
     ~StreamAnimator() {}
 
     // Sets an animation pose
-    void setAnimationPose(const AnimationPose& pose);
+    void setAnimationPose(const AnimationPose& pose, bool clearAnim = false);
 
     // Clears all animation poses
     void clearAnimationPose();
@@ -46,6 +48,13 @@ public:
     u16 getTileId() const { return tilePointer.getTileId(); }
 
     // Set visible and is visible
-    bool isVisible() { return getTileId() != graphics::NoTile; }
+    bool isVisible() const { return getTileId() != graphics::NoTile; }
     void setVisible(bool visible);
+
+    // Getters
+    auto getFrameTime() const { return frameTime; }
+    auto getFrameCount() const { return frameCount; }
+    auto getCurFrame() const { return curFrame; }
+    auto getRepeatFrame() const { return repeatFrame; }
+    auto getEndFrame() const { return endFrame; }
 };
