@@ -54,82 +54,82 @@
  <objectgroup id="2" name="actors">
   <object id="1" name="bumper0" type="Bumper" x="208" y="544" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="false"/>
    </properties>
   </object>
   <object id="2" name="bumper1" type="Bumper" x="448" y="512" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="false"/>
    </properties>
   </object>
   <object id="3" name="bumper2" type="Bumper" x="720" y="528" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="true"/>
    </properties>
   </object>
   <object id="4" name="bumper3" type="Bumper" x="864" y="320" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="false"/>
    </properties>
   </object>
   <object id="5" name="bumper4" type="Bumper" x="560" y="272" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="true"/>
    </properties>
   </object>
   <object id="6" name="bumper5" type="Bumper" x="144" y="240" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="false"/>
    </properties>
   </object>
   <object id="7" name="bumper6" type="Bumper" x="80" y="96" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="false"/>
    </properties>
   </object>
   <object id="8" name="bumper7" type="Bumper" x="608" y="96" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="false"/>
    </properties>
   </object>
   <object id="9" name="bumper2" type="Bumper" x="352" y="624" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="false"/>
    </properties>
   </object>
   <object id="10" name="bumper2" type="Bumper" x="928" y="240" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="true"/>
    </properties>
   </object>
   <object id="11" name="bumper2" type="Bumper" x="928" y="64" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="true"/>
    </properties>
   </object>
   <object id="13" name="bumper2" type="Bumper" x="848" y="96" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="true"/>
    </properties>
   </object>
   <object id="14" name="bumper2" type="Bumper" x="256" y="64" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="false"/>
    </properties>
   </object>
   <object id="15" name="bumper2" type="Bumper" x="48" y="416" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="true"/>
    </properties>
   </object>
   <object id="17" name="bumper2" type="Bumper" x="96" y="608" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="true"/>
    </properties>
   </object>
   <object id="18" name="bumper2" type="Bumper" x="272" y="432" width="16" height="16">
    <properties>
-    <property name="param" type="int" value="12"/>
+    <property name="dir" type="bool" value="true"/>
    </properties>
   </object>
  </objectgroup>
