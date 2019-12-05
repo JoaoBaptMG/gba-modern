@@ -6,7 +6,6 @@
 #pragma once
 
 #include "scenes/IScene.hpp"
-#include "util/PointerInterfaceContainer.hpp"
 #include "util/UnorderedPolymorphicList.hpp"
 #include "util/LightBitset.hpp"
 #include "actors/IActor.hpp"
