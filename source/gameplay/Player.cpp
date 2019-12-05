@@ -159,7 +159,7 @@ void Player::observeMelee()
     if (meleeAnimator.isVisible())
     {
         auto& scene = gameScene();
-        for (auto& actor : scene.actors)
+        for (auto& actor : scene.getActors())
             actor.respondToMelee(scene);
     }
 }

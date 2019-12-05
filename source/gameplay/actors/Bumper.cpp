@@ -73,7 +73,7 @@ void Bumper::respondToMelee(GameScene& scene)
     if (collision::box<>(pos, BumperSize, player.getMeleePos(), player.getMeleeSize()))
     {
         scene.removeActor(*this);
-        scene.actors.add<BumperDeath>(pos, animator.getTileId());
+        scene.addActor<BumperDeath>(pos, animator.getTileId());
     }
 }
 

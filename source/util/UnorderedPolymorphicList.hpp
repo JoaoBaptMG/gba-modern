@@ -41,7 +41,7 @@ public:
     }
 
     template <typename Derived, typename... Ts>
-    void add(Ts &&... ts)
+    void add(Ts&&... ts)
     {
         static_assert(std::is_base_of_v<Base, Derived>,
             "The Derived class must be derived from Base!");
