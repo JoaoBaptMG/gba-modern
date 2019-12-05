@@ -14,7 +14,9 @@
 template <typename Base, std::size_t Size>
 class alignas(max_align_t) PointerInterfaceContainer
 {
-    static_assert(std::has_virtual_destructor<Base>::value,
+    static_assert(std::is_default_constructible_v<Base>,
+        "PointerInterfaceContainer will not work without a Base that is default constructible!");
+    static_assert(std::has_virtual_destructor_v<Base>,
         "PointerInterfaceContainer will not work properly without virtual destructors!");
     static_assert(sizeof(Base) >= sizeof(std::intptr_t),
         "PointerInterfaceContainer must not be smaller than a pointer");
@@ -22,10 +24,7 @@ class alignas(max_align_t) PointerInterfaceContainer
     std::byte storage[Size];
 
 public:
-    PointerInterfaceContainer()
-    {
-        *reinterpret_cast<std::intptr_t*>(storage) = 0;
-    }
+    PointerInterfaceContainer() { new (storage) Base(); }
 
     template <typename Derived, typename... Ts>
     void assign(Ts&&... ts)
@@ -37,15 +36,11 @@ public:
         static_assert(!is_virtual_base_of_v<Base, Derived>,
             "PointerInterfaceContainer does not work properly with virtual base classes!");
 
-        if (!empty()) reinterpret_cast<Base*>(storage)->~Base();
+        reinterpret_cast<Base*>(storage)->~Base();
         new (storage) Derived(std::forward<Ts>(ts)...);
     }
 
-    void clear()
-    { 
-        if (!empty()) reinterpret_cast<Base*>(storage)->~Base();
-        *reinterpret_cast<std::intptr_t*>(storage) = 0;
-    }
+    void clear() { assign<Base>(); }
 
     PointerInterfaceContainer(const PointerInterfaceContainer&) = delete;
     PointerInterfaceContainer(PointerInterfaceContainer&&) = delete;
@@ -57,15 +52,8 @@ public:
     Base& operator*() { return *reinterpret_cast<Base*>(storage); }
     const Base& operator*() const { return *reinterpret_cast<const Base*>(storage); }
 
-    bool empty() const // This function might cause undefined behavior
-    { 
-        return *reinterpret_cast<const std::intptr_t*>(storage) == 0;
-    }
-
-    explicit operator bool() const { return !empty(); }
-
     ~PointerInterfaceContainer()
     {
-        if (!empty()) reinterpret_cast<Base*>(storage)->~Base();
+        reinterpret_cast<Base*>(storage)->~Base();
     }
 };
