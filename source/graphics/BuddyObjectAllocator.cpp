@@ -21,6 +21,7 @@ BuddyObjectAllocator::BuddyObjectAllocator()
 
     // Set the first block's memory
     freeList[LogNumTiles] = 0;
+    toFreeFirst = toFreeLast = graphics::NoTile;
 }
 
 // Allocate a block with a tile order
@@ -74,49 +75,76 @@ void BuddyObjectAllocator::freeBlock(u16 tile)
     // Bail out if no tile
     if (tile == graphics::NoTile) return;
 
-    // Bail out if somehow we have been fed an already free block
+    // Bail out if somehow we have been fed an already freed block
     if (blocks[tile].prev == graphics::NoTile || !(blocks[tile].prev & InUse)) return;
 
-    // Get the order and assure it is valid
-    uint order = blocks[tile].prev &~ InUse;
-    ASSERT(order <= LogNumTiles);
+    blocks[tile].next = graphics::NoTile;
+
+    // Put it in the list to free
+    if (toFreeLast == graphics::NoTile)
+        toFreeFirst = toFreeLast = tile;
+    else
+    {
+        blocks[toFreeLast].next = tile;
+        toFreeLast = tile;
+    }
+}
+
+void BuddyObjectAllocator::commitFreeBlocks()
+{
+    // Finally, free all the tiles here
+    u16 nextTile;
+    for (u16 tile = toFreeFirst; tile != graphics::NoTile; tile = nextTile)
+    {
+        // We need to memoise the next tile here, because the block structure
+        // will be updated and inserted in the free list
+        // (yes, there are two linked lists that this thing can be on)
+        nextTile = blocks[tile].next;
+
+        // Get the order and assure it is valid
+        uint order = blocks[tile].prev &~ InUse;
+        ASSERT(order <= LogNumTiles);
 
 #ifdef CLEAR_TILE_AFTER
-    // Just clear the tile, to see clearly what's going on
-    memset32(&tile_mem_obj[0][tile], 0, (sizeof(TILE)/sizeof(u32)) << order);
+        // Just clear the tile, to see clearly what's going on
+        memset32(&tile_mem_obj[0][tile], 0, (sizeof(TILE)/sizeof(u32)) << order);
 #endif
 
-    // Try to join the block with its buddy, to insert a superior block
-    while (order < LogNumTiles)
-    {
-        u16 buddy = tile ^ (1 << order);
+        // Try to join the block with its buddy, to insert a superior block
+        while (order < LogNumTiles)
+        {
+            u16 buddy = tile ^ (1 << order);
 
-        // If its buddy is still active, stop joining
-        if (blocks[buddy].prev & InUse) break;
+            // If its buddy is still active, stop joining
+            if (blocks[buddy].prev & InUse) break;
 
-        // Take the buddy from the free list, updating the links
-        if (blocks[buddy].next != graphics::NoTile)
-            blocks[blocks[buddy].next].prev = blocks[buddy].prev;
-        if (blocks[buddy].prev != graphics::NoTile)
-            blocks[blocks[buddy].prev].next = blocks[buddy].next;
-        else freeList[order] = blocks[buddy].next;
+            // Take the buddy from the free list, updating the links
+            if (blocks[buddy].next != graphics::NoTile)
+                blocks[blocks[buddy].next].prev = blocks[buddy].prev;
+            if (blocks[buddy].prev != graphics::NoTile)
+                blocks[blocks[buddy].prev].next = blocks[buddy].next;
+            else freeList[order] = blocks[buddy].next;
 
-        // Update the lists
-        blocks[tile].next = graphics::NoTile;
+            // Update the lists
+            blocks[tile].next = graphics::NoTile;
+            blocks[tile].prev = graphics::NoTile;
+            blocks[buddy].next = graphics::NoTile;
+            blocks[buddy].prev = graphics::NoTile;
+
+            // Join the two blocks and increase the order
+            tile &= ~(1 << order);
+            order++;
+        }
+
+        // Inserts the block (possibly joined with its buddies) in the free list
+        u16 first = freeList[order];
+        if (first != graphics::NoTile)
+            blocks[first].prev = tile;
+        blocks[tile].next = first;
         blocks[tile].prev = graphics::NoTile;
-        blocks[buddy].next = graphics::NoTile;
-        blocks[buddy].prev = graphics::NoTile;
-
-        // Join the two blocks and increase the order
-        tile &= ~(1 << order);
-        order++;
+        freeList[order] = tile;
     }
 
-    // Inserts the block (possibly joined with its buddies) in the free list
-    u16 first = freeList[order];
-    if (first != graphics::NoTile)
-        blocks[first].prev = tile;
-    blocks[tile].next = first;
-    blocks[tile].prev = graphics::NoTile;
-    freeList[order] = tile;
+    // Reset the list
+    toFreeFirst = toFreeLast = graphics::NoTile;
 }

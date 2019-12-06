@@ -17,6 +17,7 @@ class BuddyObjectAllocator final
     struct Block { u16 prev, next; };
     Block blocks[NumTiles];
     u16 freeList[LogNumTiles+1];
+    u16 toFreeFirst, toFreeLast;
 
 public:
     // Constructors and destructors
@@ -26,4 +27,5 @@ public:
     // Allocators and deleters
     u16 allocBlock(uint order);
     void freeBlock(u16 tile);
+    void commitFreeBlocks();
 };

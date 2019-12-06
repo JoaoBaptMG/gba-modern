@@ -70,7 +70,11 @@ void graphics::update()
     }
     romCopyCount = 0;
 
+    // Copy to shadow OAM
     oam.copyToOAM();
+
+    // Commit the free tiles so we do not get the nasty bug
+    buddy.commitFreeBlocks();
 }
 
 void* graphics::newCopyCommand32(void* dst, u16 count)
