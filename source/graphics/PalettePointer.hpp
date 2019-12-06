@@ -11,9 +11,6 @@
 #include "util/AllocatorPointer.hpp"
 #include "graphics.hpp"
 
-// For debugging purposes
-#define CLEAR_PALETTE_AFTER
-
 template <std::size_t N>
 class PaletteAllocator final : public Allocator<PaletteAllocator<N>>
 {
@@ -30,12 +27,7 @@ class PaletteAllocator final : public Allocator<PaletteAllocator<N>>
 
     // Free the data, optionally (for debug) clearing it
     void clear()
-    { 
-#ifdef CLEAR_PALETTE_AFTER
-        for (std::size_t i = 0; i < N; i++)
-            memset32(pal_obj_bank + palettes[i], 0, sizeof(PALBANK) / sizeof(u32));
-#undef CLEAR_PALETTE_AFTER
-#endif
+    {
         graphics::freeObjPalettes(N, palettes);
     }
 

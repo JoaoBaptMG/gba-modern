@@ -46,6 +46,9 @@ namespace graphics
     // Return the palette space allocated for the palette
     void freeObjPalettes(u32 numPalettes, const u16* indices);
 
+    // Commit the palettes needed to fill
+    void commitFreePalettes();
+
     // The Oam manager
     extern OamManager oam;
 }

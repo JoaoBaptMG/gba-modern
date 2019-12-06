@@ -7,6 +7,9 @@
 #include "graphics/BuddyObjectAllocator.hpp"
 #include "util/gba-assert.hpp"
 
+// TODO: remove this - for debugging purposes
+#define CLEAR_PALETTE_AFTER
+
 constexpr u32 MaxCopyWords = 256;
 constexpr u32 MaxVerticalWords = 64;
 constexpr u32 MaxRomCopies = 32;
@@ -17,7 +20,7 @@ struct RomCopy { const void* src; void* dst; u32 countCtl; };
 static RomCopy romCopyBuffer[MaxRomCopies] IWRAM_DATA;
 
 static u32 objCount IWRAM_DATA, copyCount IWRAM_DATA, verticalCount IWRAM_DATA, romCopyCount IWRAM_DATA;
-static u32 palettesUsed EWRAM_BSS;
+static u16 palettesUsed EWRAM_BSS, palettesToFree EWRAM_BSS;
 
 static BuddyObjectAllocator buddy EWRAM_BSS;
 OamManager graphics::oam IWRAM_DATA;
@@ -29,6 +32,7 @@ void graphics::init()
     verticalCount = 0;
     romCopyCount = 0;
     palettesUsed = 0;
+    palettesToFree = 0;
     oam.init();
 }
 
@@ -73,8 +77,9 @@ void graphics::update()
     // Copy to shadow OAM
     oam.copyToOAM();
 
-    // Commit the free tiles so we do not get the nasty bug
+    // Commit the free tiles and the free palettes so we do not get the nasty bug
     buddy.commitFreeBlocks();
+    commitFreePalettes();
 }
 
 void* graphics::newCopyCommand32(void* dst, u16 count)
@@ -140,6 +145,20 @@ void graphics::freeObjPalettes(u32 numPalettes, const u16* indices)
     for (u32 j = 0; j < numPalettes; j++)
     {
         u32 i = *indices++;
-        palettesUsed &= ~(1 << i);
+        palettesToFree |= 1 << i;
     }
+}
+
+void graphics::commitFreePalettes()
+{
+#ifdef CLEAR_PALETTE_AFTER
+    for (u32 i = 0; i < 16; i++)
+    {
+        if (palettesToFree & (1 << i))
+            memset32(pal_obj_bank+i, 0, sizeof(PALBANK) / sizeof(u32));
+    }
+#endif
+
+    palettesUsed &= ~palettesToFree;
+    palettesToFree = 0;
 }
