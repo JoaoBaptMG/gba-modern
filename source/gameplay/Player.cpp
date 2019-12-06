@@ -16,16 +16,16 @@
 constexpr s32f8 JumpSpeed = -3.5;
 constexpr auto DecaySpeed = JumpSpeed / 2;
 
-static SinglePaletteAllocator palette(player_png_palette);
+static SinglePaletteAllocator palette(data::sprites::player.png.palette);
 
-Player::Player() : meleeAnimator(player_melee_png_tiles, SpriteSize::s16x32_4bpp, player_melee_png_animation::FrameStep) {}
+Player::Player() : meleeAnimator(data::sprites::player_melee.png, SpriteSize::s16x32_4bpp, 2) {}
 
 void Player::init(s32f8 x, s32f8 y)
 {
     playerPtr = ObjectTilePointer(SpriteSize::s16x32_4bpp);
 
     // Copy the player's data to the main palette
-    playerPtr.setData(player_png_tiles);
+    playerPtr.setData(data::sprites::player.png.tiles);
 
     // Allocate to the palette
     palPtr = SinglePalettePointer(palette);
@@ -146,8 +146,8 @@ void Player::triggerMelee()
     // Triggers the melee attack (use the animation counter for it)
     if (!meleeAnimator.isVisible())
     {
-        using namespace player_melee_png_animation;
-        meleeAnimator.setAnimationPose(Animation_Default, true);
+        using namespace data::sprites;
+        meleeAnimator.setAnimationPose(player_melee.png.poses.Default, true);
         meleeAnimator.setVisible(true);
     }
 }

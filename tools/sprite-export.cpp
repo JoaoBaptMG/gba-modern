@@ -3,7 +3,7 @@
 
 struct State
 {
-    std::string inlabel;
+    SpecialName name;
     std::size_t groupWidth, groupHeight;
     bool exportPalette;
 };
@@ -33,9 +33,12 @@ void writeCharData(std::ostream& of, const State& state, const T& charData);
 template <typename T>
 void writeHeaderData(std::ostream& hof, const State& state, const T& charData);
 
+void writeCharAnimationData(std::ofstream& of, const State& state, std::size_t totalNumFrames);
+
 using AnimationData = std::map<std::string, AnimationPose>;
-void writeAnimationData(std::ostream &hof, const State &state, const AnimationData &animations, std::size_t frameStep,
-    std::size_t totalNumFrames);
+template <typename T>
+void writeAnimatedHeaderData(std::ostream &hof, const State &state, const T& charData,
+    const AnimationData &animations, std::size_t frameStep, std::size_t totalNumFrames);
 
 int spriteExport(int argc, char **argv)
 {
@@ -47,7 +50,7 @@ int spriteExport(int argc, char **argv)
 
     // Parameters
     bool is8bpp = false;
-    State state = { labelizeName(in), 1, 1, true };
+    State state = { deriveSpecialName(out), 1, 1, true };
     std::ifstream mdin(in + ".json");
     std::size_t maxColors = 16;
     bool preserveOrder = false;
@@ -93,39 +96,31 @@ int spriteExport(int argc, char **argv)
     hof << "// " << outh << std::endl;
     hof << "// " << std::endl;
     hof << "#pragma once" << std::endl << std::endl;
-    hof << "#include <cstdint>" << std::endl;
     if (exportAnimation)
     {
-        hof << "#include <utility>" << std::endl;
+        hof << "#include \"graphics/AnimatedPng.hpp\"" << std::endl;
         hof << "#include \"graphics/AnimationPose.hpp\"" << std::endl;
     }
+    else hof << "#include \"graphics/DataPng.hpp\"" << std::endl;
     hof << std::endl;
 
-    std::size_t numFrames;
-    if (!is8bpp)
+    auto exportChars = [&](auto charData)
     {
-        auto charData = convertPngToCharacters4bpp(in, maxColors, preserveOrder);
         charData.palette[0] = 0;
         writeCharData(of, state, charData);
-        writeHeaderData(hof, state, charData);
 
-        auto framesX = (charData.chars.width() + state.groupWidth - 1) / state.groupWidth;
-        auto framesY = (charData.chars.height() + state.groupHeight - 1) / state.groupHeight;
-        numFrames = framesX * framesY;
-    }
-    else
-    {
-        auto charData = convertPngToCharacters8bpp(in, maxColors, preserveOrder);
-        charData.palette[0] = 0;
-        writeCharData(of, state, charData);
-        writeHeaderData(hof, state, charData);
+        if (!exportAnimation) writeHeaderData(hof, state, charData);
+        else
+        {
+            auto framesX = (charData.chars.width() + state.groupWidth - 1) / state.groupWidth;
+            auto framesY = (charData.chars.height() + state.groupHeight - 1) / state.groupHeight;
+            writeCharAnimationData(of, state, framesX * framesY);
+            writeAnimatedHeaderData(hof, state, charData, animations, frameStep, framesX * framesY);
+        } 
+    };
 
-        auto framesX = (charData.chars.width() + state.groupWidth - 1) / state.groupWidth;
-        auto framesY = (charData.chars.height() + state.groupHeight - 1) / state.groupHeight;
-        numFrames = framesX * framesY;
-    }
-
-    if (exportAnimation) writeAnimationData(hof, state, animations, frameStep, numFrames);
+    if (!is8bpp) exportChars(convertPngToCharacters4bpp(in, maxColors, preserveOrder));
+    else exportChars(convertPngToCharacters8bpp(in, maxColors, preserveOrder));
 
     of.close();
     hof.close();
@@ -136,11 +131,11 @@ int spriteExport(int argc, char **argv)
 template <typename T>
 void writeCharData(std::ostream& of, const State& state, const T& charData)
 {
-    of << "    .section .rodata." << state.inlabel << "_tiles" << std::endl;
+    of << "    .section .rodata." << state.name.mangledName << std::endl;
     of << "    .align 2" << std::endl;
-    of << "    .global " << state.inlabel << "_tiles" << std::endl;
-    of << "    .hidden " << state.inlabel << "_tiles" << std::endl;
-    of << state.inlabel << "_tiles:";
+    of << "    .global " << state.name.mangledName << std::endl;
+    of << "    .hidden " << state.name.mangledName << std::endl;
+    of << state.name.mangledName << ':';
     for (std::size_t j = 0; j < charData.chars.height(); j += state.groupHeight)
         for (std::size_t i = 0; i < charData.chars.width(); i += state.groupWidth)
         {
@@ -159,16 +154,10 @@ void writeCharData(std::ostream& of, const State& state, const T& charData)
             }
         }
 
-    of << std::endl << std::endl;
+    of << std::endl;
 
     if (state.exportPalette)
     {
-        of << "    .section .rodata." << state.inlabel << "_palette" << std::endl;
-        of << "    .align 2" << std::endl;
-        of << "    .global " << state.inlabel << "_palette" << std::endl;
-        of << "    .hidden " << state.inlabel << "_palette" << std::endl;
-        of << state.inlabel << "_palette:";
-
         std::size_t index = 0;
         for (Color c : charData.palette)
         {
@@ -177,62 +166,57 @@ void writeCharData(std::ostream& of, const State& state, const T& charData)
             of << toHex(c, 4);
             index++;
         }
-        of << std::endl << std::endl;
+        of << std::endl;
     }
+
+    of << std::endl;
+}
+
+void writeCharAnimationData(std::ofstream& of, const State& state, std::size_t totalNumFrames)
+{
+    for (std::size_t i = 0; i < totalNumFrames; i++)
+        of << "    .hword 0x0000, " << toHex(i, 4) << std::endl;
+    of << std::endl;
 }
 
 template <typename T>
 void writeHeaderData(std::ostream& hof, const State& state, const T& charData)
 {
-    hof << "extern const std::uint8_t " << state.inlabel << "_tiles[";
-    std::size_t size = charData.chars.width() * charData.chars.height() * charData.chars.at(0, 0).size();
-    hof << size << "];" << std::endl;
-
-    if (state.exportPalette)
-    {
-        hof << "extern const std::uint16_t " << state.inlabel << "_palette[";
-        hof << charData.palette.size() << "];" << std::endl;
-    }
-}
-
-std::vector<std::size_t> powersOfTwo(std::size_t k)
-{
-    std::size_t pot = 8*sizeof(std::size_t) - 1;
-    std::size_t bit = (std::size_t)1 << pot;
-
-    std::vector<std::size_t> bits;
-    while (bit)
-    {
-        if (k & bit) bits.push_back(pot);
-        bit >>= 1;
-        pot--;
-    }
-
-    return bits;
-}
-
-void writeAnimationData(std::ostream &hof, const State &state, const AnimationData &animations, std::size_t frameStep,
-    std::size_t totalNumFrames)
-{
-    hof << std::endl;
-    hof << "namespace " << state.inlabel << "_animation" << std::endl;
+    hof << "namespace " << state.name.nmspace << std::endl;
     hof << '{' << std::endl;
-    hof << "    constexpr std::size_t FrameStep = " << frameStep << ';' << std::endl;
-    hof << "    using AllocationBlocks = std::index_sequence<";
 
-    bool nf = false;
-    for (auto b : powersOfTwo(totalNumFrames))
-    {
-        if (nf) hof << ", ";
-        nf = true;
-        hof << b;
-    }
+    std::size_t charSize = charData.chars.width() * charData.chars.height() * charData.chars.at(0, 0).size();
+    std::size_t paletteSize = state.exportPalette ? charData.palette.size() : 0;
 
-    hof << ">;" << std::endl << std::endl;
+    hof << "    extern const DataPng<" << charSize << ',' << paletteSize << "> ";
+    hof << state.name.fileName << ';' << std::endl;
+
+    hof << '}' << std::endl << std::endl;
+}
+
+template <typename T>
+void writeAnimatedHeaderData(std::ostream &hof, const State &state, const T& charData,
+    const AnimationData &animations, std::size_t frameStep, std::size_t totalNumFrames)
+{
+    hof << "namespace " << state.name.nmspace << std::endl;
+    hof << '{' << std::endl;
+
+    hof << "    struct __animation_" << state.name.fileName << " final" << std::endl;
+    hof << "    {" << std::endl;
+
     for (const auto& p : animations)
     {
-        hof << "    constexpr AnimationPose Animation_" << p.first << " = { ";
+        hof << "        constexpr static const AnimationPose " << p.first << " = { ";
         hof << p.second.init << ", " << p.second.repeat << ", " << p.second.end << " };" << std::endl;
     }
-    hof << '}' << std::endl;
+
+    hof << "    };" << std::endl;
+
+    std::size_t charSize = charData.chars.width() * charData.chars.height() * charData.chars.at(0, 0).size();
+    std::size_t paletteSize = state.exportPalette ? charData.palette.size() : 0;
+
+    hof << "    extern const AnimatedPng<" << charSize << ',' << paletteSize << ',' << totalNumFrames;
+    hof << ", __animation_" << state.name.fileName << "> " << state.name.fileName << ';' << std::endl;
+
+    hof << '}' << std::endl << std::endl;
 }

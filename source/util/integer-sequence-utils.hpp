@@ -47,3 +47,25 @@ struct prefix_sum<std::integer_sequence<T, Nums...>>
         T(0), std::integer_sequence<T, Nums...>> {};
 
 template <typename T> using prefix_sum_t = typename prefix_sum<T>::type;
+
+namespace detail
+{
+    template <std::size_t N, std::size_t Idx, std::size_t... Nums>
+    struct bit_sequence_helper : std::conditional_t<N&1,
+        bit_sequence_helper<(N>>1), Idx+1, Idx, Nums...>,
+        bit_sequence_helper<(N>>1), Idx+1, Nums...>> {};
+
+    template <std::size_t Idx, std::size_t... Nums>
+    struct bit_sequence_helper<0, Idx, Nums...>
+    {
+        using type = std::index_sequence<Nums...>;
+    };
+}
+
+// The bit sequence of a number, i.e., the sequence that has
+// i for each i-th bit that is set on that number
+template <std::size_t N>
+struct bit_sequence : detail::bit_sequence_helper<N, 0> {};
+
+template <std::size_t N>
+using bit_sequence_t = typename bit_sequence<N>::type;

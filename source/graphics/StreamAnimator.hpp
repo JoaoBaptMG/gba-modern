@@ -8,14 +8,17 @@
 
 #include <tonc.h>
 #include "graphics/SpriteSize.hpp"
+#include "graphics/AnimatedPng.hpp"
 #include "graphics/AnimationPose.hpp"
 #include "graphics/ObjectTilePointer.hpp"
 
 // The StreamAnimator starts as invisible
 class StreamAnimator final
 {
+    // The pointer to the tile data
+    const TILE* animationTiles;
     // The pointer to the frame data
-    const TILE* animationFrames;
+    const AnimationFrame* animationFrames;
     // The size of the sprite requested, used in the calculations
     u16 logNumBlocks:15;
     // Whether it should clear or not the animation at the end
@@ -32,8 +35,13 @@ class StreamAnimator final
 
 public:
     // Constructor and destructor
-    StreamAnimator(const void* animationFrames, SpriteSize spriteSize, u16 frameTime);
+    StreamAnimator(const void* animationTiles, const AnimationFrame* animationFrames, SpriteSize spriteSize, u16 frameTime);
     ~StreamAnimator() {}
+
+    // Helper templated constructor
+    template <typename Png>
+    StreamAnimator(const Png& png, SpriteSize spriteSize, u16 frameTime)
+        : StreamAnimator(png.tiles, png.animationFrames, spriteSize, frameTime) {}
 
     // Sets an animation pose
     void setAnimationPose(const AnimationPose& pose, bool clearAnim = false);

@@ -13,6 +13,7 @@
 #include "grid.hpp"
 #include "nlohmann/json.hpp"
 #include "util.hpp"
+#include "split.hpp"
 
 #define LODEPNG_NO_COMPILE_ENCODER
 #define LODEPNG_NO_COMPILE_ANCILLARY_CHUNKS

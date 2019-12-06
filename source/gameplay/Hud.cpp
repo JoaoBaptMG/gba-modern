@@ -10,7 +10,9 @@
 #include "Player.hpp"
 #include "data/sprites/hud.hpp"
 
-static SinglePaletteAllocator palette(hud_png_palette);
+using namespace data::sprites;
+
+static SinglePaletteAllocator palette(hud.png.palette);
 
 void Hud::init()
 {
@@ -19,8 +21,8 @@ void Hud::init()
     bitsPtr = ObjectTilePointer(SpriteSize::s16x16_4bpp);
 
     // Load the graphics
-    iconPtr.setData(hud_png_tiles, sizeof(hud_png_tiles)/2);
-    bitsPtr.setData(hud_png_tiles+sizeof(hud_png_tiles)/2, sizeof(hud_png_tiles)/2);
+    iconPtr.setData(hud.png.tiles, sizeof(hud.png.tiles)/2);
+    bitsPtr.setData(hud.png.tiles+sizeof(hud.png.tiles)/2, sizeof(hud.png.tiles)/2);
 
     palPtr = SinglePalettePointer(palette);
 }

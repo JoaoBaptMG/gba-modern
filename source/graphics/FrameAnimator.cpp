@@ -6,8 +6,8 @@
 //--------------------------------------------------------------------------------
 #include "FrameAnimator.hpp"
 
-FrameAnimatorBase::FrameAnimatorBase(const u16* frameTileIndices, u16 frameTime)
-    : frameTileIndices(frameTileIndices), frameTime(frameTime), frameCount(0),
+FrameAnimatorBase::FrameAnimatorBase(const u16* frameTileIndices, const AnimationFrame* animationFrames, u16 frameTime)
+    : frameTileIndices(frameTileIndices), animationFrames(animationFrames), frameTime(frameTime), frameCount(0),
       curFrame(0), repeatFrame(0), endFrame(0) {}
 
 void FrameAnimatorBase::setAnimationPose(const AnimationPose &pose)

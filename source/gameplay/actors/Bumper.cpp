@@ -9,10 +9,11 @@
 #include "gameplay/GameScene.hpp"
 #include "gameplay/collision.hpp"
 
-static SinglePaletteAllocator palette EWRAM_BSS (animation_png_palette);
+using namespace data::sprites;
 
-static FrameStore<animation_png_animation::AllocationBlocks, SpriteSize::s16x16_4bpp>
-    frameStore EWRAM_BSS (animation_png_tiles);
+static SinglePaletteAllocator palette EWRAM_BSS (animation.png.palette);
+
+static FrameStore<data::sprites::animation, SpriteSize::s16x16_4bpp> frameStore EWRAM_BSS;
 
 constexpr s32f8 BumperRadius = 8;
 constexpr vec2 BumperSize(BumperRadius, BumperRadius);
@@ -27,7 +28,7 @@ u16 getRandom(void* thisptr)
 }
 
 Bumper::Bumper(s32f8 x, s32f8 y, bool dir)
-    : animator(frameStore, animation_png_animation::FrameStep + 2 * getRandom(this) - 8),
+    : animator(frameStore, 30 + 2 * getRandom(this) - 8),
     palettePtr(palette, false)
 {
     pos = vec2(x, y);
@@ -35,7 +36,7 @@ Bumper::Bumper(s32f8 x, s32f8 y, bool dir)
     vel = vec2(-1, 1);
     if (dir) vel = -vel;
 
-    animator.setAnimationPose(animation_png_animation::Animation_Default);
+    animator.setAnimationPose(animation.png.poses.Default);
 }
 
 void Bumper::update(GameScene& scene)

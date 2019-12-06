@@ -1,4 +1,5 @@
 #include "util.hpp"
+#include "split.hpp"
 
 #include <vector>
 #include <cctype>
@@ -11,32 +12,23 @@ std::string simplifyPath(const std::string &str)
     std::size_t numPrevsInBeginning = 0;
 
     // Now, pass through each segment
-    std::size_t curPos = std::string::npos;
-    do
+    for (auto curSegment : split(str, '/'))
     {
-        std::size_t prevPos = curPos+1, size;
-        curPos = str.find('/', prevPos);
-        if (curPos == std::string::npos) size = curPos;
-        else size = curPos - prevPos;
-        auto curSegment = str.substr(prevPos, size);
-
         // Check for the special "." and ".." segment
         if (curSegment == "..")
         {
             if (segments.empty()) numPrevsInBeginning++;
             else segments.pop_back();
         }
-        else if (curSegment != ".")
-            segments.push_back(curSegment);
-
-    } while (curPos != std::string::npos);
+        else if (curSegment != ".") segments.emplace_back(curSegment);
+    }
 
     // Now, compose the simplified path
     std::string result;
     for (std::size_t i = 0; i < numPrevsInBeginning; i++)
         result += "../";
     for (const auto& segment : segments)
-        result += segment + '/';
+        result += std::string(segment) + '/';
     result.pop_back();
 
     return result;
@@ -48,8 +40,14 @@ std::string labelizeName(const std::string &name, bool stripExtension)
     if (stripExtension)
         shortName = shortName.substr(0, shortName.find_last_of('.'));
     
-    for (auto& c : shortName) if (!std::isalnum(c)) c = '_';
-    return shortName;
+    return labelizeString(shortName);
+}
+
+std::string labelizeString(std::string str)
+{
+    for (auto& c : str)
+        if (!std::isalnum(c)) c = '_';
+    return str;
 }
 
 std::string toHex(std::uintmax_t v, std::intmax_t minChars)
@@ -68,4 +66,35 @@ std::string toHex(std::uintmax_t v, std::intmax_t minChars)
     str += "x0";
     std::reverse(str.begin(), str.end());
     return str;
+}
+
+SpecialName deriveSpecialName(const std::string& name)
+{
+    SpecialName result;
+
+    std::vector<std::string> splitVector;
+    for (auto sv : split(simplifyPath(name), '/'))
+        splitVector.emplace_back(sv);
+
+    // build the filename
+    result.fileName = splitVector.back();
+    result.fileName = result.fileName.substr(0, result.fileName.find_last_of('.'));
+    result.fileName = labelizeString(result.fileName);
+    splitVector.pop_back();
+
+    // now, build the namespace and the mangled name
+    bool nsnotfirst = false;
+    result.mangledName = "_ZN";
+    for (const auto& str : splitVector)
+    {
+        auto lstr = labelizeString(str);
+        if (nsnotfirst) result.nmspace += "::";
+        nsnotfirst = true;
+        result.nmspace += lstr;
+        result.mangledName += std::to_string(lstr.size()) + lstr;
+    }
+    // Add the last file name and the mangling details
+    result.mangledName += std::to_string(result.fileName.size()) + result.fileName + "E";
+
+    return result;
 }
