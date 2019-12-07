@@ -278,16 +278,8 @@ std::vector<std::uint32_t> decodeDataLayer(std::string datatext, std::string enc
     else if (encoding == "csv")
     {
         // Run through each comma
-        std::size_t curPos = 0;
-        do
-        {
-            std::size_t prevPos = curPos+1, size;
-            curPos = datatext.find(',', prevPos);
-            if (curPos == std::string::npos) size = curPos;
-            else size = curPos - prevPos;
-            auto curSegment = datatext.substr(prevPos, size);
-            curData.push_back(std::stoul(curSegment));
-        } while (curPos != std::string::npos);
+        for (auto curSegment : split(datatext, ','))
+            curData.push_back(std::stoul(std::string(curSegment)));
     }
     else throw std::invalid_argument("Data layer encoding must be either csv or base64");
 
