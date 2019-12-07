@@ -98,10 +98,10 @@ int spriteExport(int argc, char **argv)
     hof << "#pragma once" << std::endl << std::endl;
     if (exportAnimation)
     {
-        hof << "#include \"graphics/AnimatedPng.hpp\"" << std::endl;
+        hof << "#include \"data/AnimatedPng.hpp\"" << std::endl;
         hof << "#include \"graphics/AnimationPose.hpp\"" << std::endl;
     }
-    else hof << "#include \"graphics/DataPng.hpp\"" << std::endl;
+    else hof << "#include \"data/DataPng.hpp\"" << std::endl;
     hof << std::endl;
 
     auto exportChars = [&](auto charData)

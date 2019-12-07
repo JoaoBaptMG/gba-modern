@@ -12,7 +12,7 @@
 #include "graphics.hpp"
 #include "graphics/AnimationPose.hpp"
 #include "graphics/SpriteSize.hpp"
-#include "graphics/AnimatedPng.hpp"
+#include "data/AnimatedPng.hpp"
 #include "util/AllocatorPointer.hpp"
 #include "util/integer-sequence-utils.hpp"
 
