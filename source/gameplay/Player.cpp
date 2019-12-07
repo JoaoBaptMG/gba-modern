@@ -36,6 +36,7 @@ void Player::init(s32f8 x, s32f8 y)
     // Initialize the health
     health = maxHealth = 8;
     invCounter = 0;
+    money = 0;
 
     inAir = false;
 }
@@ -139,6 +140,13 @@ void Player::damage(int amount)
         // TODO: die
         for (;;); // Just hang up
     }
+}
+
+void Player::giveMoney(int amount)
+{
+    ASSERT(amount > 0);
+    money += amount;
+    gameScene().hud.notifyMoneyChange(money);
 }
 
 void Player::triggerMelee()

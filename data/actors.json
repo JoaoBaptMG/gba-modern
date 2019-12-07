@@ -6,5 +6,10 @@
         [
             { "name": "dir", "type": "literal" }
         ]
+    },
+    "Money":
+    {
+        "header": "gameplay/actors/Money.hpp",
+        "params": []
     }
 }

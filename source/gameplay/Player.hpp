@@ -29,6 +29,7 @@ class Player final
     SinglePalettePointer palPtr;
     StreamAnimator meleeAnimator;
     u16 health, maxHealth, invCounter;
+    u16 money;
 
     // flags
     u16 goingLeft:1;
@@ -47,6 +48,8 @@ public:
 
     void heal(int amount = 1);
     void damage(int amount = 1);
+
+    void giveMoney(int amount = 1);
 
     void respondToGravityAndCollision();
     void triggerMelee();

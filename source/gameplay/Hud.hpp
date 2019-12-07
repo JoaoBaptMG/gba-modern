@@ -13,11 +13,18 @@ class GameScene;
 class Hud final
 {
     SinglePalettePointer palPtr;
-    ObjectTilePointer iconPtr, bitsPtr;
+    ObjectTilePointer iconPtr, bitsPtr, numberPtrs[2];
+    u16 money, moneyDigits;
+    s16 moneyDisplayCounter;
 
+    void createNewDigits();
+    void displayMoney();
     GameScene &gameScene();
+
 public:
     Hud() {}
     void init();
     void pushGraphics();
+
+    void notifyMoneyChange(u16 newMoney);
 };
