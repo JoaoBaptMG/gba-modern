@@ -24,4 +24,3 @@ using SceneStack = ObjectStack<IScene, 65536, 4>;
 extern SceneStack sceneStack EWRAM_BSS;
 extern bool popScene EWRAM_BSS;
 
-#define CHANGE_SCENE(Type) do { nextScene = []() { scene.assign<Type>(); }; } while (0)

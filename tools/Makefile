@@ -10,8 +10,9 @@ C_FILES   		:= $(wildcard *.c)
 CPP_FILES 		:= $(wildcard *.cpp)
 O_FILES			:= $(C_FILES:%.c=obj/%.o) $(CPP_FILES:%.cpp=obj/%.o)
 
-C_FLAGS		:= -Wall -g
+C_FLAGS		:= -Wall -g -I/usr/include/freetype2
 CPP_FLAGS	:= $(C_FLAGS) -std=c++17
+LIBS 		:= -lfreetype
 
 PCH_SRC		:= pch.hpp
 PCH_INC		:= grid.hpp lodepng.h nlohmann/json.hpp util.hpp
@@ -33,7 +34,7 @@ obj/%.o: %.cpp $(PCH_OUT)
 	$(CXX) -MMD $(CPP_FLAGS) -include $(PCH_SRC) -c -o $@ $<
 
 tools: $(O_FILES)
-	$(CXX) $(CPP_FLAGS) -o $@ $^
+	$(CXX) $(CPP_FLAGS) -o $@ $^ $(LIBS)
 
 objdir:
 	@mkdir -p obj

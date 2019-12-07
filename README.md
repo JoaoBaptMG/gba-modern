@@ -4,7 +4,7 @@ The objective of this project is to aim to create a Game Boy Advance game using 
 
 Building
 ========
-This project consists in a toolkit written in C++17 to generate assembly files for the resources (tilesets, maps and sprites as of writing), and it also includes the source files of the game, written in C++17. The included *Makefile* makes sure all the files are properly built. It requires that devkitARM is installed and a "traditional" `g++` which supports C++17. Once all of those are done, you can properly `make` the project, and the ROM will be available with the name _gba-modern.gba_.
+This project consists in a toolkit written in C++17 to generate assembly files for the resources (tilesets, maps and sprites as of writing), and it also includes the source files of the game, written in C++17. The included *Makefile* makes sure all the files are properly built. It requires that devkitARM is installed and a "traditional" `g++` which supports C++17. **It also requires the `freetype` library!** Once all of those are done, you can properly `make` the project, and the ROM will be available with the name _gba-modern.gba_.
 
 Editing the map files
 ---------------------
@@ -27,7 +27,7 @@ All contribution is welcome. If you have interesting things to add, please submi
 
 Credits
 =======
-All files in this repository, with exception of specific libraries are Copyright (c) 2019 João Baptista de Paula e Silva and are under the MIT license
+All files in this repository with exception of specific libraries and the fonts located in the _fonts_ foder are Copyright (c) 2019 João Baptista de Paula e Silva and are under the MIT license.
 
 Niels Lohmann's "JSON for Modern C++" library can be found [here](https://github.com/nlohmann/json) and is also under the MIT license.
 
@@ -36,3 +36,5 @@ TinyXML2 belongs to Lee Thomason and can be found [here](https://github.com/leet
 The LodePNG files belong to Lode Vandevenne and can be found [here](https://lodev.org/lodepng/) also under the zlib license.
 
 Finally, the base64 library belongs to René Nyffenegger and can be found [here](https://github.com/ReneNyffenegger/cpp-base64) under the zlib license.
+
+The font _PixelFJVerdana12pt.ttf_ has its own license that can be seen [here](data/fonts/1001fonts-pix-pixelfjverdana12pt-eula.txt).

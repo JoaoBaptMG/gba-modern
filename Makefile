@@ -70,6 +70,7 @@ rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subs
 export SPR_FOLDER	:= $(foreach dir,$(DATA),$(dir)/sprites)
 export TST_FOLDER	:= $(foreach dir,$(DATA),$(dir)/tilesets)
 export MAP_FOLDER	:= $(MAPS)
+export FNT_FOLDER   := $(foreach dir,$(DATA),$(dir)/fonts)
 
 # Tools
 export TOOLS = $(CURDIR)/tools/tools
@@ -91,7 +92,8 @@ ALLSRCS		:=  $(addprefix $(SOURCES)/, $(CFILES) $(CPPFILES) $(SFILES))
 SPRITES		:=  $(foreach dir,$(SPR_FOLDER),$(call rwildcard, $(dir)/,*.png))
 TILESETS	:= 	$(foreach dir,$(TST_FOLDER),$(call rwildcard, $(dir)/,*.png))
 MAPS		:=  $(foreach dir,$(MAP_FOLDER),$(wildcard $(dir)/*.tmx))
-ALLRSRCS	:=	$(SPRITES) $(TILESETS) $(MAPS)
+FONTS 		:=  $(foreach dir,$(FNT_FOLDER),$(call rwildcard, $(dir)/,*.ttf))
+ALLRSRCS	:=	$(SPRITES) $(TILESETS) $(MAPS) $(FONTS)
 
 export BUILDFOLDERS := $(addprefix $(CURDIR)/$(BUILD)/, $(sort $(dir $(ALLSRCS) $(ALLRSRCS))))
 export VPATH 		:= $(CURDIR)/
@@ -119,12 +121,12 @@ export OFILES_BIN := $(addsuffix .o,$(BINFILES))
 
 export OFILES_SOURCES := $(addprefix $(SOURCES)/, $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o))
 
-export OFILES_DATA := $(SPRITES:.png=.o) $(TILESETS:.png=.o) $(MAPS:.tmx=.o) $(MAPS:.tmx=_init.o)
+export OFILES_DATA := $(SPRITES:.png=.o) $(TILESETS:.png=.o) $(MAPS:.tmx=.o) $(MAPS:.tmx=_init.o) $(FONTS:.ttf=.o)
 
 export OFILES := $(OFILES_BIN) $(OFILES_SOURCES) $(OFILES_DATA)
 export DFILES := $(addprefix $(DEPSDIR)/, $(OFILES:.o=.d))
 
-export HFILES_DATA := $(SPRITES:.png=.hpp) $(TILESETS:.png=.hpp) $(MAPS:.tmx=.hpp)
+export HFILES_DATA := $(SPRITES:.png=.hpp) $(TILESETS:.png=.hpp) $(MAPS:.tmx=.hpp) $(FONTS:.ttf=.hpp)
 export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES))) $(HFILES_DATA)
 
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-iquote $(CURDIR)/$(dir)) \
@@ -206,6 +208,13 @@ $(MAP_FOLDER)/%.s $(MAP_FOLDER)/%_init.cpp $(MAP_FOLDER)/%.hpp: $(MAP_FOLDER)/%.
 	$(eval MAP := $(basename $@))
 	$(eval MAP := $(MAP:_init=))
 	$(TOOLS) map-export $< $(MAP).s $(MAP)_init.cpp $(MAP).hpp
+
+#---------------------------------------------------------------------------------
+# This rule is for fonts
+#---------------------------------------------------------------------------------
+$(FNT_FOLDER)/%.s $(FNT_FOLDER)/%.hpp: $(FNT_FOLDER)/%.ttf $(FNT_FOLDER)/%.ttf.json
+	@echo $(notdir $<)
+	$(TOOLS) font-export $< $(basename $@).s $(basename $@).hpp
 
 -include $(DFILES)
 #---------------------------------------------------------------------------------------

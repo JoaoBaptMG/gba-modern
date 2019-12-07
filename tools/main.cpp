@@ -5,14 +5,14 @@ using Tool = int(*)(int argc, char **argv);
 int spriteExport(int argc, char **argv);
 int tilesetExport(int argc, char **argv);
 int mapExport(int argc, char **argv);
-//int actorExport(int argc, char **argv);
+int fontExport(int argc, char **argv);
 
 const std::map<std::string, Tool> toolList =
 {
     { "sprite-export", spriteExport },
     { "tileset-export", tilesetExport },
     { "map-export", mapExport },
-    //{ "actor-export", actorExport },
+    { "font-export", fontExport },
 };
 
 int main(int argc, char **argv)
