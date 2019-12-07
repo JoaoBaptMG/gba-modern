@@ -7,7 +7,7 @@ void processAutotile(const CharacterData8bpp& image, State<Character8bpp>& state
 void processTileset(const CharacterData8bpp& image, State<Character8bpp>& state, const std::vector<bool>& solid);
 
 template <typename Character>
-void writeTileset(std::ostream& of, const std::string &inlabel, const State<Character>& state, const std::vector<Palette>& palettes);
+void writeTileset(std::ostream& of, const SpecialName& name, const State<Character>& state, const std::vector<Palette>& palettes);
 
 int tilesetExport(int argc, char **argv)
 {
@@ -69,7 +69,6 @@ int tilesetExport(int argc, char **argv)
 
     state.tiles.resize(256, { emptyid, emptyid, emptyid, emptyid });
     state.flags.resize(256, 0);
-    auto inlabel = labelizeName(in, true);
 
     std::ofstream of;
     of.exceptions(std::ofstream::failbit | std::ofstream::badbit);
@@ -79,6 +78,8 @@ int tilesetExport(int argc, char **argv)
     of << "@ " << std::endl;
     of << "@ " << out << std::endl;
     of << "@ " << std::endl << std::endl;
+
+    auto name = deriveSpecialName(out);
 
     if (is8bpp)
     {
@@ -95,13 +96,13 @@ int tilesetExport(int argc, char **argv)
         palettes[0][0] = 0;
 
         // And write the file
-        writeTileset(of, inlabel, state, palettes);
+        writeTileset(of, name, state, palettes);
     }
     else
     {
         // Do the conversion and write
         auto [state4bpp, palettes] = convertTilesetTo4bpp(state, image.palette);
-        writeTileset(of, inlabel, state4bpp, palettes);
+        writeTileset(of, name, state4bpp, palettes);
     }
 
     // Write the header
@@ -113,7 +114,10 @@ int tilesetExport(int argc, char **argv)
         hof << "// " << outh << std::endl;
         hof << "// " << std::endl;
         hof << "#pragma once" << std::endl << std::endl;
-        hof << "extern \"C\" const TilesetData ts_" << inlabel << ';' << std::endl << std::endl;
+        hof << "namespace " << name.nmspace << std::endl;
+        hof << "{" << std::endl;
+        hof << "    extern const TilesetData " << name.fileName << ';' << std::endl;
+        hof << "}" << std::endl << std::endl;
     }
 
     return 0;
@@ -156,14 +160,14 @@ void processTileset(const CharacterData8bpp& image, State<Character8bpp>& state,
 }
 
 template <typename Character>
-void writeTileset(std::ostream& of, const std::string &inlabel, const State<Character>& state, const std::vector<Palette>& palettes)
+void writeTileset(std::ostream& of, const SpecialName& name, const State<Character>& state, const std::vector<Palette>& palettes)
 {
     // The main structure
     of << "    .section .rodata" << std::endl;
     of << "    .align 2" << std::endl;
-    of << "    .global ts_" << inlabel << std::endl;
-    of << "    .hidden ts_" << inlabel << std::endl;
-    of << "ts_" << inlabel << ":" << std::endl;
+    of << "    .global " << name.mangledName << std::endl;
+    of << "    .hidden " << name.mangledName << std::endl;
+    of << name.mangledName << ":" << std::endl;
     of << std::endl << "    @ Tiles";
 
     // Export the tiles
@@ -194,14 +198,14 @@ void writeTileset(std::ostream& of, const std::string &inlabel, const State<Char
     of << "    .hword " << (state.chars.size() * sizeof(Character)) << std::endl;
     of << "    .byte " << palettes.size();
     of << ", " << toHex(is8bpp ? 1 : 0, 2) << std::endl;
-    of << "    .word ts_" << inlabel << "_chars, ts_" << inlabel << "_palette" << std::endl;
+    of << "    .word ts_" << name.fileName << "_chars, ts_" << name.fileName << "_palette" << std::endl;
 
     // Now, the chars and the palettes
     of << std::endl;
     of << "    .section .rodata" << std::endl;
     of << "    .align 2" << std::endl;
-    of << "    .hidden ts_" << inlabel << "_chars" << std::endl;
-    of << "ts_" << inlabel << "_chars:";
+    of << "    .hidden ts_" << name.fileName << "_chars" << std::endl;
+    of << "ts_" << name.fileName << "_chars:";
     for (const auto& c : state.chars)
     {
         std::size_t index = 0;
@@ -217,8 +221,8 @@ void writeTileset(std::ostream& of, const std::string &inlabel, const State<Char
     of << std::endl << std::endl;
     of << "    .section .rodata" << std::endl;
     of << "    .align 2" << std::endl;
-    of << "    .hidden ts_" << inlabel << "_palette" << std::endl;
-    of << "ts_" << inlabel << "_palette:" << std::endl;
+    of << "    .hidden ts_" << name.fileName << "_palette" << std::endl;
+    of << "ts_" << name.fileName << "_palette:" << std::endl;
 
     for (const auto& palette : palettes)
     {

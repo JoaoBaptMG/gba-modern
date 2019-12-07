@@ -94,7 +94,7 @@ int mapExport(int argc, char **argv)
         nlohmann::json j;
         inj >> j;
 
-        if (j.contains("num-autotiles")) numAutotiles = j.at("num-autotiles").get<std::size_t>();
+        if (j.contains("num-autotiles")) j.at("num-autotiles").get_to(numAutotiles);
     }
 
     // Build the tile equivalences
@@ -127,8 +127,8 @@ int mapExport(int argc, char **argv)
     auto [actors, occurences] = getActorsFromMap(map, actorTypes);
 
     // Now, we should start create the maps
-    auto inlabel = labelizeName(argv[2], true);
-    auto tsname = getBaseName(tilesetFolder);
+    auto name = deriveSpecialName(argv[3]);
+    auto tsname = deriveSpecialName("data/" + tilesetFolder).mangledName;
 
     // Write the data
     {
@@ -143,19 +143,20 @@ int mapExport(int argc, char **argv)
 
         of << "    .section .rodata" << std::endl;
         of << "    .align 2" << std::endl;
-        of << "    .global map_" << inlabel << std::endl;
-        of << "    .hidden map_" << inlabel << std::endl;
-        of << "map_" << inlabel << ":" << std::endl;
+        of << "    .global " << name.mangledName << std::endl;
+        of << "    .hidden " << name.mangledName << std::endl;
+        of << name.mangledName << ":" << std::endl;
 
         // Write the metadata
         of << "    .hword " << width << ", " << height << std::endl;
-        of << "    .word ts_" << tsname << ", map_" << inlabel << "_data, map_" << inlabel << "_init" << std::endl << std::endl;
+        of << "    .word " << tsname << std::endl;
+        of << "    .word map_" << name.fileName << "_data, map_" << name.fileName << "_init" << std::endl << std::endl;
 
         // Write the main data
         of << "    .section .rodata" << std::endl;
         of << "    .align 2" << std::endl;
-        of << "    .hidden map_" << inlabel << "_data" << std::endl;
-        of << "map_" << inlabel << "_data:";
+        of << "    .hidden map_" << name.fileName << "_data" << std::endl;
+        of << "map_" << name.fileName << "_data:";
 
         std::size_t index = 0;
         for (auto tile : tiles)
@@ -185,7 +186,7 @@ int mapExport(int argc, char **argv)
             cof << "#include \"" << actorTypes.at(type).includeName << "\"" << std::endl;
 
         cof << std::endl;
-        cof << "extern \"C\" void map_" << inlabel << "_init(GameScene& scene)" << std::endl;
+        cof << "extern \"C\" void map_" << name.fileName << "_init(GameScene& scene)" << std::endl;
         cof << "{" << std::endl;
 
         std::size_t i = 0;
@@ -216,7 +217,10 @@ int mapExport(int argc, char **argv)
         hof << "// " << outh << std::endl;
         hof << "// " << std::endl;
         hof << "#pragma once" << std::endl << std::endl;
-        hof << "extern \"C\" const MapData map_" << inlabel << ';' << std::endl << std::endl;
+        hof << "namespace " << name.nmspace << std::endl;
+        hof << '{' << std::endl;
+        hof << "    extern const MapData " << name.fileName << ';' << std::endl;
+        hof << '}' << std::endl << std::endl;
     }
 
     return 0;

@@ -17,7 +17,7 @@ GameScene::GameScene()
 
     // Initialize the map and load a single map
     map.init();
-    map.loadMap(map_level1);
+    map.loadMap(tiled_maps::level1);
 
     // Reload the graphics data
     graphics::resetObjectsAndPalettes();
