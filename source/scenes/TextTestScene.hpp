@@ -8,10 +8,11 @@
 #include "IScene.hpp"
 
 #include "text/TextWriter.hpp"
+#include "text/Mode3GlyphWriter.hpp"
 
 class TextTestScene final : public IScene
 {
-    TextWriter writer;
+    TextWriter<Mode3GlyphWriter> writer;
 
 public:
     TextTestScene();

@@ -34,7 +34,7 @@ int main()
 	REG_DISPCNT = DCNT_BLANK;
 
 	// Change to the main game scene
-	scene.push<GameScene>();
+	scene.push<TextTestScene>();
 
 	//mmStart(MOD_RPGLAST, MM_PLAY_ONCE);
 	
