@@ -1,14 +1,14 @@
 //--------------------------------------------------------------------------------
-// TextTestScene.cpp
+// Mode3TextTestScene.cpp
 //--------------------------------------------------------------------------------
 // A test scene for text input
 //--------------------------------------------------------------------------------
-#include "TextTestScene.hpp"
+#include "Mode3TextTestScene.hpp"
 
-#include "data/fonts/PixelFJVerdana12pt.hpp"
+#include "data/fonts/Anonymous.hpp"
 #include "text/StringBuilder.hpp"
 
-TextTestScene::TextTestScene() : IScene(), writer(data::fonts::PixelFJVerdana12pt, vid_mem)
+Mode3TextTestScene::Mode3TextTestScene() : IScene(), writer(data::fonts::Anonymous, vid_mem)
 {
     // Set the display registers
     REG_DISPCNT = DCNT_MODE3 | DCNT_BG2;

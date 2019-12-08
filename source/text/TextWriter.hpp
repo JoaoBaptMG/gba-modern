@@ -12,9 +12,6 @@ template <typename GlyphWriter>
 class TextWriter final
 {
     const Font& font;
-    GlyphWriter glyphWriter;
-
-    void putGlyph(int x, int y, std::size_t glyph, COLOR color);
 
 public:
     template <typename... Ts>
@@ -45,6 +42,8 @@ public:
     // Put a single char in the screen
     void putChar(int x, int y, std::size_t ch, COLOR color)
     {
-        putGlyph(x, y, font.glyphFor(ch), color);
+        glyphWriter.putGlyph(x, y, font.glyphFor(ch), color);
     }
+
+    GlyphWriter glyphWriter;
 };

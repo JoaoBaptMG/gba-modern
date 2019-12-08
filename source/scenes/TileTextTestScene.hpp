@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// TextTestScene.hpp
+// TileTextTestScene.hpp
 //--------------------------------------------------------------------------------
 // A test scene for text input
 //--------------------------------------------------------------------------------
@@ -8,12 +8,12 @@
 #include "IScene.hpp"
 
 #include "text/TextWriter.hpp"
-#include "text/Mode3GlyphWriter.hpp"
+#include "text/Tile4bppGlyphWriter.hpp"
 
-class TextTestScene final : public IScene
+class TileTextTestScene final : public IScene
 {
-    TextWriter<Mode3GlyphWriter> writer;
+    TextWriter<Tile4bppGlyphWriter> writer;
 
 public:
-    TextTestScene();
+    TileTextTestScene();
 };

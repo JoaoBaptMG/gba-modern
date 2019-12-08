@@ -7,7 +7,7 @@
 
 #include "scenes/IScene.hpp"
 #include "gameplay/GameScene.hpp"
-#include "scenes/TextTestScene.hpp"
+#include "scenes/TileTextTestScene.hpp"
 #include "graphics.hpp"
 //#include <maxmod.h>
 
@@ -34,7 +34,7 @@ int main()
 	REG_DISPCNT = DCNT_BLANK;
 
 	// Change to the main game scene
-	scene.push<TextTestScene>();
+	scene.push<TileTextTestScene>();
 
 	//mmStart(MOD_RPGLAST, MM_PLAY_ONCE);
 	
