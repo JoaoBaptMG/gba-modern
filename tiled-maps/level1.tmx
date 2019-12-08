@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="64" height="44" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="19">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="64" height="44" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="42">
  <tileset firstgid="1" source="tilesets/level1/tileset.tsx"/>
  <tileset firstgid="33" source="tilesets/level1/autotile0.tsx"/>
  <tileset firstgid="81" source="tilesets/level1/autotile1.tsx"/>
@@ -132,5 +132,28 @@
     <property name="dir" type="bool" value="true"/>
    </properties>
   </object>
+  <object id="19" name="money" type="Money" x="512" y="512" width="8" height="8"/>
+  <object id="20" name="money" type="Money" x="560" y="528" width="8" height="8"/>
+  <object id="21" name="money" type="Money" x="624" y="560" width="8" height="8"/>
+  <object id="22" name="money" type="Money" x="288" y="624" width="8" height="8"/>
+  <object id="23" name="money" type="Money" x="272" y="512" width="8" height="8"/>
+  <object id="24" name="money" type="Money" x="144" y="576" width="8" height="8"/>
+  <object id="25" name="money" type="Money" x="880" y="512" width="8" height="8"/>
+  <object id="26" name="money" type="Money" x="928" y="448" width="8" height="8"/>
+  <object id="27" name="money" type="Money" x="848" y="384" width="8" height="8"/>
+  <object id="28" name="money" type="Money" x="672" y="320" width="8" height="8"/>
+  <object id="29" name="money" type="Money" x="560" y="320" width="8" height="8"/>
+  <object id="30" name="money" type="Money" x="448" y="272" width="8" height="8"/>
+  <object id="31" name="money" type="Money" x="368" y="288" width="8" height="8"/>
+  <object id="32" name="money" type="Money" x="272" y="256" width="8" height="8"/>
+  <object id="33" name="money" type="Money" x="128" y="112" width="8" height="8"/>
+  <object id="34" name="money" type="Money" x="368" y="112" width="8" height="8"/>
+  <object id="35" name="money" type="Money" x="528" y="112" width="8" height="8"/>
+  <object id="36" name="money" type="Money" x="576" y="112" width="8" height="8"/>
+  <object id="37" name="money" type="Money" x="624" y="112" width="8" height="8"/>
+  <object id="38" name="money" type="Money" x="672" y="112" width="8" height="8"/>
+  <object id="39" name="money" type="Money" x="720" y="112" width="8" height="8"/>
+  <object id="40" name="money" type="Money" x="768" y="112" width="8" height="8"/>
+  <object id="41" name="money" type="Money" x="816" y="112" width="8" height="8"/>
  </objectgroup>
 </map>
