@@ -26,7 +26,7 @@
     .type tile4bppPutGlyph STT_FUNC
 tile4bppPutGlyph:
     push    {r4-r9}                 @ Get necessary workspace for our function
-    adr     r9, bitunpackLut        @ Preload the LUT used in bit unpacking down there
+    ldr     r9, =0x01010101         @ Preload the auxiliary mask used in the loop down there
     ldmia   r2, {r4, r5}            @ Load the config words
     tst     r5, #255                @ Quick check to see if height is 0
     beq     .end
@@ -41,7 +41,7 @@ tile4bppPutGlyph:
     mov     r0, r0, lsr #3          @ now r0 = x/8
 
     @ Calculate the first position in space
-    ldr     r12, [sp, #24]           @ Load the buffer in r12
+    ldr     r12, [sp, #24]          @ Load the buffer in r12
     ldr     r2, [sp, #28]           @ Load the pixel height in r2
     mla     r1, r0, r2, r1          @ y + pixelHeight*tileX
     add     r12, r12, r1, lsl #2    @ now buffer is &buffer[y + pixelHeight*tileX]
@@ -63,7 +63,11 @@ tile4bppPutGlyph:
     mov     r1, r1, lsl r6          @ shift the result by the stride
 .putglyphhword:
     and     r7, r1, #255            @ Take the next byte
-    ldr     r7, [r9, r7, lsl #2]    @ LUT-unpack the bit
+    orr     r7, r7, r7, lsl #12     @ Shift the higher nibbles into their place...
+    orr     r7, r7, r7, lsl #6      @ ...in order to be able to apply the mask
+    and     r8, r7, r9, lsl #1      @ Pick up the even bits
+    and     r7, r7, r9              @ Pibk up the odd bits
+    orr     r7, r7, r8, lsl #3      @ Combine them into a single 4-bit unpacked value 
     mul     r8, r7, r3              @ Multiply by the color
     ldr     r7, [r12]               @ Load the older value
     orr     r7, r7, r8              @ Or both
@@ -89,7 +93,11 @@ tile4bppPutGlyph:
     mov     r1, r1, lsl r6          @ shift the result by the stride
 .putglyphword:
     and     r7, r1, #255            @ Take the next byte
-    ldr     r7, [r9, r7, lsl #2]    @ LUT-unpack the bit
+    orr     r7, r7, r7, lsl #12     @ Shift the higher nibbles into their place...
+    orr     r7, r7, r7, lsl #6      @ ...in order to be able to apply the mask
+    and     r8, r7, r9, lsl #1      @ Pick up the even bits
+    and     r7, r7, r9              @ Pibk up the odd bits
+    orr     r7, r7, r8, lsl #3      @ Combine them into a single 4-bit unpacked value 
     mul     r8, r7, r3              @ Multiply by the color
     ldr     r7, [r12]               @ Load the older value
     orr     r7, r7, r8              @ Or both
@@ -113,10 +121,3 @@ tile4bppPutGlyph:
     pop     {r4-r9}
     bx      lr
 
-bitunpackLut:
-    .equ cnt, 0
-    .rept 256
-    .word (cnt&1) | ((cnt&2)<<3) | ((cnt&4)<<6) | ((cnt&8)<<9)\
-        | ((cnt&16)<<12) | ((cnt&32)<<15) | ((cnt&64)<<18) | ((cnt&128)<<21)
-    .equ cnt, cnt+1
-    .endr
