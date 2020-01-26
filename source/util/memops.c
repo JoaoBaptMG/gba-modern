@@ -77,6 +77,7 @@ void* memset(void* dst, int val, size_t cnt)
     // This is manually assembled because for some reason gcc
     // assembles this function incorrectly (it includes a call
     // to itself, causing a stack overflow)
+    // See: https://godbolt.org/z/RGCCio
     // while (cnt--) *dst8++ = val8;
     asm volatile(
         "cmp %0, #0\n\t"
