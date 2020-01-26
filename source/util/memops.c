@@ -45,7 +45,7 @@ void* memcpy(void* dst, const void* src, size_t cnt)
         }
     }
 
-    while (cnt--) *dst8 = *src8;
+    while (cnt--) *dst8++ = *src8++;
 
     return dst;
 }
@@ -54,15 +54,15 @@ void* memset(void* dst, int val, size_t cnt)
 {
     // Return early
     if (cnt == 0) return dst;
-    unsigned char* dst8 = (unsigned char*)dst;
+    char* dst8 = (char*)dst;
 
     // Truncate val to 8 bits
-    val &= 255;
+    char val8 = val & 255;
 
     // Align first
     while ((uint32_t)dst8 & 3)
     {
-        *dst8++ = val;
+        *dst8++ = val8;
         cnt--;
     }
 
@@ -74,7 +74,22 @@ void* memset(void* dst, int val, size_t cnt)
     cnt &= 3;
 
     // Copy the last bytes
-    while (cnt--) *dst8++ = val;
+    // This is manually assembled because for some reason gcc
+    // assembles this function incorrectly (it includes a call
+    // to itself, causing a stack overflow)
+    // while (cnt--) *dst8++ = val8;
+    asm volatile(
+        "cmp %0, #0\n\t"
+        "beq .copyend\n"
+        ".copyloop:\n\t"
+        "strb %2, [%1]\n\t"
+        "add %1, #1\n\t"
+        "sub %0, #1\n\t"
+        "bne .copyloop\n"
+        ".copyend:" 
+        : "+r" (cnt), "+r" (dst8)
+        : "r" (val8) 
+        : "memory");
 
     return dst;
 }
