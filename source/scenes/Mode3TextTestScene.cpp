@@ -26,6 +26,6 @@ Mode3TextTestScene::Mode3TextTestScene() : IScene(), writer(data::fonts::Anonymo
     u32 time = ((u32)REG_TM3D << 16) | REG_TM2D;
 
     StringBuilder<64> sb;
-    sb.append("Time: ", /*time,*/ " cycles.");
+    sb.append("Time: ", time, " cycles.");
     writer.write(4, 156, sb, CLR_ORANGE);
 }

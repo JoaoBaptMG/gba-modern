@@ -38,8 +38,4 @@ TileTextTestScene::TileTextTestScene() : IScene(), writer(data::fonts::Anonymous
     StringBuilder<64> sb;
     sb.append("Time: ", time, " cycles.");
     writer.write(4, 156, sb, 2);
-
-    //StringBuilder<64> sb2;
-    //sb2.append("Testing ", 1, " constexpr StringBuilder: ", sizeof(void*));
-    //writer.write(4, 120, sb2, 3);
 }
