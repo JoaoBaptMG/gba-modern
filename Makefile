@@ -38,7 +38,7 @@ CFLAGS	:=	-g -Wall -O3 -ffunction-sections -fdata-sections\
 
 CFLAGS	+=	$(INCLUDE)
 
-CXXFLAGS	:=	$(CFLAGS) -std=c++17 -fno-rtti -fno-exceptions
+CXXFLAGS	:=	$(CFLAGS) -std=c++2a -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-g $(ARCH) -Wl,--gc-sections -Wl,-Map,$(notdir $*.map)
