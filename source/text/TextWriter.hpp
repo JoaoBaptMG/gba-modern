@@ -7,6 +7,7 @@
 
 #include "data/Font.hpp"
 #include <tonc.h>
+#include "StringBuilder.hpp"
 
 template <typename GlyphWriter>
 class TextWriter final
@@ -37,6 +38,14 @@ public:
                 y += font.verticalStride;
             }
         }
+    }
+
+    // Quick shortcut for StringBuilder
+    template <std::size_t N>
+    void write(int x, int y, StringBuilder<N>& sb, COLOR color)
+    {
+        auto str = sb.getString();
+        write(x, y, str.data(), color);
     }
 
     // Put a single char in the screen

@@ -21,6 +21,7 @@ TileTextTestScene::TileTextTestScene() : IScene(), writer(data::fonts::Anonymous
 
     pal_bg_bank[0][1] = CLR_SKYBLUE;
     pal_bg_bank[0][2] = CLR_ORANGE;
+    pal_bg_bank[0][3] = CLR_GREEN;
 
     // Profile the writer
     REG_TM2D = 0; REG_TM3D = 0;
@@ -36,5 +37,9 @@ TileTextTestScene::TileTextTestScene() : IScene(), writer(data::fonts::Anonymous
 
     StringBuilder<64> sb;
     sb.append("Time: ", time, " cycles.");
-    writer.write(4, 156, sb.getString(), 2);
+    writer.write(4, 156, sb, 2);
+
+    //StringBuilder<64> sb2;
+    //sb2.append("Testing ", 1, " constexpr StringBuilder: ", sizeof(void*));
+    //writer.write(4, 120, sb2, 3);
 }
