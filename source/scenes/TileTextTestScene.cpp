@@ -5,10 +5,10 @@
 //--------------------------------------------------------------------------------
 #include "TileTextTestScene.hpp"
 
-#include "data/fonts/Anonymous.hpp"
+#include "data/fonts/monogram.hpp"
 #include "text/StringBuilder.hpp"
 
-TileTextTestScene::TileTextTestScene() : IScene(), writer(data::fonts::Anonymous, &tile_mem[0], 160)
+TileTextTestScene::TileTextTestScene() : IScene(), writer(data::fonts::monogram, &tile_mem[0], 160)
 {
     // Set the display registers
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;

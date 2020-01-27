@@ -43,4 +43,4 @@ The LodePNG files belong to Lode Vandevenne and can be found [here](https://lode
 
 Finally, the base64 library belongs to René Nyffenegger and can be found [here](https://github.com/ReneNyffenegger/cpp-base64) under the zlib license.
 
-The font _PixelFJVerdana12pt.ttf_ has its own license that can be seen [here](data/fonts/1001fonts-pix-pixelfjverdana12pt-eula.txt).
+The font _monogram.ttf_ belongs to Vinícius Menézio can be found [here](https://datagoblin.itch.io/monogram) under the CC0.

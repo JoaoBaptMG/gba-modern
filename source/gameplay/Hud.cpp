@@ -10,6 +10,7 @@
 #include "Player.hpp"
 #include "data/sprites/hud.hpp"
 #include "data/sprites/numbers.hpp"
+#include "util/uintDigits.h"
 
 using namespace data::sprites;
 
@@ -35,7 +36,6 @@ void Hud::init()
     palPtr = SinglePalettePointer(palette);
 
     money = 0;
-    moneyDigits = 0;
     moneyDisplayCounter = 0;
 }
 
@@ -79,20 +79,9 @@ void Hud::notifyMoneyChange(u16 newMoney)
 
 void Hud::createNewDigits()
 {
-    moneyDigits = -1;
-    auto oldMoney = money;
-
-    for (int i = 0; i < 4; i++)
-    {
-        money /= 10;
-        auto d = oldMoney - 10 * money;
-        oldMoney = money;
-
-        moneyDigits &= ~(0xF << (4*i));
-        moneyDigits |= d << (4*i);
-
-        if (money == 0) break; 
-    }
+    auto end = uintDigits(moneyDigits, money);
+    while (end < moneyDigits + sizeof(moneyDigits))
+        *end++ = -1;
 }
 
 void Hud::displayMoney()
@@ -103,11 +92,10 @@ void Hud::displayMoney()
     else if (moneyDisplayCounter > MoneyDuration - MoneyFade)
         cur.y = 14 * (MoneyDuration - moneyDisplayCounter) / MoneyFade - 6;
 
-    s16 digits = moneyDigits;
     for (int i = 0; i < 4; i++)
     {
-        if (digits == -1) break;
-        int digit = digits&15;
+        int digit = moneyDigits[i];
+        if (digit == -1) break;
 
         int tileId;
         if (digit < 8)
@@ -115,7 +103,6 @@ void Hud::displayMoney()
         else tileId = numberPtrs[1].getTileId() + digit - 8;
 
         graphics::oam.pushRegular(cur, SpriteSize::s8x8_4bpp, tileId, palPtr.getPalette(), 0);
-        digits >>= 4;
         cur.x -= 6;
     }
 }

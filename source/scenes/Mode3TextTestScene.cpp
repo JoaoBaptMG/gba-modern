@@ -5,10 +5,10 @@
 //--------------------------------------------------------------------------------
 #include "Mode3TextTestScene.hpp"
 
-#include "data/fonts/Anonymous.hpp"
+#include "data/fonts/monogram.hpp"
 #include "text/StringBuilder.hpp"
 
-Mode3TextTestScene::Mode3TextTestScene() : IScene(), writer(data::fonts::Anonymous, vid_mem)
+Mode3TextTestScene::Mode3TextTestScene() : IScene(), writer(data::fonts::monogram, vid_mem)
 {
     // Set the display registers
     REG_DISPCNT = DCNT_MODE3 | DCNT_BG2;

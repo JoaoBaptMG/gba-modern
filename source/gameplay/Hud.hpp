@@ -14,8 +14,9 @@ class Hud final
 {
     SinglePalettePointer palPtr;
     ObjectTilePointer iconPtr, bitsPtr, numberPtrs[2];
-    u16 money, moneyDigits;
+    u16 money;
     s16 moneyDisplayCounter;
+    char moneyDigits[4];
 
     void createNewDigits();
     void displayMoney();
