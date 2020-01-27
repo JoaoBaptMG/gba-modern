@@ -10,23 +10,31 @@
 #include <type_traits>
 #include <limits>
 #include <algorithm>
-#include <array>
+#include <tonc.h>
+#include "util/uintDigits.h"
+
+template <typename T>
+constexpr std::size_t numCharsInTempBuffer()
+{
+    auto num = std::numeric_limits<T>::digits10;
+    return (num + 3) & ~3;
+}
 
 template <std::size_t N>
 class StringBuilder final
 {
     std::size_t cur;
-    std::array<char, N+1> buffer;
+    char buffer[N+1];
 
 public:
-    constexpr StringBuilder() : cur(0), buffer{0} {}
+    StringBuilder() : cur(0) { buffer[0] = 0; }
 
-    constexpr void append(char ch)
+    void append(char ch)
     {
         if (cur < N) buffer[cur++] = ch;
     }
 
-    constexpr void append(const char* str)
+    void append(const char* str)
     {
         for (auto p = str; *p; p++)
         {
@@ -36,33 +44,30 @@ public:
     }
 
     template <std::size_t M>
-    constexpr void append(const char str[M])
+    void append(const char str[M])
     {
         std::size_t tsize = std::min(N-cur, M-1);
-        std::copy(str, str+tsize, buffer+cur);
-        cur += tsize;
+        std::size_t words = tsize/sizeof(u32);
+        std::size_t bytes = words*sizeof(u32);
+
+        if (words > 0) memcpy32(buffer+cur, str, words);
+        tsize -= bytes;
+        cur += bytes;
+
+        while (tsize--) buffer[cur++] = str[bytes++];
     }
 
     template <typename T>
     constexpr std::enable_if_t<std::is_unsigned_v<T>>
     append(T v)
     {
-        char tmp[std::numeric_limits<T>::digits10] = {0};
-        std::size_t i = 0;
-        T oldv = v;
-
-        do
-        {
-            v /= T(10);
-            tmp[i++] = oldv - v * T(10);
-            oldv = v;
-        } while (v);
-
-        while (i-- && cur < N) buffer[cur++] = '0' + tmp[i];
+        char tmp[numCharsInTempBuffer<T>()];
+        auto tmpv = uintDigits(tmp, v);
+        while (tmpv != tmp && cur < N) buffer[cur++] = '0' + *--tmpv;
     }
 
     template <typename T>
-    constexpr std::enable_if_t<std::is_signed_v<T>>
+    std::enable_if_t<std::is_signed_v<T>>
     append(T v)
     {
         if (v < T(0))
@@ -74,15 +79,13 @@ public:
     }
 
     template <typename... Ts>
-    constexpr std::enable_if_t<sizeof...(Ts) != 0>
+    std::enable_if_t<sizeof...(Ts) != 0>
     append(Ts&&... vs)
     {
-        ((void)append(std::forward<Ts>(vs)), ...);
+        (append(std::forward<Ts>(vs)), ...);
     }
 
-    constexpr auto numCharactersWritten() const { return cur; }
-
-    constexpr std::array<char, N+1> getString()
+    const char* getString()
     { 
         buffer[cur] = 0;
         return buffer;

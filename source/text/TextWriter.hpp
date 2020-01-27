@@ -44,8 +44,7 @@ public:
     template <std::size_t N>
     void write(int x, int y, StringBuilder<N>& sb, COLOR color)
     {
-        auto str = sb.getString();
-        write(x, y, str.data(), color);
+        write(x, y, sb.getString(), color);
     }
 
     // Put a single char in the screen
