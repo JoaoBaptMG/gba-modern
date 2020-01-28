@@ -8,6 +8,10 @@
 #include "data/fonts/monogram.hpp"
 #include "text/StringBuilder.hpp"
 
+static const char String[] =
+    u8"This is a test of what we can\ndo using this engine. We're\ngoing to stress it out "
+    u8"by\nwriting an extensive amount of\ntext, so we can hopefully\nmeasure its performance.";
+
 TileTextTestScene::TileTextTestScene() : IScene(), writer(data::fonts::monogram, &tile_mem[0], 160)
 {
     // Set the display registers
@@ -28,14 +32,13 @@ TileTextTestScene::TileTextTestScene() : IScene(), writer(data::fonts::monogram,
     REG_TM2CNT = 0; REG_TM3CNT = 0;
     REG_TM3CNT = TM_CASCADE | TM_ENABLE;
     REG_TM2CNT = TM_ENABLE;
-    writer.write(4, 16, "This is a test of what we can\ndo using this engine. We're\ngoing to stress it out "
-        "by\nwriting an extensive amount of\ntext, so we can hopefully\nmeasure its performance.", 1);
+    writer.write(4, 16, String, 1);
 
     // Stop the timer
     REG_TM2CNT = 0;
     u32 time = ((u32)REG_TM3D << 16) | REG_TM2D;
 
     StringBuilder<64> sb;
-    sb.append("Time: ", time, " cycles.");
+    sb.append("Time: ", time, " cycles / ", sizeof(String)-1, " characters.");
     writer.write(4, 156, sb, 2);
 }
