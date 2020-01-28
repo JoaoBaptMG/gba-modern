@@ -66,7 +66,7 @@ tile4bppPutGlyph:
     orr     r7, r7, r7, lsl #12     @ Shift the higher nibbles into their place...
     orr     r7, r7, r7, lsl #6      @ ...in order to be able to apply the mask
     and     r8, r7, r9, lsl #1      @ Pick up the even bits
-    and     r7, r7, r9              @ Pibk up the odd bits
+    and     r7, r7, r9              @ Pick up the odd bits
     orr     r7, r7, r8, lsl #3      @ Combine them into a single 4-bit unpacked value 
     mul     r8, r7, r3              @ Multiply by the color
     ldr     r7, [r12]               @ Load the older value
@@ -96,7 +96,7 @@ tile4bppPutGlyph:
     orr     r7, r7, r7, lsl #12     @ Shift the higher nibbles into their place...
     orr     r7, r7, r7, lsl #6      @ ...in order to be able to apply the mask
     and     r8, r7, r9, lsl #1      @ Pick up the even bits
-    and     r7, r7, r9              @ Pibk up the odd bits
+    and     r7, r7, r9              @ Pick up the odd bits
     orr     r7, r7, r8, lsl #3      @ Combine them into a single 4-bit unpacked value 
     mul     r8, r7, r3              @ Multiply by the color
     ldr     r7, [r12]               @ Load the older value
