@@ -25,7 +25,6 @@ Images
 ![Screenshot #3](screenshots/gba-modern-3.png)
 ![Screenshot #4](screenshots/gba-modern-4.png)
 ![Screenshot #5](screenshots/gba-modern-5.png)
-![Screenshot #6](screenshots/gba-modern-6.png)
 
 Contributing
 ============
