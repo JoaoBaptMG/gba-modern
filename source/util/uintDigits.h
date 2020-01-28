@@ -6,10 +6,14 @@
 #pragma once
 
 #include <tonc.h>
-#define NOINLINE __attribute__((noinline))
 
 #ifdef __cplusplus
 extern "C"
+{
 #endif
-char* uintDigits(char* buffer, u32 val);
-#undef NOINLINE
+    // Puts in buffer the digits of val, in "crescent order" (least significant
+    // bit first), and from 0 to 9 (not from '0' to '9')
+    char* uintDigits(char* buffer, u32 val);
+#ifdef __cplusplus
+}
+#endif
