@@ -5,14 +5,14 @@
 //--------------------------------------------------------------------------------
 #include "TileTextTestScene.hpp"
 
-#include "data/fonts/monogram.hpp"
+#include "data/fonts/monogram_extended.hpp"
 #include "text/StringBuilder.hpp"
 
 static const char String[] =
     u8"This is a test of what we can\ndo using this engine. We're\ngoing to stress it out "
     u8"by\nwriting an extensive amount of\ntext, so we can hopefully\nmeasure its performance.";
 
-TileTextTestScene::TileTextTestScene() : IScene(), writer(data::fonts::monogram, &tile_mem[0], 160)
+TileTextTestScene::TileTextTestScene() : IScene(), writer(data::fonts::monogram_extended, &tile_mem[0], 160)
 {
     // Set the display registers
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0;

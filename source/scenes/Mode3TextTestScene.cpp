@@ -5,14 +5,14 @@
 //--------------------------------------------------------------------------------
 #include "Mode3TextTestScene.hpp"
 
-#include "data/fonts/monogram.hpp"
+#include "data/fonts/monogram_extended.hpp"
 #include "text/StringBuilder.hpp"
 
 static const char String[] =
     u8"This is a test of what we can\ndo using this engine. We're\ngoing to stress it out "
     u8"by\nwriting an extensive amount of\ntext, so we can hopefully\nmeasure its performance.";
 
-Mode3TextTestScene::Mode3TextTestScene() : IScene(), writer(data::fonts::monogram, vid_mem)
+Mode3TextTestScene::Mode3TextTestScene() : IScene(), writer(data::fonts::monogram_extended, vid_mem)
 {
     // Set the display registers
     REG_DISPCNT = DCNT_MODE3 | DCNT_BG2;
