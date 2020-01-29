@@ -65,7 +65,7 @@ public:
         else
         {
             s16 px = x;
-            int ch;
+            u32 ch;
             while ((ch = decodeUtf8(str))) // This increments str until it is zero
             {
                 if (ch == '\n')
@@ -91,7 +91,7 @@ public:
     }
 
     // Put a single char in the screen
-    void putChar(int x, int y, std::size_t ch, COLOR color)
+    void putChar(int x, int y, u32 ch, COLOR color)
     {
         glyphWriter.putGlyph(x, y, font.glyphFor(ch), color);
     }
