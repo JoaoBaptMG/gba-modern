@@ -9,7 +9,20 @@
 #include <tonc.h>
 #include "StringBuilder.hpp"
 
-extern "C" int decodeUtf8(const char** str);
+extern "C" std::uint64_t decodeUtf8Asm(const char *str);
+
+inline static u32 decodeUtf8(const char*& str)
+{
+    union
+    { 
+        std::uint64_t res;
+        struct { const char* newstr; u32 ch; } vals;
+    } result;
+
+    result.res = decodeUtf8Asm(str);
+    str = result.vals.newstr;
+    return result.vals.ch;
+}
 
 template <typename T>
 class has_putString
@@ -53,7 +66,7 @@ public:
         {
             s16 px = x;
             int ch;
-            while ((ch = decodeUtf8(&str))) // This increments str until it is zero
+            while ((ch = decodeUtf8(str))) // This increments str until it is zero
             {
                 if (ch == '\n')
                 {
