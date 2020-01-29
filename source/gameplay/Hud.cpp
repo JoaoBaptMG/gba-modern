@@ -14,7 +14,7 @@
 
 using namespace data::sprites;
 
-constexpr int MoneyFade = 32;
+constexpr int MoneyFade = 16;
 constexpr int MoneyDuration = 300;
 
 static SinglePaletteAllocator palette(hud.png.palette);
@@ -88,9 +88,9 @@ void Hud::displayMoney()
 {
     vec2 cur(227, 8);
     if (moneyDisplayCounter < MoneyFade)
-        cur.y = 14 * moneyDisplayCounter / MoneyFade - 6;
+        cur.y = 16 * moneyDisplayCounter / MoneyFade - 8;
     else if (moneyDisplayCounter > MoneyDuration - MoneyFade)
-        cur.y = 14 * (MoneyDuration - moneyDisplayCounter) / MoneyFade - 6;
+        cur.y = 16 * (MoneyDuration - moneyDisplayCounter) / MoneyFade - 8;
 
     for (int i = 0; i < 4; i++)
     {
