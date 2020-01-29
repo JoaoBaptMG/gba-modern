@@ -9,6 +9,21 @@
 #include <tonc.h>
 #include "StringBuilder.hpp"
 
+extern "C" int decodeUtf8(const char** str);
+
+template <typename T>
+class has_putString
+{
+    template <typename C> static std::true_type test(decltype(&C::putString));
+    template <typename C> static std::false_type test(...);
+
+public:
+    constexpr static auto value = decltype(test<T>(nullptr))::value;
+};
+
+template <typename T>
+constexpr bool has_putString_v = has_putString<T>::value;
+
 template <typename GlyphWriter>
 class TextWriter final
 {
@@ -22,20 +37,35 @@ public:
     // Put an entire string in the screen
     void write(int x, int y, const char* str, COLOR color)
     {
-        s16 px = x;
-        int ch;
-        while ((ch = *str++)) // This increments str until it is zero
+        if constexpr (has_putString_v<GlyphWriter>)
         {
-            if (ch >= font.glyphOffset)
+            // Pick up all the lines
+            while (*str)
             {
-                const GlyphData& glyph = font.glyphFor(ch);
-                glyphWriter.putGlyph(x, y, glyph, color);
-                x += glyph.advanceX;
-            }
-            else if (ch == '\n')
-            {
-                x = px;
+                auto strEnd = str;
+                while (*strEnd && *strEnd != '\n') strEnd++;
+                glyphWriter.putString(x, y, str, strEnd-str, font, color);
                 y += font.verticalStride;
+                str = strEnd + (*strEnd != 0);
+            }
+        }
+        else
+        {
+            s16 px = x;
+            int ch;
+            while ((ch = decodeUtf8(&str))) // This increments str until it is zero
+            {
+                if (ch == '\n')
+                {
+                    x = px;
+                    y += font.verticalStride;
+                }
+                else
+                {
+                    const GlyphData& glyph = font.glyphFor(ch);
+                    glyphWriter.putGlyph(x, y, glyph, color);
+                    x += glyph.advanceX;
+                }
             }
         }
     }

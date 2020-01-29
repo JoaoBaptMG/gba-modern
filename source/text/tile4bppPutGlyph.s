@@ -7,7 +7,6 @@
 @ for reference:
 @ struct GlyphData final
 @ {
-@     const char* data; // 1bpp data
 @     std::uint8_t height;
 @     std::int8_t offsetX;
 @     std::int8_t offsetY;
@@ -15,6 +14,7 @@
 @
 @     // 0 for 16-bit bitfield, 1 for 32-bit bitfield
 @     std::uint8_t attr:1;
+@     const char* data; // 1bpp data
 @ };
 
 @ void tile4bppPutGlyph(int x, int y, const GlyphData* gl, COLOR color, void* buffer, u32 pixelHeight);
@@ -28,12 +28,12 @@ tile4bppPutGlyph:
     push    {r4-r9}                 @ Get necessary workspace for our function
     ldr     r9, =0x01010101         @ Preload the auxiliary mask used in the loop down there
     ldmia   r2, {r4, r5}            @ Load the config words
-    tst     r5, #255                @ Quick check to see if height is 0
+    tst     r4, #255                @ Quick check to see if height is 0
     beq     .end
 
-    mov     r2, r5, lsl #16         @ Last byte will contain gl->offsetX
+    mov     r2, r4, lsl #16         @ Last byte will contain gl->offsetX
     add     r0, r0, r2, asr #24     @ Sign extend gl->offsetX and add to x
-    mov     r2, r5, lsl #8          @ Last byte will contain gl->offsetY
+    mov     r2, r4, lsl #8          @ Last byte will contain gl->offsetY
     add     r1, r1, r2, asr #24     @ Sign extend gl->offsetY and add to y
 
     @ Separate the X coordinate into its quotient and remainder by 8
@@ -48,18 +48,18 @@ tile4bppPutGlyph:
 
     @ Up to this point, we have
     @ r0: x/8 (not necessary anymore), r1: y + pixelHeight*tileX (not necessary anymore)
-    @ r2: pixelHeight, r3: color, r4: buffer, r5: height, r6: x%8, r12: buffer
+    @ r2: pixelHeight, r3: color, r4: height, r5: buffer, r6: x%8, r12: buffer
 
     @ so, we'll put a spare of the buffer in r0 and the character row in r1
 
     mov     r0, r12                 @ since r0 is not necessary anymore
-    tst     r5, #1 << 31            @ check the attr flag
-    and     r5, r5, #0xff           @ keep only the height
+    tst     r4, #1 << 31            @ check the attr flag
+    and     r4, r4, #0xff           @ keep only the height
     bne     .wordsize               @ branch to the word routine
 
 .hwordsize:
     @ Load the next 1bpp word
-    ldrh    r1, [r4], #2            @ r1 = *(u16*)r4++
+    ldrh    r1, [r5], #2            @ r1 = *(u16*)r5++
     mov     r1, r1, lsl r6          @ shift the result by the stride
 .putglyphhword:
     and     r7, r1, #255            @ Take the next byte
@@ -79,14 +79,14 @@ tile4bppPutGlyph:
 
     add     r0, r0, #4              @ update the buffer
     mov     r12, r0
-    subs    r5, r5, #1              @ subtract 1 from the height
+    subs    r4, r4, #1              @ subtract 1 from the height
     bne     .hwordsize              @ next iteration
     b       .end
 
 .wordsize:
     @ Load the next 1bpp word
     push    {r10}
-    ldr     r1, [r4], #4            @ r1 = *(u32*)r4++
+    ldr     r1, [r5], #4            @ r1 = *(u32*)r5++
     rsb     r6, r6, #32             @ r6 = 32 - r6
     mov     r10, r1, lsr r6         @ now r10 has the remaining part
     rsb     r6, r6, #32             
@@ -113,7 +113,7 @@ tile4bppPutGlyph:
 
     add     r0, r0, #4              @ update the buffer
     mov     r12, r0
-    subs    r5, r5, #1              @ subtract 1 from the height
+    subs    r4, r4, #1              @ subtract 1 from the height
     bne     .wordsize               @ next iteration
     pop     {r10}
 

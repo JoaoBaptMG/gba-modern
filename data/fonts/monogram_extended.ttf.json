@@ -1,4 +1,4 @@
 {
     "export-size": 16,
-    "export-range": [32, 127]
+    "export-range": [[32, 127], [161, 256]]
 }

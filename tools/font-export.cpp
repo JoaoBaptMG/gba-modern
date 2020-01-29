@@ -39,7 +39,7 @@ int fontExport(int argc, char **argv)
 
     // Parameters
     std::size_t exportSize;
-    std::size_t exportFirst, exportLast;
+    std::vector<std::vector<std::size_t>> exportIntervals;
 
     {
         nlohmann::json j;
@@ -50,9 +50,11 @@ int fontExport(int argc, char **argv)
         mdin.close();
 
         j.at("export-size").get_to(exportSize);
-        j.at("export-range").at(0).get_to(exportFirst);
-        j.at("export-range").at(1).get_to(exportLast);
+        j.at("export-range").get_to(exportIntervals);
     }
+
+    if (exportIntervals.empty())
+        throw std::domain_error("You must export at least one interval!");
 
     // Initialize FreeType and set the font parameters
     FT_Library library;
@@ -66,13 +68,19 @@ int fontExport(int argc, char **argv)
 
     // Push each glyph to the rectangle
     std::vector<GlyphData> glyphs;
-    for (std::size_t i = exportFirst; i <= exportLast; i++)
-        glyphs.push_back(getGlyph(face, i));
+    for (const auto& v : exportIntervals)
+        for (std::size_t i = v[0]; i < v[1]; i++)
+            glyphs.push_back(getGlyph(face, i));
+
+    // Compute the minimum vertical ascent of the font
+    int minOfsY = 1000000000;
+    for (const GlyphData& glyph : glyphs)
+        minOfsY = std::min(minOfsY, (int)glyph.offsetY);
 
     auto name = deriveSpecialName(out);
 
     // Write the data file
-        // Write the data
+    // Write the data
     {
         std::ofstream of;
         of.exceptions(std::ofstream::failbit | std::ofstream::badbit);
@@ -90,8 +98,11 @@ int fontExport(int argc, char **argv)
 
         // Write the font metadata
         of << "    .word fnt_" << name.fileName << "_glyphs" << std::endl;
-        of << "    .hword " << glyphs.size() << ", " << exportFirst << ", ";
-        of << verticalStride << ", 0" << std::endl << std::endl;
+        of << "    .hword " << verticalStride << ", " << minOfsY << std::endl;
+        of << "    .word " << toHex(exportIntervals[0][0] + (exportIntervals[0][1] << 16), 8);
+        for (std::size_t i = 1; i < exportIntervals.size(); i++)
+            of << ", " << toHex(exportIntervals[i][0] + (exportIntervals[i][1] << 16), 8);
+        of << ", 0" << std::endl << std::endl;
 
         // Now the glyph metadata
         of << "    .section .rodata" << std::endl;
@@ -99,7 +110,7 @@ int fontExport(int argc, char **argv)
         of << "    .hidden fnt_" << name.fileName << "_glyphs" << std::endl;
         of << "fnt_" << name.fileName << "_glyphs:" << std::endl;
 
-        std::size_t i = 0;
+        std::size_t accum = 0;
         for (const auto& glyph : glyphs)
         {
             // Mount the word
@@ -109,15 +120,20 @@ int fontExport(int argc, char **argv)
             wrd |= std::uint8_t(glyph.advanceX) << 24;
             wrd |= std::uint32_t(glyph.attr) << 31;
 
-            of << "    .word fnt_" << name.fileName << "_glyphdata" << (i++) << ", " << toHex(wrd, 8) << std::endl;
+            of << "    .word " << toHex(wrd, 8) << ", fnt_" << name.fileName << "_glyphdata+" << accum << std::endl;
+            accum += glyph.data.size() * (glyph.attr ? 4 : 2);
         }
+        of << std::endl;
 
         // Now the glyph data properly
-        i = 0;
+        of << "    .section .rodata" << std::endl;
+        of << "    .align 2" << std::endl;
+        of << "    .hidden fnt_" << name.fileName << "_glyphdata" << std::endl;
+        of << "fnt_" << name.fileName << "_glyphdata:";
+
         for (const auto& glyph : glyphs)
         {
-            of << std::endl << "fnt_" << name.fileName << "_glyphdata" << (i++) << ":";
-
+            of << std::endl << "    @ new character";
             std::size_t index = 0;
             for (std::size_t r : glyph.data)
             {
