@@ -104,14 +104,9 @@ CharacterData8bpp convertPngToCharacters8bpp(std::string filename, std::size_t m
 
 CharacterData4bpp convertPngToCharacters4bpp(std::string filename, std::size_t maxColors, bool preserveOrder)
 {
-    auto charData8bpp = convertPngToCharacters8bpp(filename);
+    auto charData8bpp = convertPngToCharacters8bpp(filename, maxColors, preserveOrder);
 
     CharacterData4bpp charData{};
-
-    // Try to reduce the palette
-    charData.actualColors = 16;
-    auto paletteMap = preserveOrder ? increasingMap() : reducePalette(charData8bpp.palette, maxColors, charData.actualColors);
-
     std::copy_n(charData8bpp.palette.begin(), 16, charData.palette.begin());
 
     // Now we build the tiles
@@ -131,7 +126,7 @@ CharacterData4bpp convertPngToCharacters4bpp(std::string filename, std::size_t m
                     if (firstCode >= maxColors) throwCodeError(maxColors);
                     if (secondCode >= maxColors) throwCodeError(maxColors);
                     // This will not overflow
-                    charData.chars(x, y)[4*j + i] = paletteMap[firstCode] | (paletteMap[secondCode] << 4);
+                    charData.chars(x, y)[4*j + i] = firstCode | (secondCode << 4);
                 }
         }
 
