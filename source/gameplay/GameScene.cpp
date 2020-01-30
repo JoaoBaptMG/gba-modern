@@ -66,6 +66,6 @@ void GameScene::update()
 vec2<s16> GameScene::calculateCameraVector() const
 {
     // The objective is to always let the player in the middle of the camera
-    return vec2<s16>(clamp(s16(player.pos.x) - 120 + PlayerWidth/2, 0, TileSize * map.width() - 240),
-        clamp(s16(player.pos.y) - 80 + PlayerHeight/2, 0, TileSize * map.height() - 160));
+    return vec2<s16>(clamp(s16(player.pos.x) - SCREEN_WIDTH/2 + PlayerWidth/2, 0, TileSize * map.width() - SCREEN_WIDTH),
+        clamp(s16(player.pos.y) - SCREEN_HEIGHT/2 + PlayerHeight/2, 0, TileSize * map.height() - SCREEN_HEIGHT));
 }
