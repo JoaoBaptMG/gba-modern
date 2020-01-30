@@ -16,6 +16,7 @@
 //void maxmodInit();
 
 #include "math/fixed.hpp"
+#include "memory/allocator.hpp"
 
 SceneStack scene EWRAM_BSS;
 bool popScene EWRAM_BSS;
@@ -26,6 +27,9 @@ int main()
 	irq_init(isr_master);
 	irq_enable(II_VBLANK);
 	//maxmodInit();
+
+	// Init the memory allocator
+	ewram::init();
 
 	// Init the graphics module
 	graphics::init();
