@@ -67,5 +67,5 @@ void Money::pushGraphics(vec2<s16> camera)
     bool visible = updateVisibility(dp.x > -8 && dp.x < 240 && dp.y > -8 && dp.y < 160);
 
     // Push the sprite, but only if it's not offscreen
-    if (visible) graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, tilePtr.getTileId(), palPtr.getPalette(), 0);
+    if (visible) graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, tilePtr.getTileId(), palPtr.getPalette(), 0, 4);
 }

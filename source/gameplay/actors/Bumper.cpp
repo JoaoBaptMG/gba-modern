@@ -94,7 +94,7 @@ void Bumper::pushGraphics(vec2<s16> camera)
     bool visible = updateVisibility(dp.x > -16 && dp.x < 240 && dp.y > -16 && dp.y < 160);
 
     // Push the sprite, but only if it's not offscreen
-    if (visible) graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, animator.getTileId(), palettePtr.getPalette(), 0);
+    if (visible) graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, animator.getTileId(), palettePtr.getPalette(), 0, 4);
 }
 
 // Bumper death

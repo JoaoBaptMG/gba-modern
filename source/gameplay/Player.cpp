@@ -110,7 +110,7 @@ void Player::pushGraphics()
         {
             auto dps = goingLeft ? vec2(-16, 0) : vec2(PlayerWidth, 0);
             graphics::oam.pushRegular(dp + dps, SpriteSize::s16x32_4bpp, meleeAnimator.getTileId(),
-                palPtr.getPalette(), 0, flip);
+                palPtr.getPalette(), 0, flip, 4);
         }
     }
 }
