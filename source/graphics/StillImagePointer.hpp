@@ -25,7 +25,8 @@ class StillImageAllocator final : public Allocator<StillImageAllocator>
     void clear()
     { 
         pointer = ObjectTilePointer();
-    }   
+    }
+
 public:
     StillImageAllocator(const void* data, u16 logBlocks)
         : tiles((const TILE*)data), logBlocks(logBlocks) {}

@@ -17,6 +17,8 @@ using namespace data::sprites;
 constexpr int MoneyFade = 16;
 constexpr int MoneyDuration = 300;
 
+constexpr int UIPriority = 2;
+
 static SinglePaletteAllocator palette(hud.png.palette);
 
 void Hud::init()
@@ -42,7 +44,7 @@ void Hud::init()
 void Hud::pushGraphics()
 {
     // Push the icon
-    graphics::oam.pushRegular(vec2(8, 8), SpriteSize::s16x16_4bpp, iconPtr.getTileId(), palPtr.getPalette(), 0);
+    graphics::oam.pushRegular(vec2(8, 8), SpriteSize::s16x16_4bpp, iconPtr.getTileId(), palPtr.getPalette(), 0, UIPriority);
 
     const Player& player = gameScene().player;
     int health = player.getHealth(), maxHealth = player.getMaxHealth();
@@ -53,12 +55,12 @@ void Hud::pushGraphics()
     {
         u16 tileId = bitsPtr.getTileId();
         if (i >= health) tileId++;
-        graphics::oam.pushRegular(cur, SpriteSize::s8x8_4bpp, tileId, palPtr.getPalette(), 0);
+        graphics::oam.pushRegular(cur, SpriteSize::s8x8_4bpp, tileId, palPtr.getPalette(), 0, UIPriority);
         cur.x += 8;
     }
 
     // Push the tip
-    graphics::oam.pushRegular(cur, SpriteSize::s8x8_4bpp, bitsPtr.getTileId()+2, palPtr.getPalette(), 0);
+    graphics::oam.pushRegular(cur, SpriteSize::s8x8_4bpp, bitsPtr.getTileId()+2, palPtr.getPalette(), 0, UIPriority);
 
     // Push the numbers
     if (moneyDisplayCounter > 0 && ++moneyDisplayCounter == MoneyDuration) moneyDisplayCounter = 0;
@@ -102,7 +104,7 @@ void Hud::displayMoney()
             tileId = numberPtrs[0].getTileId() + digit;
         else tileId = numberPtrs[1].getTileId() + digit - 8;
 
-        graphics::oam.pushRegular(cur, SpriteSize::s8x8_4bpp, tileId, palPtr.getPalette(), 0);
+        graphics::oam.pushRegular(cur, SpriteSize::s8x8_4bpp, tileId, palPtr.getPalette(), 0, UIPriority);
         cur.x -= 6;
     }
 }

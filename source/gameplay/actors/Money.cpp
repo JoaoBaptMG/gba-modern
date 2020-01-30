@@ -22,6 +22,8 @@ constexpr double Pi = 3.14159265358979323846;
 constexpr s32f16 AccelCounter = (2 * Pi / Period) * (2 * Pi / Period);
 constexpr s32f8 InitialVelocity = Pi * Amplitude / Period;
 
+constexpr int MoneyPriority = 3;
+
 static StillImageAllocator tiles EWRAM_BSS (money.png.tiles, SpriteSize::s8x8_4bpp);
 static SinglePaletteAllocator palette EWRAM_BSS (money.png.palette);
 
@@ -67,5 +69,6 @@ void Money::pushGraphics(vec2<s16> camera)
     bool visible = updateVisibility(dp.x > -8 && dp.x < 240 && dp.y > -8 && dp.y < 160);
 
     // Push the sprite, but only if it's not offscreen
-    if (visible) graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, tilePtr.getTileId(), palPtr.getPalette(), 0, 4);
+    if (visible) graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, tilePtr.getTileId(),
+        palPtr.getPalette(), 0, MoneyPriority);
 }

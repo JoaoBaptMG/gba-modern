@@ -19,6 +19,8 @@ constexpr s32f8 BumperRadius = 8;
 constexpr vec2 BumperSize(BumperRadius, BumperRadius);
 constexpr auto BumperDeathCounter = 64;
 
+constexpr int BumperPriority = 5;
+
 // Quick & dirty way to get a random number (warning: UB)
 u16 getRandom(void* thisptr)
 {
@@ -94,7 +96,8 @@ void Bumper::pushGraphics(vec2<s16> camera)
     bool visible = updateVisibility(dp.x > -16 && dp.x < 240 && dp.y > -16 && dp.y < 160);
 
     // Push the sprite, but only if it's not offscreen
-    if (visible) graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, animator.getTileId(), palettePtr.getPalette(), 0, 4);
+    if (visible) graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, animator.getTileId(),
+        palettePtr.getPalette(), 0, BumperPriority);
 }
 
 // Bumper death
@@ -123,11 +126,16 @@ void BumperDeath::pushGraphics(vec2<s16> camera)
         auto ldiag = vec2(-offset, offset);
         constexpr auto Right = vec2((int)BumperRadius, 0);
         constexpr auto Down = vec2(0, (int)BumperRadius);
+        constexpr auto Rd = Right + Down;
 
-        graphics::oam.pushRegular(dp - rdiag, SpriteSize::s8x8_4bpp, tileId, palettePtr.getPalette(), 0);
-        graphics::oam.pushRegular(dp + Right - ldiag, SpriteSize::s8x8_4bpp, tileId + 1, palettePtr.getPalette(), 0);
-        graphics::oam.pushRegular(dp + Down + ldiag, SpriteSize::s8x8_4bpp, tileId + 2, palettePtr.getPalette(), 0);
-        graphics::oam.pushRegular(dp + Right + Down + rdiag, SpriteSize::s8x8_4bpp, tileId + 3, palettePtr.getPalette(), 0);
+        graphics::oam.pushRegular(dp - rdiag, SpriteSize::s8x8_4bpp, tileId, 
+            palettePtr.getPalette(), 0, BumperPriority);
+        graphics::oam.pushRegular(dp + Right - ldiag, SpriteSize::s8x8_4bpp, tileId + 1,
+            palettePtr.getPalette(), 0, BumperPriority);
+        graphics::oam.pushRegular(dp + Down + ldiag, SpriteSize::s8x8_4bpp, tileId + 2,
+            palettePtr.getPalette(), 0, BumperPriority);
+        graphics::oam.pushRegular(dp + Rd + rdiag, SpriteSize::s8x8_4bpp, tileId + 3,
+            palettePtr.getPalette(), 0, BumperPriority);
     }
 }
 

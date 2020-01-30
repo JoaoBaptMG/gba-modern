@@ -16,6 +16,8 @@
 constexpr s32f8 JumpSpeed = -3.5;
 constexpr auto DecaySpeed = JumpSpeed / 2;
 
+constexpr int PlayerPriority = 4;
+
 static SinglePaletteAllocator palette(data::sprites::player.png.palette);
 
 Player::Player() : meleeAnimator(data::sprites::player_melee.png, SpriteSize::s16x32_4bpp, 2) {}
@@ -105,12 +107,13 @@ void Player::pushGraphics()
         auto flip = goingLeft ? SpriteFlip::Horizontal : SpriteFlip::None;
 
         if (!(invCounter & 2))
-            graphics::oam.pushRegular(dp, SpriteSize::s16x32_4bpp, playerPtr.getTileId(), palPtr.getPalette(), 0, flip);
+            graphics::oam.pushRegular(dp, SpriteSize::s16x32_4bpp, playerPtr.getTileId(),
+                palPtr.getPalette(), 0, flip, PlayerPriority);
         if (meleeAnimator.isVisible())
         {
             auto dps = goingLeft ? vec2(-16, 0) : vec2(PlayerWidth, 0);
             graphics::oam.pushRegular(dp + dps, SpriteSize::s16x32_4bpp, meleeAnimator.getTileId(),
-                palPtr.getPalette(), 0, flip, 4);
+                palPtr.getPalette(), 0, flip, PlayerPriority);
         }
     }
 }
