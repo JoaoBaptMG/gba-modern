@@ -34,7 +34,7 @@ MUSIC		:=
 ARCH	:=	-mthumb -mthumb-interwork
 
 CFLAGS	:=	-g -Wall -O3 -ffunction-sections -fdata-sections\
-		-mcpu=arm7tdmi -mtune=arm7tdmi -flto -fno-omit-frame-pointer $(ARCH)
+		-mcpu=arm7tdmi -mtune=arm7tdmi -flto $(ARCH)
 
 CFLAGS	+=	$(INCLUDE)
 
