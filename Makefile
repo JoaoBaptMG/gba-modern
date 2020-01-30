@@ -34,7 +34,7 @@ MUSIC		:=
 ARCH	:=	-mthumb -mthumb-interwork
 
 CFLAGS	:=	-g -Wall -O3 -ffunction-sections -fdata-sections\
-		-mcpu=arm7tdmi -mtune=arm7tdmi $(ARCH) -flto
+		-mcpu=arm7tdmi -mtune=arm7tdmi -flto -fno-omit-frame-pointer $(ARCH)
 
 CFLAGS	+=	$(INCLUDE)
 
@@ -185,6 +185,18 @@ soundbank.bin soundbank.h : $(AUDIOFILES)
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	@$(bin2o)
+
+#---------------------------------------------------------------------------------
+# Those rules link to ARM without LTO enabled for those objects only
+#---------------------------------------------------------------------------------
+%.niwram.o: %.niwram.cpp
+	@echo $(notdir $<)
+	$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.iwram.d $(CXXFLAGS) -fno-lto -marm -mlong-calls -c $< -o $@ $(ERROR_FILTER)
+
+#---------------------------------------------------------------------------------
+%.niwram.o: %.niwram.c
+	@echo $(notdir $<)
+	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.iwram.d $(CFLAGS) -fno-lto -marm -mlong-calls -c $< -o $@ $(ERROR_FILTER)
 
 #---------------------------------------------------------------------------------
 # This rule is for sprites
