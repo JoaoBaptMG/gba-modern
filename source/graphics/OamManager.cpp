@@ -8,6 +8,15 @@
 #include <algorithm>
 
 //#define DISABLE_OAM_SORTING
+void OamManager::pushAttrs(u16 attr0, u16 attr1, u16 attr2, u16 prio)
+{
+    ASSERT(objCount < MaxObjs);
+    shadowOAM[objCount].attr0 = attr0;
+    shadowOAM[objCount].attr1 = attr1;
+    shadowOAM[objCount].attr2 = attr2;
+    shadowOAM[objCount].fill = (prio << 7) | objCount;
+    objCount++;
+}
 
 void OamManager::copyToOAM()
 {

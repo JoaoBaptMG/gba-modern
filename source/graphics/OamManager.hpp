@@ -24,15 +24,7 @@ class OamManager final
     OBJ_ATTR shadowOAM[MaxObjs];
     u32 objCount;
 
-    void pushAttrs(u16 attr0, u16 attr1, u16 attr2, u16 prio = 0)
-    {
-        ASSERT(objCount < MaxObjs);
-        shadowOAM[objCount].attr0 = attr0;
-        shadowOAM[objCount].attr1 = attr1;
-        shadowOAM[objCount].attr2 = attr2;
-        shadowOAM[objCount].fill = prio;
-        objCount++;
-    }
+    void pushAttrs(u16 attr0, u16 attr1, u16 attr2, u16 prio = 0);
 
 public:
     OamManager() {}
