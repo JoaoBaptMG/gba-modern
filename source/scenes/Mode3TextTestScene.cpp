@@ -8,9 +8,15 @@
 #include "data/fonts/monogram_extended.hpp"
 #include "text/StringBuilder.hpp"
 
+#if 0
+static const char String[] =
+    u8"Thìs ís à test òf whát wè câñ\ndó ùsîng thïs téxt êngiñë. We'rè\ngôìng tõ stress ít öút "
+    u8"bý\nwrîtïñg ãn éxtêñsivë ämoûnt òf\ntext, só wè cåñ hôpéfüllÿ\nmêasure ìts përfõrmànce.";
+#else
 static const char String[] =
     u8"This is a test of what we can\ndo using this engine. We're\ngoing to stress it out "
     u8"by\nwriting an extensive amount of\ntext, so we can hopefully\nmeasure its performance.";
+#endif
 
 Mode3TextTestScene::Mode3TextTestScene() : IScene(), writer(data::fonts::monogram_extended, vid_mem)
 {
