@@ -40,6 +40,7 @@ int fontExport(int argc, char **argv)
     // Parameters
     std::size_t exportSize;
     std::vector<std::vector<std::size_t>> exportIntervals;
+    int verticalStride = -1;
 
     {
         nlohmann::json j;
@@ -51,6 +52,8 @@ int fontExport(int argc, char **argv)
 
         j.at("export-size").get_to(exportSize);
         j.at("export-range").get_to(exportIntervals);
+        if (j.contains("override-vertical-stride"))
+            j.at("override-vertical-stride").get_to(verticalStride);
     }
 
     if (exportIntervals.empty())
@@ -64,7 +67,8 @@ int fontExport(int argc, char **argv)
     checkError(FT_Set_Char_Size(face, 0, exportSize*64, 72, 72));
 
     // Get the vertical stride
-    int verticalStride = face->size->metrics.height >> 6;
+    if (verticalStride == -1)
+        verticalStride = face->size->metrics.height >> 6;
 
     // Push each glyph to the rectangle
     std::vector<GlyphData> glyphs;
