@@ -9,19 +9,13 @@
 #include <tonc.h>
 #include "StringBuilder.hpp"
 
-extern "C" std::uint64_t decodeUtf8Asm(const char *str);
-
 inline static u32 decodeUtf8(const char*& str)
 {
-    union
-    { 
-        std::uint64_t res;
-        struct { const char* newstr; u32 ch; } vals;
-    } result;
-
-    result.res = decodeUtf8Asm(str);
-    str = result.vals.newstr;
-    return result.vals.ch;
+    u32 ch = *str++;
+    if (!(ch & 0x80)) return ch;
+    ch = (ch << 6) | (*str++ & 0x3F);
+    if (!(ch & (1 << 11))) return ch & ~(3 << 12);
+    return (ch << 6) | (*str++ & 0x3F);
 }
 
 template <typename GlyphWriter>
