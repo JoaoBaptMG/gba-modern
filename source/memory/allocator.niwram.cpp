@@ -43,10 +43,10 @@ void* ewram::allocate(std::size_t sz)
     // Assert that we have enough space
     ASSERT(freeSlots[im].size >= sz);
 
-    void* result = freeSlots[im].ptr;
-    freeSlots[im].ptr += sz;
+    // Allocate from the end of the block, it's more performant
     freeSlots[im].size -= sz;
-
+    void* result = freeSlots[im].ptr + freeSlots[im].size;
+    
     // If the slot is now empty, remove it from the list
     if (freeSlots[im].size == 0)
     {
@@ -64,22 +64,49 @@ void* ewram::allocate(std::size_t sz)
 
 void ewram::free(void* ptr, std::size_t sz)
 {
-    // First, search if a free slot can be allocated
-    auto slot = std::find_if(freeSlots, freeSlots+numFreeSlots,
-        [=](const FreeSlot& fs) { return (char*)ptr + sz == fs.ptr; });
-
-    // If so, just merge it
-    if (slot != freeSlots+numFreeSlots)
+    // First, search if a free slot can be merged with this one
+    std::size_t backMergeSlot = -1;
+    std::size_t frontMergeSlot = -1;
+    for (std::size_t i = 0; i < numFreeSlots; i++)
     {
-        slot->ptr = (char*)ptr;
-        slot->size += sz;
+        if (freeSlots[i].ptr + freeSlots[i].size == ptr) backMergeSlot = i;
+        else if ((char*)ptr + sz == freeSlots[i].ptr) frontMergeSlot = i;
     }
-    else
+
+    if (backMergeSlot != (std::size_t)-1 && frontMergeSlot != (std::size_t)-1)
+    {
+        // Check which slot is the first
+        auto [firstSlot, secondSlot] = std::minmax(backMergeSlot, frontMergeSlot);
+
+        // Update the pointers
+        freeSlots[firstSlot].ptr = freeSlots[backMergeSlot].ptr;
+        freeSlots[firstSlot].size += sz + freeSlots[secondSlot].ptr;
+
+        // And remove the second slot
+        for (std::size_t i = numFreeSlots-1; i > secondSlot; i--)
+        {
+            freeSlots[i-1].ptr = freeSlots[i].ptr;
+            freeSlots[i-1].size = freeSlots[i].size;
+        }
+
+        numFreeSlots--;
+    }
+    else if (backMergeSlot != -1)
+    {
+        // The slot is on the back of the free pointer, just add to the size
+        freeSlots[backMergeSlot].size += sz;
+    }
+    else if (frontMergeSlot != -1)
+    {
+        // The slot is on the front of the free pointer, needs to update the pointer
+        freeSlots[frontMergeSlot].ptr = (char*)ptr;
+        freeSlots[frontMergeSlot].size += sz;
+    }
+    else // No slots to merge
     {
         ASSERT(numFreeSlots < MaxFreeSlots);
+        freeSlots[numFreeSlots].ptr = (char*)ptr;
+        freeSlots[numFreeSlots].size = sz;
         numFreeSlots++;
-
-        slot->ptr = (char*)ptr;
-        slot->size = sz;
     }
 }
