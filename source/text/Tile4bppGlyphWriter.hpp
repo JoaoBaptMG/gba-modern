@@ -9,7 +9,6 @@
 #include "data/Font.hpp"
 
 extern "C" void tile4bppPutGlyph(int x, int y, const GlyphData* gl, COLOR color, void* buffer, u32 pixelHeight);
-extern "C" void tile4bppPutString(int x, int y, const char* str, int size, const Font* font, COLOR color, void* buffer, u32 pixelHeight);
 
 class Tile4bppGlyphWriter final
 {
@@ -25,10 +24,5 @@ public:
     void putGlyph(int x, int y, const GlyphData& gl, COLOR color)
     {
         tile4bppPutGlyph(x, y, &gl, color, buffer, pixelHeight);
-    }
-
-    void putString(int x, int y, const char* str, int size, const Font& font, COLOR color)
-    {
-        tile4bppPutString(x, y, str, size, &font, color, buffer, pixelHeight);
     }
 };

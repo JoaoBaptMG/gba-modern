@@ -24,19 +24,6 @@ inline static u32 decodeUtf8(const char*& str)
     return result.vals.ch;
 }
 
-template <typename T>
-class has_putString
-{
-    template <typename C> static std::true_type test(decltype(&C::putString));
-    template <typename C> static std::false_type test(...);
-
-public:
-    constexpr static auto value = decltype(test<T>(nullptr))::value;
-};
-
-template <typename T>
-constexpr bool has_putString_v = has_putString<T>::value;
-
 template <typename GlyphWriter>
 class TextWriter final
 {
@@ -50,35 +37,20 @@ public:
     // Put an entire string in the screen
     void write(int x, int y, const char* str, COLOR color)
     {
-        if constexpr (has_putString_v<GlyphWriter>)
+        s16 px = x;
+        u32 ch;
+        while ((ch = decodeUtf8(str))) // This increments str until it is zero
         {
-            // Pick up all the lines
-            while (*str)
+            if (ch == '\n')
             {
-                auto strEnd = str;
-                while (*strEnd && *strEnd != '\n') strEnd++;
-                glyphWriter.putString(x, y, str, strEnd-str, font, color);
+                x = px;
                 y += font.verticalStride;
-                str = strEnd + (*strEnd != 0);
             }
-        }
-        else
-        {
-            s16 px = x;
-            u32 ch;
-            while ((ch = decodeUtf8(str))) // This increments str until it is zero
+            else
             {
-                if (ch == '\n')
-                {
-                    x = px;
-                    y += font.verticalStride;
-                }
-                else
-                {
-                    const GlyphData& glyph = font.glyphFor(ch);
-                    glyphWriter.putGlyph(x, y, glyph, color);
-                    x += glyph.advanceX;
-                }
+                const GlyphData& glyph = font.glyphFor(ch);
+                glyphWriter.putGlyph(x, y, glyph, color);
+                x += glyph.advanceX;
             }
         }
     }
