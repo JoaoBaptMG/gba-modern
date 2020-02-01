@@ -80,7 +80,7 @@ void ewram::free(void* ptr, std::size_t sz)
 
         // Update the pointers
         freeSlots[firstSlot].ptr = freeSlots[backMergeSlot].ptr;
-        freeSlots[firstSlot].size += sz + freeSlots[secondSlot].ptr;
+        freeSlots[firstSlot].size += sz + freeSlots[secondSlot].size;
 
         // And remove the second slot
         for (std::size_t i = numFreeSlots-1; i > secondSlot; i--)
@@ -91,12 +91,12 @@ void ewram::free(void* ptr, std::size_t sz)
 
         numFreeSlots--;
     }
-    else if (backMergeSlot != -1)
+    else if (backMergeSlot != (std::size_t)-1)
     {
         // The slot is on the back of the free pointer, just add to the size
         freeSlots[backMergeSlot].size += sz;
     }
-    else if (frontMergeSlot != -1)
+    else if (frontMergeSlot != (std::size_t)-1)
     {
         // The slot is on the front of the free pointer, needs to update the pointer
         freeSlots[frontMergeSlot].ptr = (char*)ptr;
