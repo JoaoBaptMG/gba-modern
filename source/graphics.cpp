@@ -17,9 +17,9 @@ constexpr u32 MaxRomCopies = 32;
 static u32 copyBuffer[MaxCopyWords] IWRAM_DATA;
 static u32 verticalBuffer[MaxVerticalWords] IWRAM_DATA;
 struct RomCopy { const void* src; void* dst; u32 countCtl; };
-static RomCopy romCopyBuffer[MaxRomCopies] IWRAM_DATA;
+static RomCopy romCopyBuffer[MaxRomCopies] EWRAM_BSS;
 
-static u32 objCount IWRAM_DATA, copyCount IWRAM_DATA, verticalCount IWRAM_DATA, romCopyCount IWRAM_DATA;
+static u16 copyCount EWRAM_BSS, verticalCount EWRAM_BSS, romCopyCount EWRAM_BSS;
 static u16 palettesUsed EWRAM_BSS, palettesToFree EWRAM_BSS;
 
 static BuddyObjectAllocator buddy EWRAM_BSS;
@@ -27,7 +27,6 @@ OamManager graphics::oam IWRAM_DATA;
 
 void graphics::init()
 {
-    objCount = 0;
     copyCount = 0;
     verticalCount = 0;
     romCopyCount = 0;
@@ -84,7 +83,7 @@ void graphics::update()
 
 void* graphics::newCopyCommand32(void* dst, u16 count)
 {
-    ASSERT(copyCount + count + 2 <= MaxCopyWords);
+    ASSERT(copyCount + count + 2u <= MaxCopyWords);
     copyBuffer[copyCount++] = count | DMA_32NOW | DMA_ENABLE;
     copyBuffer[copyCount++] = (u32)dst;
     copyCount += count;
@@ -93,7 +92,7 @@ void* graphics::newCopyCommand32(void* dst, u16 count)
 
 void* graphics::newVerticalCopyCommand32(void* dst, u16 count)
 {
-    ASSERT(verticalCount + count + 2 <= MaxVerticalWords);
+    ASSERT(verticalCount + count + 2u <= MaxVerticalWords);
     verticalBuffer[verticalCount++] = count;
     verticalBuffer[verticalCount++] = (u32)dst;
     verticalCount += count;
