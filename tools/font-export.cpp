@@ -81,7 +81,7 @@ int fontExport(int argc, char **argv)
     for (const GlyphData& glyph : glyphs)
         minOfsY = std::min(minOfsY, (int)glyph.offsetY);
 
-    auto name = deriveSpecialName(out);
+    auto name = deriveSpecialName(in);
 
     // Write the data file
     // Write the data

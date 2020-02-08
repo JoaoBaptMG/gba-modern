@@ -1,234 +1,190 @@
-#---------------------------------------------------------------------------------
-.SUFFIXES:
-#---------------------------------------------------------------------------------
-
-ifeq ($(strip $(DEVKITARM)),)
-$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
+# Running on windows is not supported
+ifdef OS
+	$(error "Making this project on Windows is not yet supported. Consider using WSL.")
 endif
 
-include $(DEVKITARM)/gba_rules
-
-#---------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# INCLUDES is a list of directories containing extra header files
-# DATA is a list of directories containing binary data
-# GRAPHICS is a list of directories containing files to be processed by grit
-#
-# All directories are specified relative to the project directory where
-# the makefile is found
-#
-#---------------------------------------------------------------------------------
-TARGET		:= $(notdir $(CURDIR))
-BUILD		:= build
-SOURCES		:= source
-INCLUDES	:= include
-DATA		:= data
-MAPS		:= tiled-maps
-MUSIC		:=
-
-#---------------------------------------------------------------------------------
-# options for code generation
-#---------------------------------------------------------------------------------
-ARCH	:=	-mthumb -mthumb-interwork
-
-CFLAGS	:=	-g -Wall -O3 -ffunction-sections -fdata-sections\
-		-mcpu=arm7tdmi -mtune=arm7tdmi -flto $(ARCH)
-
-CFLAGS	+=	$(INCLUDE)
-
-CXXFLAGS	:=	$(CFLAGS) -std=c++2a -fno-rtti -fno-exceptions
-
-ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-g $(ARCH) -Wl,--gc-sections -Wl,-Map,$(notdir $*.map)
-
-#---------------------------------------------------------------------------------
-# any extra libraries we wish to link with the project
-#---------------------------------------------------------------------------------
-LIBS	:= -nodefaultlibs -ltonc
-
-#---------------------------------------------------------------------------------
-# list of directories containing libraries, this must be the top level containing
-# include and lib
-#---------------------------------------------------------------------------------
-LIBDIRS	:=	$(DEVKITPRO)/libtonc $(LIBGBA)
-
-#---------------------------------------------------------------------------------
-# no real need to edit anything past this point unless you need to add additional
-# rules for different file extensions
-#---------------------------------------------------------------------------------
-
-
-ifneq ($(BUILD),$(notdir $(CURDIR)))
-#---------------------------------------------------------------------------------
-
-# Recursive wildcard
+# Utility function
 rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 
-# Resources
-export SPR_FOLDER	:= $(foreach dir,$(DATA),$(dir)/sprites)
-export TST_FOLDER	:= $(foreach dir,$(DATA),$(dir)/tilesets)
-export MAP_FOLDER	:= $(MAPS)
-export FNT_FOLDER   := $(foreach dir,$(DATA),$(dir)/fonts)
+# Compilation flags
+ARCH := -mthumb -mthumb-interwork
+CFLAGS := -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto $(ARCH)
+CPPFLAGS := $(CFLAGS) -std=c++17 -fno-rtti -fno-exceptions
+ASFLAGS := -g $(ARCH)
+LDFLAGS	= -g $(ARCH) -Wl,--gc-sections -Wl,-Map,gba.map
 
-# Tools
-export TOOLS = $(CURDIR)/tools/tools
+# Libraries
+TONC := tonclib/code/tonclib
+LIBRARIES := -nodefaultlibs -ltonc
+LIBDIRS := $(TONC)
 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
+# Source files
+C_FILES := $(call rwildcard, source/, *.c)
+CPP_FILES := $(call rwildcard, source/, *.cpp)
+S_FILES := $(call rwildcard, source/, *.s)
 
-#export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-#					$(foreach dir,$(DATA),$(CURDIR)/$(dir))
-
-export DEPSDIR	:=	$(CURDIR)/$(BUILD)
-
-CFILES		:=	$(patsubst $(SOURCES)/%,%,$(call rwildcard,$(SOURCES)/,*.c))
-CPPFILES	:=	$(patsubst $(SOURCES)/%,%,$(call rwildcard,$(SOURCES)/,*.cpp))
-SFILES		:=	$(patsubst $(SOURCES)/%,%,$(call rwildcard,$(SOURCES)/,*.s))
-# BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
-ALLSRCS		:=  $(addprefix $(SOURCES)/, $(CFILES) $(CPPFILES) $(SFILES))
+# Source objects
+SRC_OFILES = $(addprefix build/, $(C_FILES:.c=.o) $(CPP_FILES:.cpp=.o) $(S_FILES:.s=.o))
 
 # Resources
-SPRITES		:=  $(foreach dir,$(SPR_FOLDER),$(call rwildcard, $(dir)/,*.png))
-TILESETS	:= 	$(foreach dir,$(TST_FOLDER),$(call rwildcard, $(dir)/,*.png))
-MAPS		:=  $(foreach dir,$(MAP_FOLDER),$(wildcard $(dir)/*.tmx))
-FONTS 		:=  $(foreach dir,$(FNT_FOLDER),$(call rwildcard, $(dir)/,*.ttf))
-ALLRSRCS	:=	$(SPRITES) $(TILESETS) $(MAPS) $(FONTS)
+SPR_FILES := $(call rwildcard, data/sprites/, *.png)
+TST_FILES := $(call rwildcard, data/tilesets/, *.png)
+FNT_FILES := $(call rwildcard, data/fonts/, *.ttf)
+MAP_FILES := $(wildcard tiled-maps/*.tmx)
 
-export BUILDFOLDERS := $(addprefix $(CURDIR)/$(BUILD)/, $(sort $(dir $(ALLSRCS) $(ALLRSRCS))))
-export VPATH 		:= $(CURDIR)/
+# Resource objects
+RSRC_OFILES := $(addprefix build/, $(SPR_FILES:.png=.o) $(TST_FILES:.png=.o)\
+	$(FNT_FILES:.ttf=.o) $(MAP_FILES:.tmx=.o) $(MAP_FILES:.tmx=_init.o)) 
 
-ifneq ($(strip $(MUSIC)),)
-	export AUDIOFILES	:=	$(foreach dir,$(notdir $(wildcard $(MUSIC)/*.*)),$(CURDIR)/$(MUSIC)/$(dir))
-	BINFILES += soundbank.bin
+# Resource headers
+RSRC_HFILES := $(addprefix build/, $(SPR_FILES:.png=.hpp) $(TST_FILES:.png=.hpp)\
+	$(FNT_FILES:.ttf=.hpp) $(MAP_FILES:.tmx=.hpp))
+
+# Helper variables
+OFILES := $(RSRC_OFILES) $(SRC_OFILES)
+DFILES := $(OFILES:.o=.d)
+LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+INCLUDE	:= $(foreach dir,$(LIBDIRS),-isystem $(dir)/include) -iquote build -iquote source
+
+# Links to Tonc
+TONC_URL := http://www.coranac.com/files/tonc-code.zip
+
+# Link to the GCC - use architecture to pull the right one
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	UNAME_P := $(shell uname -p)
+	ifeq ($(UNAME_P),x86_64)
+		GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2
+	endif
+	ifneq ($(filter arm%,$(UNAME_P)),)
+		GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-aarch64-linux.tar.bz2
+	endif
 endif
+ifeq ($(UNAME_S),Darwin)
+	GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-mac.tar.bz2
+endif
+GCC_DEST := gcc-arm-none-eabi-9-2019-q4-major
 
-#---------------------------------------------------------------------------------
-# use CXX for linking C++ projects, CC for standard C
-#---------------------------------------------------------------------------------
+# Path to the tools used
+ARMCC := $(GCC_DEST)/bin/arm-none-eabi-gcc
+ARMCPP := $(GCC_DEST)/bin/arm-none-eabi-g++
+ARMOC := $(GCC_DEST)/bin/arm-none-eabi-objcopy
+
+# Get the right linker
 ifeq ($(strip $(CPPFILES)),)
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CC)
-#---------------------------------------------------------------------------------
+	ARMLD := $(ARMCC)
 else
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CXX)
-#---------------------------------------------------------------------------------
+	ARMLD := $(ARMCPP)
 endif
-#---------------------------------------------------------------------------------
 
-export OFILES_BIN := $(addsuffix .o,$(BINFILES))
+# Keep all intermediary files (maps, assembly and such) around
+.SECONDARY:
 
-export OFILES_SOURCES := $(addprefix $(SOURCES)/, $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o))
+# Enable second expansion rule
+.SECONDEXPANSION:
 
-export OFILES_DATA := $(SPRITES:.png=.o) $(TILESETS:.png=.o) $(MAPS:.tmx=.o) $(MAPS:.tmx=_init.o) $(FONTS:.ttf=.o)
+# Now, the actual rules
+.PHONY: all clean clean-everything clean-downloads download-deps build-tools
 
-export OFILES := $(OFILES_BIN) $(OFILES_SOURCES) $(OFILES_DATA)
-export DFILES := $(addprefix $(DEPSDIR)/, $(OFILES:.o=.d))
+all: bin/game.gba
 
-export HFILES_DATA := $(SPRITES:.png=.hpp) $(TILESETS:.png=.hpp) $(MAPS:.tmx=.hpp) $(FONTS:.ttf=.hpp)
-export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES))) $(HFILES_DATA)
+# Now, make the game
+bin/game.gba: download-deps build-tools tools/tools bin/game.elf
+	@mkdir -p bin
+	@echo "Sanitizing final file"
+	@$(ARMOC) -O binary $(@:.gba=.elf) $@
+	@tools/tools rom-sanitize $@ gba.json $@
 
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-iquote $(CURDIR)/$(dir)) \
-					$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-					-I$(CURDIR)/$(BUILD) -I$(CURDIR)/$(SOURCES)
-
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
-
-.PHONY: $(BUILD) clean
-
-#---------------------------------------------------------------------------------
-$(BUILD):
-	@[ -d $@ ] || mkdir -p $@
-	@mkdir -p $(BUILDFOLDERS)
-	@$(MAKE) -C tools
-	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
-	arm-none-eabi-objdump -dCS gba-modern.elf > gba-modern.dump
-
-#---------------------------------------------------------------------------------
-clean:
-	@echo clean ...
-	@$(MAKE) --no-print-directory -C tools clean
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).gba
-
-#---------------------------------------------------------------------------------
-else
-
-#---------------------------------------------------------------------------------
-# main targets
-#---------------------------------------------------------------------------------
-
-$(OUTPUT).gba	:	$(OUTPUT).elf
-
-$(OUTPUT).elf	:	$(OFILES)
-
-$(OFILES_SOURCES) : $(HFILES)
-
-$(OFILES_DATA) : $(TOOLS)
-
-#---------------------------------------------------------------------------------
-# The bin2o rule should be copied and modified
-# for each extension used in the data directories
-#---------------------------------------------------------------------------------
-
-#---------------------------------------------------------------------------------
-# rule to build soundbank from music files
-#---------------------------------------------------------------------------------
-soundbank.bin soundbank.h : $(AUDIOFILES)
-#---------------------------------------------------------------------------------
-	@mmutil $^ -osoundbank.bin -hsoundbank.h
-
-#---------------------------------------------------------------------------------
-# This rule links in binary data with the .bin extension
-#---------------------------------------------------------------------------------
-%.bin.o	%_bin.h :	%.bin
-#---------------------------------------------------------------------------------
-	@echo $(notdir $<)
-	@$(bin2o)
-
-#---------------------------------------------------------------------------------
-# Those rules link to ARM without LTO enabled for those objects only
-#---------------------------------------------------------------------------------
-%.niwram.o: %.niwram.cpp
-	@echo $(notdir $<)
-	$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.iwram.d $(CXXFLAGS) -fno-lto -marm -mlong-calls -c $< -o $@ $(ERROR_FILTER)
-
-#---------------------------------------------------------------------------------
-%.niwram.o: %.niwram.c
-	@echo $(notdir $<)
-	$(CC) -MMD -MP -MF $(DEPSDIR)/$*.iwram.d $(CFLAGS) -fno-lto -marm -mlong-calls -c $< -o $@ $(ERROR_FILTER)
-
-#---------------------------------------------------------------------------------
-# This rule is for sprites
-#---------------------------------------------------------------------------------
-$(SPR_FOLDER)/%.s $(SPR_FOLDER)/%.hpp: $(SPR_FOLDER)/%.png
-	@echo $(notdir $<)
-	$(TOOLS) sprite-export $< $(basename $@).s $(basename $@).hpp
-
-#---------------------------------------------------------------------------------
-# This rule is for tilesets
-#---------------------------------------------------------------------------------
-$(TST_FOLDER)/%.s $(TST_FOLDER)/%.hpp: $(TST_FOLDER)/%.png $(TST_FOLDER)/%.png.json
-	@echo $(notdir $<)
-	$(TOOLS) tileset-export $< $(basename $@).s $(basename $@).hpp
-
-#---------------------------------------------------------------------------------
-# This rule is for maps
-#---------------------------------------------------------------------------------
-$(MAP_FOLDER)/%.s $(MAP_FOLDER)/%_init.cpp $(MAP_FOLDER)/%.hpp: $(MAP_FOLDER)/%.tmx
-	@echo $(notdir $<)
-	$(eval MAP := $(basename $@))
-	$(eval MAP := $(MAP:_init=))
-	$(TOOLS) map-export $< $(MAP).s $(MAP)_init.cpp $(MAP).hpp
-
-#---------------------------------------------------------------------------------
-# This rule is for fonts
-#---------------------------------------------------------------------------------
-$(FNT_FOLDER)/%.s $(FNT_FOLDER)/%.hpp: $(FNT_FOLDER)/%.ttf $(FNT_FOLDER)/%.ttf.json
-	@echo $(notdir $<)
-	$(TOOLS) font-export $< $(basename $@).s $(basename $@).hpp
+bin/game.elf: $(OFILES)
+	@mkdir -p bin
+	@echo "Linking"
+	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) $(LIBRARIES) -o $(@:.gba=.elf)
 
 -include $(DFILES)
-#---------------------------------------------------------------------------------------
+
+build/tiled-maps/%.o: build/tiled-maps/%.cpp
+	@mkdir -p $(@D)
+	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
+
+build/tiled-maps/%.o: build/tiled-maps/%.s
+	@mkdir -p $(@D)
+	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
+
+build/data/%.o: build/data/%.s
+	@mkdir -p $(@D)
+	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
+
+build/data/sprites/%.s build/data/sprites/%.hpp: data/sprites/%.png tools/tools
+	@mkdir -p $(@D)
+	tools/tools sprite-export $(filter %.png,$^) $(basename $@).s $(basename $@).hpp
+
+build/data/tilesets/%.s build/data/tilesets/%.hpp: data/tilesets/%.png data/tilesets/%.png.json tools/tools
+	@mkdir -p $(@D)
+	tools/tools tileset-export $(filter %.png,$^) $(basename $@).s $(basename $@).hpp
+
+build/data/fonts/%.s build/data/fonts/%.hpp: data/fonts/%.ttf data/fonts/%.ttf.json tools/tools
+	@mkdir -p $(@D)
+	tools/tools font-export $(filter %.ttf,$^) $(basename $@).s $(basename $@).hpp
+
+build/tiled-maps/%.s build/tiled-maps/%.hpp build/tiled-maps/%_init.cpp: tiled-maps/%.tmx tools/tools
+	@mkdir -p $(@D)
+	$(eval MAP := $(basename $@))
+	$(eval MAP := $(MAP:_init=))
+	tools/tools map-export $(filter %.tmx,$^) $(MAP).s $(MAP)_init.cpp $(MAP).hpp
+
+# Source files
+build/%.niwram.o: %.niwram.cpp
+	@mkdir -p $(@D)
+	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
+
+build/%.niwram.o: %.niwram.c
+	@mkdir -p $(@D)
+	$(ARMCC) -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
+
+build/%.o: %.cpp
+	@mkdir -p $(@D)
+	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
+
+build/%.o: %.c
+	@mkdir -p $(@D)
+	$(ARMCC) -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+build/%.o: %.s
+	@mkdir -p $(@D)
+	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
+
+download-deps: $(GCC_DEST) tonc
+
+# Pull tonc
+tonc: tonc.zip
+	unzip -qq -n tonc.zip 'code/tonclib/*' -d tonclib
+
+tonc.zip:
+	wget $(TONC_URL) -O tonc.zip
+
+# Pull gcc
+$(GCC_DEST): gcc.tar.bz2
+ifeq (,$(GCC_URL))
+	$(error "This platform does not have a prebuilt arm-none-eabi; try to compile it from source and place it at $(GCC_DEST)")
 endif
-#---------------------------------------------------------------------------------------
+	tar xjf gcc.tar.bz2
+
+gcc.tar.bz2:
+	wget $(GCC_URL) -O gcc.tar.bz2
+
+# Tools
+tools/tools: build-tools
+
+build-tools:
+	$(MAKE) -C tools
+
+clean:
+	rm -rf bin build
+
+clean-everything:
+	$(MAKE) -C tools clean
+	rm -rf bin build
+
+clean-downloads:
+	$(MAKE) -C tools clean
+	rm -rf bin build tonc* gcc*

@@ -127,7 +127,7 @@ int mapExport(int argc, char **argv)
     auto [actors, occurences] = getActorsFromMap(map, actorTypes);
 
     // Now, we should start create the maps
-    auto name = deriveSpecialName(argv[3]);
+    auto name = deriveSpecialName(argv[2]);
     auto tsname = deriveSpecialName("data/" + tilesetFolder).mangledName;
 
     // Write the data

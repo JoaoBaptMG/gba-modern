@@ -6,6 +6,7 @@ int spriteExport(int argc, char **argv);
 int tilesetExport(int argc, char **argv);
 int mapExport(int argc, char **argv);
 int fontExport(int argc, char **argv);
+int romSanitize(int argc, char **argv);
 
 const std::map<std::string, Tool> toolList =
 {
@@ -13,6 +14,7 @@ const std::map<std::string, Tool> toolList =
     { "tileset-export", tilesetExport },
     { "map-export", mapExport },
     { "font-export", fontExport },
+    { "rom-sanitize", romSanitize }
 };
 
 int main(int argc, char **argv)

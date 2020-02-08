@@ -9,5 +9,7 @@ tools/obj
 tools/tools
 tools/pch.hpp.gch
 gba-modern.code-workspace
-gba-modern.*
-playground
+bin
+gba.map
+tonc*
+gcc*

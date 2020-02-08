@@ -50,7 +50,7 @@ int spriteExport(int argc, char **argv)
 
     // Parameters
     bool is8bpp = false;
-    State state = { deriveSpecialName(out), 1, 1, true };
+    State state = { deriveSpecialName(in), 1, 1, true };
     std::ifstream mdin(in + ".json");
     std::size_t maxColors = 16;
     bool preserveOrder = false;

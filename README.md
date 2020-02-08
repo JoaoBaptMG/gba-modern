@@ -4,7 +4,9 @@ The objective of this project is to aim to create a Game Boy Advance game using 
 
 Building
 ========
-This project consists in a toolkit written in C++17 to generate assembly files for the resources (tilesets, maps and sprites as of writing), and it also includes the source files of the game, written in C++2a. The included *Makefile* makes sure all the files are properly built. It requires that devkitARM is installed and a "traditional" `g++` which supports C++17. **It also requires the `freetype` library!** Once all of those are done, you can properly `make` the project, and the ROM will be available with the name _gba-modern.gba_.
+**Warning:** currently the project does not work in a Windows environment! Use WSL to build it on Windows.
+
+This project consists in a toolkit written in C++17 to generate assembly files for the resources (tilesets, maps and sprites as of writing), and it also includes the source files of the game, written in C++17. The included *Makefile* makes sure all the files are properly built. It requires a `g++` which supports C++17 (possibly every Linux distribution has one). **It also requires the `freetype` library!** Once all of those are done, you can properly `make` the project, and the ROM will be available in the path _bin/game.gba_.
 
 Editing the map files
 ---------------------

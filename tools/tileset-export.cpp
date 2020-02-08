@@ -79,7 +79,7 @@ int tilesetExport(int argc, char **argv)
     of << "@ " << out << std::endl;
     of << "@ " << std::endl << std::endl;
 
-    auto name = deriveSpecialName(out);
+    auto name = deriveSpecialName(in);
 
     if (is8bpp)
     {

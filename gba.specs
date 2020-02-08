@@ -1,0 +1,7 @@
+%rename link old_link
+
+*link:
+%(old_link) --gc-sections -T gba.ld%s
+
+*startfile:
+build/source/crt0%O%s crti%O%s crtbegin%O%s
