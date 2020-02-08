@@ -1,6 +1,6 @@
 gba-modern
 ==========
-The objective of this project is to aim to create a Game Boy Advance game using C++2a, while employing generators to the assets of the game.
+The objective of this project is to aim to create a Game Boy Advance game using C++17, while employing generators to the assets of the game.
 
 Building
 ========
