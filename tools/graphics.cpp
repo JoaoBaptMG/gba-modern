@@ -18,19 +18,16 @@ static auto reducePalette(std::array<Color, 256> &palette, std::size_t maxColors
 {
     // Use a map to count the number of distinct palette entries
     std::map<Color, std::size_t> colors;
-    for (Color c : palette) colors[c] = 0;
+
+    std::size_t index = 0;
+    for (Color c : palette)
+        if (!colors.count(c))
+            colors.emplace(c, index++);
 
     if (colors.size() > maxColors)
         throw std::invalid_argument("Image must have at most " + std::to_string(maxColors) + " distinct colors!");
 
-    std::size_t index = 1;
-    // Special case for the first color in the palette
-    for (auto& p : colors)
-        if (p.first != palette[0]) p.second = index++;
     actualColors = index;
-
-    // Don't modify anything if maxColors == actualColors
-    if (maxColors == actualColors) return increasingMap();
 
     std::array<std::size_t, 256> paletteMap;
     std::array<Color, 256> newPalette;
@@ -80,6 +77,9 @@ CharacterData8bpp convertPngToCharacters8bpp(std::string filename, std::size_t m
         auto b = state.info_png.color.palette[4*i+2];
         charData.palette[i] = makeColor(r, g, b);
     }
+
+    for (std::size_t i = size; i < 256; i++)
+        charData.palette[i] = charData.palette[0];
 
     // Try to reduce palette
     charData.actualColors = 256;
