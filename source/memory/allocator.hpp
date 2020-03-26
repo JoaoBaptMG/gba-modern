@@ -11,7 +11,7 @@
 
 namespace ewram
 {
-    void init() EWRAM_CODE;
+    void init();
 
     // Allocates a chunk of size sz in the EWRAM
     void* allocate(std::size_t sz) IWRAM_CODE;
