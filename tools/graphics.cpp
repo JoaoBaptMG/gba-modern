@@ -29,6 +29,9 @@ static auto reducePalette(std::array<Color, 256> &palette, std::size_t maxColors
         if (p.first != palette[0]) p.second = index++;
     actualColors = index;
 
+    // Don't modify anything if maxColors == actualColors
+    if (maxColors == actualColors) return increasingMap();
+
     std::array<std::size_t, 256> paletteMap;
     std::array<Color, 256> newPalette;
     newPalette.fill(palette.front());
