@@ -22,7 +22,7 @@ struct AnimatedPng final
         std::uint8_t tiles[DataCount];
         std::uint16_t palette[ColorCount];
         AnimationFrame animationFrames[FrameCount];
-        const AnimationPoses poses{};
+        AnimationPoses poses{};
     } png;
 };
 
@@ -34,6 +34,6 @@ struct AnimatedPng<DataCount, 0, FrameCount, AnimationPoses> final
         constexpr static const std::size_t NumAnimationFrames = FrameCount;
         std::uint8_t tiles[DataCount];
         AnimationFrame animationFrames[FrameCount];
-        const AnimationPoses poses{};
+        AnimationPoses poses{};
     } png;
 };
