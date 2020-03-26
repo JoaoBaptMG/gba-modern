@@ -6,7 +6,7 @@
 #include "GameScene.hpp"
 
 #include <algorithm>
-#include "graphics.hpp"
+#include "graphics/graphics.hpp"
 
 #include "tiled-maps/level1.hpp"
 

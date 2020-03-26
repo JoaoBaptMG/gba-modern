@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 #include "Hud.hpp"
 
-#include "graphics.hpp"
+#include "graphics/graphics.hpp"
 #include "GameScene.hpp"
 #include "Player.hpp"
 #include "data/sprites/hud.hpp"

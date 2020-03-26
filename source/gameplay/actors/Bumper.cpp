@@ -4,7 +4,7 @@
 // Actor that bumps through walls
 //--------------------------------------------------------------------------------
 #include "Bumper.hpp"
-#include "graphics.hpp"
+#include "graphics/graphics.hpp"
 
 #include "gameplay/GameScene.hpp"
 #include "gameplay/collision.hpp"

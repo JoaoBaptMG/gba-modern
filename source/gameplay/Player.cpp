@@ -7,7 +7,7 @@
 
 #include "data/sprites/player.hpp"
 #include "data/sprites/player-melee.hpp"
-#include "graphics.hpp"
+#include "graphics/graphics.hpp"
 #include "GameScene.hpp"
 #include "math/movetowards.hpp"
 #include <algorithm>

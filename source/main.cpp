@@ -8,7 +8,7 @@
 #include "scenes/IScene.hpp"
 #include "gameplay/GameScene.hpp"
 #include "scenes/TileTextTestScene.hpp"
-#include "graphics.hpp"
+#include "graphics/graphics.hpp"
 //#include <maxmod.h>
 
 //#include "soundbank.h"

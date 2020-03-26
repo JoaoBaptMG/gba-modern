@@ -8,8 +8,8 @@
 #include <tonc.h>
 #include <array>
 
-#include "graphics/OamManager.hpp"
-#include "graphics/SpriteSize.hpp"
+#include "OamManager.hpp"
+#include "SpriteSize.hpp"
 
 namespace graphics
 {

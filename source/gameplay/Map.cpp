@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 #include "Map.hpp"
 
-#include "graphics.hpp"
+#include "graphics/graphics.hpp"
 #include "GameScene.hpp"
 
 // constexpr utilities
