@@ -28,17 +28,13 @@ SRC_OFILES = $(addprefix build/, $(C_FILES:.c=.o) $(CPP_FILES:.cpp=.o) $(S_FILES
 
 # Resources
 SPR_FILES := $(call rwildcard, data/sprites/, *.png)
-TST_FILES := $(call rwildcard, data/tilesets/, *.png)
 FNT_FILES := $(call rwildcard, data/fonts/, *.ttf)
-MAP_FILES := $(wildcard tiled-maps/*.tmx)
 
 # Resource objects
-RSRC_OFILES := $(addprefix build/, $(SPR_FILES:.png=.o) $(TST_FILES:.png=.o)\
-	$(FNT_FILES:.ttf=.o) $(MAP_FILES:.tmx=.o) $(MAP_FILES:.tmx=_init.o)) 
+RSRC_OFILES := $(addprefix build/, $(SPR_FILES:.png=.o) $(FNT_FILES:.ttf=.o)) 
 
 # Resource headers
-RSRC_HFILES := $(addprefix build/, $(SPR_FILES:.png=.hpp) $(TST_FILES:.png=.hpp)\
-	$(FNT_FILES:.ttf=.hpp) $(MAP_FILES:.tmx=.hpp))
+RSRC_HFILES := $(addprefix build/, $(SPR_FILES:.png=.hpp) $(FNT_FILES:.ttf=.hpp))
 
 # Helper variables
 OFILES := $(RSRC_OFILES) $(SRC_OFILES)
@@ -104,14 +100,6 @@ bin/game.elf: $(OFILES)
 
 -include $(DFILES)
 
-build/tiled-maps/%.o: build/tiled-maps/%.cpp
-	@mkdir -p $(@D)
-	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
-
-build/tiled-maps/%.o: build/tiled-maps/%.s
-	@mkdir -p $(@D)
-	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
-
 build/data/%.o: build/data/%.s
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
@@ -120,19 +108,9 @@ build/data/sprites/%.s build/data/sprites/%.hpp: data/sprites/%.png tools/tools
 	@mkdir -p $(@D)
 	tools/tools sprite-export $(filter %.png,$^) $(basename $@).s $(basename $@).hpp
 
-build/data/tilesets/%.s build/data/tilesets/%.hpp: data/tilesets/%.png data/tilesets/%.png.json tools/tools
-	@mkdir -p $(@D)
-	tools/tools tileset-export $(filter %.png,$^) $(basename $@).s $(basename $@).hpp
-
 build/data/fonts/%.s build/data/fonts/%.hpp: data/fonts/%.ttf data/fonts/%.ttf.json tools/tools
 	@mkdir -p $(@D)
 	tools/tools font-export $(filter %.ttf,$^) $(basename $@).s $(basename $@).hpp
-
-build/tiled-maps/%.s build/tiled-maps/%.hpp build/tiled-maps/%_init.cpp: tiled-maps/%.tmx tools/tools
-	@mkdir -p $(@D)
-	$(eval MAP := $(basename $@))
-	$(eval MAP := $(MAP:_init=))
-	tools/tools map-export $(filter %.tmx,$^) $(MAP).s $(MAP)_init.cpp $(MAP).hpp
 
 # Source files
 build/%.niwram.o: %.niwram.cpp

@@ -11,8 +11,6 @@ int romSanitize(int argc, char **argv);
 const std::map<std::string, Tool> toolList =
 {
     { "sprite-export", spriteExport },
-    { "tileset-export", tilesetExport },
-    { "map-export", mapExport },
     { "font-export", fontExport },
     { "rom-sanitize", romSanitize }
 };
