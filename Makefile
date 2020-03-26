@@ -69,6 +69,7 @@ GCC_DEST := gcc-arm-none-eabi-9-2019-q4-major
 ARMCC := $(GCC_DEST)/bin/arm-none-eabi-gcc
 ARMCPP := $(GCC_DEST)/bin/arm-none-eabi-g++
 ARMOC := $(GCC_DEST)/bin/arm-none-eabi-objcopy
+ARMOD := $(GCC_DEST)/bin/arm-none-eabi-objdump
 
 # Get the right linker
 ifeq ($(strip $(CPPFILES)),)
@@ -98,7 +99,8 @@ bin/game.gba: download-deps build-tools tools/tools bin/game.elf
 bin/game.elf: $(OFILES)
 	@mkdir -p bin
 	@echo "Linking"
-	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) $(LIBRARIES) -o $(@:.gba=.elf)
+	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) $(LIBRARIES) -o $@
+	@$(ARMOD) -dCS $@ > $@.dump
 
 -include $(DFILES)
 
