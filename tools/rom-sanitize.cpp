@@ -47,6 +47,22 @@ inline static void writeFile(std::string str, const std::vector<char>& val)
     of.close();
 }
 
+inline static std::size_t nextPot(std::size_t n)
+{
+    if (n == 0) return 0;
+
+    n--;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    n |= n >> 32;
+    n++;
+
+    return n;
+}
+
 int romSanitize(int argc, char **argv)
 {
     if (argc < 5) throw std::out_of_range("rom-sanitize expects 3 arguments!");
@@ -96,6 +112,9 @@ int romSanitize(int argc, char **argv)
     *rptr++ = -chk;
 
     rptr = std::fill_n(rptr, 2, 0);
+
+    // Pad the ROM with zeros
+    rom.resize(nextPot(rom.size()));
 
     writeFile(out, rom);
 
