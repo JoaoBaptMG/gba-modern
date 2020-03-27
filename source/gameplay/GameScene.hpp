@@ -6,9 +6,9 @@
 #pragma once
 
 #include "scenes/IScene.hpp"
+#include "Player.hpp"
 
-constexpr u32 NumActors = 64;
-constexpr u32 ActorSize = 64;
+constexpr int HudSize = 16;
 
 class GameScene final : public IScene
 {
@@ -17,4 +17,6 @@ public:
     virtual void vblank() override;
     virtual void update() override;
     virtual ~GameScene() {}
+
+    Player player;
 };

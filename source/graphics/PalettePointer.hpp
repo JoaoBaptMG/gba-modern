@@ -14,8 +14,8 @@
 template <std::size_t N>
 class PaletteAllocator final : public Allocator<PaletteAllocator<N>>
 {
-    u16 palettes[N];
     const PALBANK* paletteData;
+    u16 palettes[N];
 
     // Allocate the palette data and move it in place
     void alloc()

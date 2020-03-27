@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 #include "GameScene.hpp"
 
-#include <algorithm>
+#include <tonc.h>
 #include "graphics/graphics.hpp"
 #include "colors.hpp"
 
@@ -14,8 +14,10 @@ GameScene::GameScene()
     // Set the display registers
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
 
-    // A very bright red color
-    pal_bg_mem[0] = colors::Red;
+    pal_bg_mem[0] = colors::DarkCyan;
+
+    // Initialize the player
+    player.init(PlayerWidth + 8, SCREEN_HEIGHT/2);
 }
 
 void GameScene::vblank()
@@ -25,5 +27,7 @@ void GameScene::vblank()
 
 void GameScene::update()
 {
-
+    // Update the player
+    player.update();
+    player.pushGraphics();
 }
