@@ -23,6 +23,7 @@ class Player final
 
     ObjectTilePointer playerPtr;
     SinglePalettePointer palPtr;
+    u16 health, maxHealth, invCounter;
 
 public:
     vec2<s32f8> pos;
@@ -31,4 +32,10 @@ public:
     void init(s32f8 x, s32f8 y);
     void update();
     void pushGraphics();
+
+    u16 getHealth() const { return health; }
+    u16 getMaxHealth() const { return maxHealth; }
+
+    void heal(int amount = 1);
+    void damage(int amount = 1);
 };

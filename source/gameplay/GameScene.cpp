@@ -18,11 +18,14 @@ GameScene::GameScene()
 
     // Initialize the player
     player.init(PlayerWidth + 8, SCREEN_HEIGHT/2);
+
+    // Initialize the hud
+    hud.init();
 }
 
 void GameScene::vblank()
 {
-    
+    hud.vblank();
 }
 
 void GameScene::update()
@@ -30,4 +33,7 @@ void GameScene::update()
     // Update the player
     player.update();
     player.pushGraphics();
+
+    // Update the HUD
+    hud.update();
 }

@@ -22,6 +22,8 @@ void Player::init(s32f8 x, s32f8 y)
     palPtr = SinglePalettePointer(palette);
 
     pos = vec2(x, y);
+
+    health = maxHealth = 5;
 }
 
 void Player::update()
@@ -38,6 +40,33 @@ void Player::pushGraphics()
     // Push the sprite
     auto dp = vec2<int>(pos) - PlayerSize/2;
     graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, playerPtr.getTileId(), palPtr.getPalette(), 0, PlayerPriority);
+}
+
+void Player::heal(int amount)
+{
+    if (amount == 0) return;
+    if (amount < 0) damage(-amount);
+    health += amount;
+    if (health > maxHealth)
+        health = maxHealth;
+}
+
+void Player::damage(int amount)
+{
+    if (amount == 0) return;
+    if (amount < 0) heal(-amount);
+
+    if (invCounter > 0) return;
+    if (health > amount)
+    {
+        health -= amount;
+        invCounter = 120;
+    }
+    else
+    {
+        // TODO: die
+        for (;;); // Just hang up
+    }
 }
 
 GameScene& Player::gameScene()

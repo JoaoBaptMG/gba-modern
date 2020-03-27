@@ -7,8 +7,9 @@
 
 #include "scenes/IScene.hpp"
 #include "Player.hpp"
+#include "Hud.hpp"
 
-constexpr int HudSize = 16;
+constexpr int HudSize = 24;
 
 class GameScene final : public IScene
 {
@@ -19,4 +20,5 @@ public:
     virtual ~GameScene() {}
 
     Player player;
+    Hud hud;
 };
