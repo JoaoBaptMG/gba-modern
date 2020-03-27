@@ -19,6 +19,8 @@ constexpr vec2 PlayerSize(PlayerWidth, PlayerHeight);
 
 class Player final
 {
+    GameScene& gameScene();
+
     ObjectTilePointer playerPtr;
     SinglePalettePointer palPtr;
 

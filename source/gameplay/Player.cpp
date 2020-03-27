@@ -39,3 +39,13 @@ void Player::pushGraphics()
     auto dp = vec2<int>(pos) - PlayerSize/2;
     graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, playerPtr.getTileId(), palPtr.getPalette(), 0, PlayerPriority);
 }
+
+GameScene& Player::gameScene()
+{
+    // Don't worry, I know what I'm doing
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+    return *reinterpret_cast<GameScene*>(
+        reinterpret_cast<std::byte*>(this) - offsetof(GameScene, player));
+#pragma GCC diagnostic pop
+}
