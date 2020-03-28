@@ -50,9 +50,10 @@ int main()
 		// assure that the important vblank routines only get called at the
 		// _next_ vblank
 		VBlankIntrWait();
-		graphics::update();
+		graphics::vblank();
 		scene.top()->vblank();
 
+		graphics::update();
 		key_poll();
 		//mmFrame();
 

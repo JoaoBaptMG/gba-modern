@@ -23,6 +23,10 @@ void Hud::init()
 
     // Transfer the palette
     memcpy32(&pal_bg_bank[15], data::sprites::hud.png.palette, sizeof(PALBANK)/sizeof(u32));
+
+    // Set the two graphic effects
+    clearAlpha = 0;
+    reloadAlpha = 8;
 }
 
 void Hud::vblank()
@@ -37,11 +41,16 @@ void Hud::vblank()
     for (; i < player.getMaxHealth(); i++)
         se_mem[31][TileBase+i] = SE_PALBANK(15) | 446;
     se_mem[31][TileBase+i] = 447;
+
+    // Reset the alpha blending
+    REG_BLDCNT = BLD_TOP(BLD_BACKDROP | BLD_OBJ | BLD_BG3 | BLD_BG2 | BLD_BG1) | BLD_BLACK;
 }
 
 void Hud::update()
 {
-    
+    // Add the two effects
+    graphics::hdma.addHdma16(HudSize, &clearAlpha, (void*)&REG_BLDY, 1);
+    graphics::hdma.addHdma16(SCREEN_HEIGHT - HudSize, &reloadAlpha, (void*)&REG_BLDY, 1);
 }
 
 GameScene& Hud::gameScene()

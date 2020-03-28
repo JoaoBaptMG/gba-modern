@@ -9,6 +9,7 @@
 #include <array>
 
 #include "OamManager.hpp"
+#include "HblankDma.hpp"
 #include "SpriteSize.hpp"
 
 namespace graphics
@@ -18,6 +19,9 @@ namespace graphics
 
     // Initialize the graphics module
     void init();
+
+    // Should be run at vblank
+    void vblank();
 
     // Updates the graphics module
     void update();
@@ -51,4 +55,7 @@ namespace graphics
 
     // The Oam manager
     extern OamManager oam;
+
+    // The HDMA manager
+    extern HblankDma hdma;
 }

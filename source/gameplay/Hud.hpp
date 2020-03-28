@@ -5,11 +5,15 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
+#include <tonc.h>
+
 class GameScene;
 
 class Hud final
 {
     GameScene &gameScene();
+
+    u16 clearAlpha, reloadAlpha;
 
 public:
     Hud() {}
