@@ -9,10 +9,9 @@
 #include "data/sprites/player.hpp"
 
 constexpr int PlayerPriority = 4;
+constexpr s32f8 PlayerSpeed = 2;
 
 static SinglePaletteAllocator palette EWRAM_BSS(data::sprites::player.png.palette);
-
-constexpr s32f8 PlayerSpeed = 2;
 
 void Player::init(s32f8 x, s32f8 y)
 {
