@@ -16,12 +16,12 @@ void HblankDma::vblank()
     // Transfer the first line
     *(DmaCopy*)(&REG_DMA3SAD) = copies[curFrame][0];
 
+    // First, disable DMA0
+    REG_DMA0CNT = 0;
+
     // Set up DMA0 to transfer for the next lines
     REG_DMA0SAD = (u32)&copies[curFrame][1];
     REG_DMA0DAD = (u32)&REG_DMA3SAD;
-
-    // First, disable DMA0 then reenable it
-    REG_DMA0CNT = 0;
     REG_DMA0CNT = 3 | DMA_DST_RELOAD | DMA_SRC_INC | DMA_REPEAT | DMA_32 | DMA_AT_HBLANK | DMA_ENABLE;
 }
 
