@@ -24,6 +24,7 @@ class Player final
     ObjectTilePointer playerPtr;
     SinglePalettePointer palPtr;
     u16 health, maxHealth, invCounter;
+    u16 shootCooldown;
 
 public:
     vec2<s32f8> pos;

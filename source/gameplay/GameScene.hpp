@@ -7,6 +7,7 @@
 
 #include "scenes/IScene.hpp"
 #include "Player.hpp"
+#include "PlayerProjectiles.hpp"
 #include "Hud.hpp"
 
 constexpr int HudSize = 16;
@@ -20,5 +21,6 @@ public:
     virtual ~GameScene() {}
 
     Player player;
+    PlayerProjectiles playerProjectiles;
     Hud hud;
 };

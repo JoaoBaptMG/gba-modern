@@ -19,6 +19,9 @@ GameScene::GameScene()
     // Initialize the player
     player.init(PlayerWidth + 8, SCREEN_HEIGHT/2);
 
+    // Initialize the projectile container
+    playerProjectiles.init();
+
     // Initialize the hud
     hud.init();
 }
@@ -30,10 +33,12 @@ void GameScene::vblank()
 
 void GameScene::update()
 {
-    // Update the player
+    // Update everything
     player.update();
-    player.pushGraphics();
-
-    // Update the HUD
+    playerProjectiles.update();
     hud.update();
+
+    // Push the graphics
+    player.pushGraphics();
+    playerProjectiles.pushGraphics();
 }
