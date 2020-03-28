@@ -13,6 +13,10 @@ void Hud::init()
     // Initialize BG0
     REG_BG0CNT = BG_CBB(3) | BG_SBB(31) | BG_REG_32x32;
 
+    // Move BG0 half a tile
+    REG_BG0HOFS = -4;
+    REG_BG0VOFS = -4;
+
     // Transfer the data to the end of the CBB
     constexpr auto DataSize = sizeof(data::sprites::hud.png.tiles);
     memcpy32(&tile_mem[3][448 - DataSize/sizeof(TILE)], data::sprites::hud.png.tiles, DataSize/sizeof(u32));
@@ -32,7 +36,7 @@ void Hud::init()
 void Hud::vblank()
 {
     // Set the tiles here
-    constexpr auto TileBase = 32*1 + 1;
+    constexpr auto TileBase = 0;
     const Player& player = gameScene().player;
 
     int i;

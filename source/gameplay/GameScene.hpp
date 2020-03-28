@@ -9,7 +9,7 @@
 #include "Player.hpp"
 #include "Hud.hpp"
 
-constexpr int HudSize = 24;
+constexpr int HudSize = 16;
 
 class GameScene final : public IScene
 {
