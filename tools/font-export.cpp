@@ -29,6 +29,15 @@ struct GlyphData
 
 GlyphData getGlyph(FT_Face face, int codepoint);
 
+struct GlyphBuffer
+{
+    std::vector<std::uint16_t> smallGlyphPool;
+    std::vector<std::uint32_t> largeGlyphPool;
+    std::vector<std::size_t> glyphIndices;
+};
+
+GlyphBuffer buildGlyphBuffer(const std::vector<GlyphData>& glyphs);
+
 int fontExport(int argc, char **argv)
 {
     if (argc < 5) throw std::out_of_range("sprite-export expects 3 arguments!");
@@ -76,6 +85,9 @@ int fontExport(int argc, char **argv)
         for (std::size_t i = v[0]; i < v[1]; i++)
             glyphs.push_back(getGlyph(face, i));
 
+    // Compute the glyph buffer
+    auto [smallGlyphs, largeGlyphs, glyphIndices] = buildGlyphBuffer(glyphs);
+
     // Compute the minimum vertical ascent of the font
     int minOfsY = 1000000000;
     for (const GlyphData& glyph : glyphs)
@@ -114,9 +126,10 @@ int fontExport(int argc, char **argv)
         of << "    .hidden fnt_" << name.fileName << "_glyphs" << std::endl;
         of << "fnt_" << name.fileName << "_glyphs:" << std::endl;
 
-        std::size_t accum = 0;
-        for (const auto& glyph : glyphs)
+        for (std::size_t i = 0; i < glyphs.size(); i++)
         {
+            const auto& glyph = glyphs[i];
+
             // Mount the word
             std::uint32_t wrd = std::uint8_t(glyph.data.size());
             wrd |= std::uint8_t(glyph.offsetX) << 8;
@@ -124,8 +137,8 @@ int fontExport(int argc, char **argv)
             wrd |= std::uint8_t(glyph.advanceX) << 24;
             wrd |= std::uint32_t(glyph.attr) << 31;
 
-            of << "    .word " << toHex(wrd, 8) << ", fnt_" << name.fileName << "_glyphdata+" << accum << std::endl;
-            accum += glyph.data.size() * (glyph.attr ? 4 : 2);
+            of << "    .word " << toHex(wrd, 8) << ", fnt_" << name.fileName << "_glyphdata+";
+            of << glyphIndices[i] << std::endl;
         }
         of << std::endl;
 
@@ -135,17 +148,23 @@ int fontExport(int argc, char **argv)
         of << "    .hidden fnt_" << name.fileName << "_glyphdata" << std::endl;
         of << "fnt_" << name.fileName << "_glyphdata:";
 
-        for (const auto& glyph : glyphs)
+        std::size_t index = 0;
+        for (std::uint16_t r : smallGlyphs)
         {
-            of << std::endl << "    @ new character";
-            std::size_t index = 0;
-            for (std::size_t r : glyph.data)
-            {
-                if (index % 8 == 0) of << std::endl << ((glyph.attr&1) ? "    .word " : "    .hword ");
-                else of << ", ";
-                of << toHex(r, (glyph.attr&1) ? 8 : 4);
-                index += 1 + (glyph.attr&1);
-            }
+            if (index % 8 == 0) of << std::endl << "    .hword ";
+            else of << ", ";
+            of << toHex(r, 4);
+            index++;
+        }
+
+        of << std::endl;
+        index = 0;
+        for (std::uint32_t r : largeGlyphs)
+        {
+            if (index % 4 == 0) of << std::endl << "    .word ";
+            else of << ", ";
+            of << toHex(r, 8);
+            index++;
         }
 
         of << std::endl << std::endl;
@@ -222,4 +241,30 @@ GlyphData getGlyph(FT_Face face, int codepoint)
     while (!glyphData.data.empty() && !glyphData.data.back()) glyphData.data.pop_back();
 
     return glyphData;
+}
+
+GlyphBuffer buildGlyphBuffer(const std::vector<GlyphData>& glyphs)
+{
+    // We are doing to do "dumb" glyph building here
+    GlyphBuffer glyphBuffer;
+
+    for (const auto& glyph : glyphs)
+    {
+        if (!(glyph.attr&1))
+        {
+            glyphBuffer.glyphIndices.push_back(sizeof(std::uint16_t) * glyphBuffer.smallGlyphPool.size());
+            glyphBuffer.smallGlyphPool.insert(glyphBuffer.smallGlyphPool.end(), glyph.data.begin(), glyph.data.end());
+        }
+        else
+        {
+            glyphBuffer.glyphIndices.push_back(sizeof(std::uint32_t) * glyphBuffer.largeGlyphPool.size());
+            glyphBuffer.largeGlyphPool.insert(glyphBuffer.largeGlyphPool.end(), glyph.data.begin(), glyph.data.end());
+        }
+    }
+
+    auto offset = sizeof(std::uint16_t) * glyphBuffer.smallGlyphPool.size();
+    for (std::size_t i = 0; i < glyphs.size(); i++)
+        if (glyphs[i].attr) glyphBuffer.glyphIndices[i] += offset;
+
+    return glyphBuffer;
 }
