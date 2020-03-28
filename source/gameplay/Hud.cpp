@@ -19,10 +19,10 @@ void Hud::init()
 
     // Transfer the data to the end of the CBB
     constexpr auto DataSize = sizeof(data::sprites::hud.png.tiles);
-    memcpy32(&tile_mem[3][448 - DataSize/sizeof(TILE)], data::sprites::hud.png.tiles, DataSize/sizeof(u32));
+    memcpy32(&tile_mem[3][384 - DataSize/sizeof(TILE)], data::sprites::hud.png.tiles, DataSize/sizeof(u32));
 
     // And set the SBB to the correct place
-    constexpr auto TileId = SE_PALBANK(15) | (448 - DataSize/sizeof(TILE) - 1);
+    constexpr auto TileId = SE_PALBANK(15) | (384 - DataSize/sizeof(TILE) - 1);
     memset32(&se_mem[31], TileId | (TileId << 16), sizeof(SCREENBLOCK)/sizeof(u32));
 
     // Transfer the palette
@@ -30,7 +30,7 @@ void Hud::init()
 
     // Set the two graphic effects
     clearAlpha = 0;
-    reloadAlpha = 8;
+    reloadAlpha = 12;
 }
 
 void Hud::vblank()
@@ -41,10 +41,10 @@ void Hud::vblank()
 
     int i;
     for (i = 0; i < player.getHealth(); i++)
-        se_mem[31][TileBase+i] = SE_PALBANK(15) | 445;
+        se_mem[31][TileBase+i] = SE_PALBANK(15) | 381;
     for (; i < player.getMaxHealth(); i++)
-        se_mem[31][TileBase+i] = SE_PALBANK(15) | 446;
-    se_mem[31][TileBase+i] = 447;
+        se_mem[31][TileBase+i] = SE_PALBANK(15) | 382;
+    se_mem[31][TileBase+i] = SE_PALBANK(15) | 383;
 
     // Reset the alpha blending
     REG_BLDCNT = BLD_TOP(BLD_BACKDROP | BLD_OBJ | BLD_BG3 | BLD_BG2 | BLD_BG1) | BLD_BLACK;

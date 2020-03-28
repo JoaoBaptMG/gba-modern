@@ -9,6 +9,7 @@
 #include "Player.hpp"
 #include "PlayerProjectiles.hpp"
 #include "Hud.hpp"
+#include "Background.hpp"
 
 constexpr int HudSize = 16;
 
@@ -23,4 +24,5 @@ public:
     Player player;
     PlayerProjectiles playerProjectiles;
     Hud hud;
+    Background background;
 };

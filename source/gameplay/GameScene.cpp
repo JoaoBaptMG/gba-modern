@@ -9,12 +9,18 @@
 #include "graphics/graphics.hpp"
 #include "colors.hpp"
 
+#include "data/backgrounds/level1.hpp"
+
 GameScene::GameScene()
 {
     // Set the display registers
-    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
+    REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D;
 
     pal_bg_mem[0] = colors::DarkCyan;
+
+    // Initialize the background
+    background.init();
+    background.load(data::backgrounds::level1.png);
 
     // Initialize the player
     player.init(PlayerWidth + 8, SCREEN_HEIGHT/2);
@@ -29,6 +35,7 @@ GameScene::GameScene()
 void GameScene::vblank()
 {
     hud.vblank();
+    background.vblank();
 }
 
 void GameScene::update()
@@ -37,6 +44,8 @@ void GameScene::update()
     player.update();
     playerProjectiles.update();
     hud.update();
+
+    background.offset.x += s32f8(0.5);
 
     // Push the graphics
     player.pushGraphics();

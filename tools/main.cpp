@@ -3,14 +3,14 @@
 using Tool = int(*)(int argc, char **argv);
 
 int spriteExport(int argc, char **argv);
-int tilesetExport(int argc, char **argv);
-int mapExport(int argc, char **argv);
+int backgroundExport(int argc, char **argv);
 int fontExport(int argc, char **argv);
 int romSanitize(int argc, char **argv);
 
 const std::map<std::string, Tool> toolList =
 {
     { "sprite-export", spriteExport },
+    { "background-export", backgroundExport },
     { "font-export", fontExport },
     { "rom-sanitize", romSanitize }
 };
