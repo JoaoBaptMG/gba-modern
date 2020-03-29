@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <algorithm>
+#include <utility>
 #include "type_traits.hpp"
 
 template <typename Base, std::size_t Size>
@@ -36,7 +37,7 @@ public:
         static_assert(!is_virtual_base_of_v<Base, Derived>,
             "PointerInterfaceContainer does not work properly with virtual base classes!");
 
-        reinterpret_cast<Base*>(storage)->~Base();
+        std::launder(reinterpret_cast<Base*>(storage))->~Base();
         new (storage) Derived(std::forward<Ts>(ts)...);
     }
 
@@ -46,14 +47,14 @@ public:
     PointerInterfaceContainer(PointerInterfaceContainer&&) = delete;
     PointerInterfaceContainer &operator=(PointerInterfaceContainer) = delete;
 
-    Base* operator->() { return reinterpret_cast<Base*>(storage); }
-    const Base* operator->() const { return reinterpret_cast<const Base*>(storage); }
+    Base* operator->() { return std::launder(reinterpret_cast<Base*>(storage)); }
+    const Base* operator->() const { return std::launder(reinterpret_cast<const Base*>(storage)); }
 
-    Base& operator*() { return *reinterpret_cast<Base*>(storage); }
-    const Base& operator*() const { return *reinterpret_cast<const Base*>(storage); }
+    Base& operator*() { return *std::launder(reinterpret_cast<Base*>(storage)); }
+    const Base& operator*() const { return *std::launder(reinterpret_cast<const Base*>(storage)); }
 
     ~PointerInterfaceContainer()
     {
-        reinterpret_cast<Base*>(storage)->~Base();
+        std::launder(reinterpret_cast<Base*>(storage))->~Base();
     }
 };

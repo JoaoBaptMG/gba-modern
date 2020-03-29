@@ -67,7 +67,7 @@ public:
 
     void removeIndex(std::size_t i)
     { 
-        reinterpret_cast<Base*>(cells[i].storage)->~Base();
+        std::launder(reinterpret_cast<Base*>(cells[i].storage))->~Base();
         cells[i].nextFreeCell = firstFreeCell;
         firstFreeCell = cells+i;
         usedCells.reset(i);
@@ -88,7 +88,7 @@ public:
     {
         for (std::size_t i = 0; i < Count; i++)
             if (usedCells.test(i))
-                reinterpret_cast<Base*>(cells[i].storage)->~Base();
+                std::launder(reinterpret_cast<Base*>(cells[i].storage))->~Base();
     }
 
 private:
@@ -121,8 +121,8 @@ private:
             : list(list), id(id) {}
 
         // Dereference (iterator)
-        reference operator*() { return *reinterpret_cast<pointer>(list->cells[id].storage); }
-        const reference operator*() const { return *reinterpret_cast<const pointer>(list->cells[id].storage); }
+        reference operator*() { return *std::launder(reinterpret_cast<pointer>(list->cells[id].storage)); }
+        const reference operator*() const { return *std::launder(reinterpret_cast<const pointer>(list->cells[id].storage)); }
 
         // Member dereference (input iterator)
         pointer operator->() { return &operator*(); }
