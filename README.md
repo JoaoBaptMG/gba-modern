@@ -8,10 +8,10 @@ Building
 
 This project consists in a toolkit written in C++17 to generate assembly files for the resources (tilesets, maps and sprites as of writing), and it also includes the source files of the game, written in C++17. The included *Makefile* makes sure all the files are properly built. It requires a `g++` which supports C++17 (possibly every Linux distribution has one). **It also requires the `freetype` library!** Once all of those are done, you can properly `make` the project, and the ROM will be available in the path _bin/game.gba_.
 
-Images
-======
+Screenshots and Videos
+======================
 
-
+[Working video](videos/video-0.mp4)
 
 Contributing
 ============
