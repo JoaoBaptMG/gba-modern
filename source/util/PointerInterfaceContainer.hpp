@@ -13,7 +13,7 @@
 #include "type_traits.hpp"
 
 template <typename Base, std::size_t Size>
-class alignas(max_align_t) PointerInterfaceContainer
+class PointerInterfaceContainer
 {
     static_assert(std::is_default_constructible_v<Base>,
         "PointerInterfaceContainer will not work without a Base that is default constructible!");
@@ -22,7 +22,7 @@ class alignas(max_align_t) PointerInterfaceContainer
     static_assert(sizeof(Base) >= sizeof(std::intptr_t),
         "PointerInterfaceContainer must not be smaller than a pointer");
 
-    std::byte storage[Size];
+    alignas(void*) std::byte storage[Size];
 
 public:
     PointerInterfaceContainer() { new (storage) Base(); }

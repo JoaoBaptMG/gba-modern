@@ -23,7 +23,7 @@ class alignas(max_align_t) UnorderedPolymorphicList final
 
     union Cell
     {
-        std::byte storage[CellSize];
+        alignas(void*) std::byte storage[CellSize];
         Cell* nextFreeCell;
     };
 

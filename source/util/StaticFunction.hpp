@@ -11,6 +11,16 @@
 #include <new>
 #include <type_traits>
 
+// Utility function
+namespace detail
+{
+    template <typename T>
+    inline static T* as(void* ptr) { return std::launder(reinterpret_cast<T*>(ptr)); }
+
+    template <typename T>
+    inline static const T* as(const void* ptr) { return std::launder(reinterpret_cast<const T*>(ptr)); }
+}
+
 template <std::size_t Size, typename Sig>
 class StaticFunction;
 
@@ -20,29 +30,28 @@ template <std::size_t Size, typename R, typename... Args>
 class StaticFunction<Size, R(Args...)>
 {
     // Define the important function pointers here
-    typedef R(*Invoker)(std::byte*, Args...);
-    typedef void(*Replacer)(std::byte*, const std::byte*);
+    using Invoker = R(*)(std::byte*, Args...);
+    using Replacer = void(*)(std::byte*, const std::byte*);
 
     template <typename Functor>
     static R genericInvoker(std::byte* f, Args... args)
     {
         static_assert(std::is_invocable_r_v<R, Functor, Args...>,
             "Functor must be callable with the appropriate signature!");
-        return std::invoke(*std::launder(reinterpret_cast<Functor*>(f)),
-            std::forward<Args>(args)...);
+        return std::invoke(*detail::as<Functor>(f), std::forward<Args>(args)...);
     }
 
     template <typename Functor>
     static void genericReplacer(std::byte* newObj, const std::byte* oldObj)
     {
-        if (oldObj) new (newObj) Functor(*std::launder(reinterpret_cast<const Functor*>(oldObj)));
-        else std::launder(reinterpret_cast<Functor*>(newObj))->~Functor();
+        if (oldObj) new (newObj) Functor(*detail::as<Functor>(oldObj));
+        else detail::as<Functor>(newObj)->~Functor();
     }
 
     static R fptrInvoker(std::byte* f, Args... args)
     {
         auto fptr = reinterpret_cast<R(**)(Args...)>(f);
-        return (*fptr)(args...);
+        return (*fptr)(std::forward<Args>(args)...);
     }
 
     static void fptrReplacer(std::byte* newObj, const std::byte* oldObj)
@@ -56,7 +65,7 @@ class StaticFunction<Size, R(Args...)>
     Replacer replacer;
 
     // And finally the storage
-    std::byte storage[Size];
+    alignas(void*) std::byte storage[Size];
 
 public:
     // A trivial default constructor

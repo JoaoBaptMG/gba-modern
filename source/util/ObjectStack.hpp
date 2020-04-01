@@ -13,7 +13,7 @@
 #include <algorithm>
 
 template <typename Base, std::size_t TotalSize, std::size_t MaxNumObjects>
-class alignas(max_align_t) ObjectStack final
+class ObjectStack final
 {
     static_assert(std::has_virtual_destructor_v<Base>,
         "ObjectStack will not work properly without virtual destructors!");
@@ -21,7 +21,7 @@ class alignas(max_align_t) ObjectStack final
     struct Object final { Base* ptr; std::size_t size; };
 
     // Storage for the data
-    std::byte _storage[TotalSize];
+    alignas(void*) std::byte _storage[TotalSize];
 
     // Size, description of objects and "next free pointer"
     std::size_t _numObjects;
