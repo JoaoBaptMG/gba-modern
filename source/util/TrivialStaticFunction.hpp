@@ -80,11 +80,14 @@ public:
             "The required function object must be trivially destructible!");
 
         // Copy the functor
-        if constexpr (sizeof(Functor) % 4 == 0 && alignof(Functor) % 4 == 0)
-            memcpy32(storage, &f, sizeof(Functor)/sizeof(u32));
-        else if constexpr (sizeof(Functor) % 2 == 0 && alignof(Functor) % 2 == 0)
-            memcpy16(storage, &f, sizeof(Functor)/sizeof(u16));
-        else memcpy(storage, &f, sizeof(Functor));
+        if constexpr (sizeof(Functor) > 0)
+        {
+            if constexpr (sizeof(Functor) % 4 == 0 && alignof(Functor) % 4 == 0)
+                memcpy32(storage, &f, sizeof(Functor)/sizeof(u32));
+            else if constexpr (sizeof(Functor) % 2 == 0 && alignof(Functor) % 2 == 0)
+                memcpy16(storage, &f, sizeof(Functor)/sizeof(u16));
+            else memcpy(storage, &f, sizeof(Functor));
+        }
     }
 
     // Copy constructor
@@ -122,11 +125,14 @@ public:
 
         // Copy the functor
         invoker = genericInvoker<Functor>;
-        if constexpr (sizeof(Functor) % 4 == 0 && alignof(Functor) % 4 == 0)
-            memcpy32(storage, &f, sizeof(Functor)/sizeof(u32));
-        else if constexpr (sizeof(Functor) % 2 == 0 && alignof(Functor) % 2 == 0)
-            memcpy16(storage, &f, sizeof(Functor)/sizeof(u16));
-        else memcpy(storage, &f, sizeof(Functor));
+        if constexpr (sizeof(Functor) > 0)
+        {
+            if constexpr (sizeof(Functor) % 4 == 0 && alignof(Functor) % 4 == 0)
+                memcpy32(storage, &f, sizeof(Functor)/sizeof(u32));
+            else if constexpr (sizeof(Functor) % 2 == 0 && alignof(Functor) % 2 == 0)
+                memcpy16(storage, &f, sizeof(Functor)/sizeof(u16));
+            else memcpy(storage, &f, sizeof(Functor));
+        }
         return *this;
     }
 
