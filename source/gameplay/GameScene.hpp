@@ -8,8 +8,11 @@
 #include "scenes/IScene.hpp"
 #include "Player.hpp"
 #include "PlayerProjectiles.hpp"
+#include "Level.hpp"
 #include "Hud.hpp"
 #include "Background.hpp"
+#include "util/UnorderedList.hpp"
+#include "Enemy.hpp"
 
 constexpr int HudSize = 16;
 
@@ -23,6 +26,10 @@ public:
 
     Player player;
     PlayerProjectiles playerProjectiles;
+    Level level;
     Hud hud;
     Background background;
+
+    UnorderedList<Enemy, 64> enemies;
+    inline void addEnemy(EnemyScript script) { enemies.add(script); }
 };

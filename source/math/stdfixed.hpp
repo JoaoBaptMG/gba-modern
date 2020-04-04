@@ -37,3 +37,6 @@ using s32f16 = s32f<16>;
 using s64f8 = s64f<8>;
 using s64f16 = s64f<16>;
 using s64f32 = s64f<32>;
+
+// Used for position of the player, enemies and projectiles
+using s16f7 = s16f<7>;
