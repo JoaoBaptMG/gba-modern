@@ -38,6 +38,9 @@ void Player::update()
     pos.x = std::clamp<s32f8>(pos.x, PlayerWidth/2, SCREEN_WIDTH - PlayerWidth/2);
     pos.y = std::clamp<s32f8>(pos.y, HudSize + PlayerHeight/2, SCREEN_HEIGHT - HudSize - PlayerHeight/2);
 
+    // Decrease the invcounter
+    if (invCounter > 0) invCounter--;
+
     // If there is not a cooldown, allow the player to shoot
     if (shootCooldown > 0) shootCooldown--;
     else
@@ -55,7 +58,9 @@ void Player::pushGraphics()
 {
     // Push the sprite
     auto dp = vec2<int>(pos) - PlayerSize/2;
-    graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, playerPtr.getTileId(), palPtr.getPalette(), 0, PlayerPriority);
+
+    if (!(invCounter & 1))
+        graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, playerPtr.getTileId(), palPtr.getPalette(), 0, PlayerPriority);
 }
 
 void Player::heal(int amount)
