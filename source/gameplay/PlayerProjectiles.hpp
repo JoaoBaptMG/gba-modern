@@ -22,7 +22,7 @@ class PlayerProjectiles final
 
     struct Projectile
     {
-        vec2<s32f8> pos, vel;
+        vec2<s16f7> pos, vel;
     };
 
     Projectile projectiles[MaxProjectiles];
