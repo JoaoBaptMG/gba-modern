@@ -10,10 +10,15 @@ extern "C"
 {
 #endif
 
+// An opaque pointer (but deeply, nothing more than the sp of that context)
 typedef struct __context* context_t;
 
+// The context entry point, for beginning questions
 typedef context_t (*context_entry_point_t)(context_t ctx, void* arg);
 
+// Gives up ownership and switches to another context. This function will
+// "wake up" the other context and, when this context is switched to again,
+// the function will return with a new context
 context_t context_switch(context_t ctx) IWRAM_CODE;
 
 // All stack pointers must be aligned by 8 bytes
