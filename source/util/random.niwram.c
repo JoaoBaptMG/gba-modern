@@ -5,8 +5,9 @@
 //--------------------------------------------------------------------------------
 #include "random.h"
 
-unsigned long long randomState IWRAM_DATA;
-u32 random()
+unsigned long long randomState;
+
+u32 IWRAM_CODE random()
 {
     randomState ^= randomState >> 11;
     randomState ^= randomState << 31;

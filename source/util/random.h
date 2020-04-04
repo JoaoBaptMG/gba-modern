@@ -7,5 +7,16 @@
 
 #include <tonc.h>
 
-extern unsigned long long randomState IWRAM_DATA;
-u32 random() IWRAM_CODE;
+// It's correct, don't worry
+extern unsigned long long randomState;
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    u32 IWRAM_CODE random();
+
+#ifdef __cplusplus
+}
+#endif
