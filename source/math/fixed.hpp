@@ -175,6 +175,22 @@ public:
         value /= v;
         return *this;
     }
+
+    template <typename U>
+    constexpr std::enable_if_t<std::is_integral_v<U>, fixed&>
+    operator<<=(U v)
+    {
+        value <<= v;
+        return *this;
+    }
+
+    template <typename U>
+    constexpr std::enable_if_t<std::is_integral_v<U>, fixed&>
+    operator>>=(U v)
+    {
+        value >>= v;
+        return *this;
+    }
 };
 
 template <typename Ty1, std::size_t N, typename Ty2, std::size_t M>
@@ -462,6 +478,22 @@ constexpr std::enable_if_t<std::is_integral_v<U>, fixed<Ty, N>>
 operator/(fixed<Ty, N> a, U b)
 {
     auto v = a.raw() / b;
+    return fixed<decltype(v), N>(direct, v);
+}
+
+template <typename Ty, std::size_t N, typename U>
+constexpr std::enable_if_t<std::is_integral_v<U>, fixed<Ty, N>>
+operator<<(fixed<Ty, N> a, U b)
+{
+    auto v = a.raw() << b;
+    return fixed<decltype(v), N>(direct, v);
+}
+
+template <typename Ty, std::size_t N, typename U>
+constexpr std::enable_if_t<std::is_integral_v<U>, fixed<Ty, N>>
+operator>>(fixed<Ty, N> a, U b)
+{
+    auto v = a.raw() >> b;
     return fixed<decltype(v), N>(direct, v);
 }
 
