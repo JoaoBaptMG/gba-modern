@@ -36,7 +36,7 @@ public:
     void update();
     void pushGraphics();
 
-    void add(vec2<s32f8> pos, vec2<s32f8> vel)
+    void add(vec2<s16f7> pos, vec2<s16f7> vel)
     {
         ASSERT(numProjectiles < MaxProjectiles);
         projectiles[numProjectiles++] = { pos, vel };

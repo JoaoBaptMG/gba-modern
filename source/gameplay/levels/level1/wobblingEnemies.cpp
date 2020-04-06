@@ -16,7 +16,7 @@ static SinglePaletteAllocator palette EWRAM_BSS(data::sprites::wobbling_enemy.pn
 void wobblingEnemyCommon(Enemy& enemy)
 {
     enemy.vel.x = -1;
-    enemy.size = vec2<s16f7>(16, 16);
+    enemy.size = vec2<s32f16>(16, 16);
     enemy.sprSize = SpriteSize::s16x16_4bpp;
     enemy.imagePtr = StillImagePointer(image);
     enemy.palPtr = SinglePalettePointer(palette);
@@ -26,16 +26,16 @@ void wobblingEnemyUp(Enemy& enemy)
 {
     wobblingEnemyCommon(enemy);
 
-    enemy.pos = vec2<s16f7>(SCREEN_WIDTH + 16, 32);
+    enemy.pos = vec2<s32f16>(SCREEN_WIDTH + 16, 32);
     HANDLE_TERM(enemy.waitForFrames(90));
-    enemy.acc.y = -s16f7::epsilon;
+    enemy.acc.y = -(s32f16::epsilon << 9);
 }
 
 void wobblingEnemyDown(Enemy& enemy)
 {
     wobblingEnemyCommon(enemy);
 
-    enemy.pos = vec2<s16f7>(SCREEN_WIDTH + 16, SCREEN_HEIGHT - 32);
+    enemy.pos = vec2<s32f16>(SCREEN_WIDTH + 16, SCREEN_HEIGHT - 32);
     HANDLE_TERM(enemy.waitForFrames(90));
-    enemy.acc.y = s16f7::epsilon;
+    enemy.acc.y = s32f16::epsilon << 9;
 }

@@ -15,6 +15,7 @@
 #include "Enemy.hpp"
 
 constexpr int HudSize = 16;
+constexpr int NumEnemies = 64;
 
 class GameScene final : public IScene
 {
@@ -30,6 +31,6 @@ public:
     Hud hud;
     Background background;
 
-    UnorderedList<Enemy, 64> enemies;
+    UnorderedList<Enemy, NumEnemies> enemies;
     inline void addEnemy(EnemyScript script) { enemies.add(script); }
 };

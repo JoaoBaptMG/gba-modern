@@ -23,15 +23,19 @@ enum class ScriptTermination { Terminate, Continue };
 class Enemy final
 {
 public:
-    vec2<s16f7> pos, vel, acc, size;
-    SpriteSize sprSize;
-    StillImagePointer imagePtr;
-    SinglePalettePointer palPtr;
+    vec2<s32f16> pos, vel, acc, size;    // 32 bytes
 
 private:
-    context_t curCtx;
-    STACKPTR std::byte ctxStack[512];
-    u16 scriptWaitTime;
+    u16 scriptWaitTime;                  // 2 bytes
+
+public:
+    SpriteSize sprSize;                  // 2 bytes
+    StillImagePointer imagePtr;          // 4 bytes
+    SinglePalettePointer palPtr;         // 4 bytes
+
+private:
+    context_t curCtx;                    // 4 bytes
+    STACKPTR std::byte ctxStack[512];    // 512 bytes
 
 public:
     Enemy(EnemyScript script);
@@ -43,9 +47,9 @@ public:
     [[nodiscard]] ScriptTermination waitForFrames(u16 frames);
 
     // Utility functions
-    [[nodiscard]] inline ScriptTermination moveTo(vec2<s16f7> dest, u16 frames)
+    [[nodiscard]] inline ScriptTermination moveTo(vec2<s32f16> dest, u16 frames)
     {
-        acc = vec2<s16f7>();
+        acc = vec2<s32f16>();
         vel = dest / frames;
         if (waitForFrames(frames) == ScriptTermination::Terminate)
             return ScriptTermination::Terminate;

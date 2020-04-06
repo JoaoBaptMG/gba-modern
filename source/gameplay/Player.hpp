@@ -27,10 +27,10 @@ class Player final
     u16 shootCooldown;
 
 public:
-    vec2<s16f7> pos;
+    vec2<s32f16> pos;
 
     Player() {}
-    void init(s16f7 x, s16f7 y);
+    void init(s32f16 x, s32f16 y);
     void update();
     void pushGraphics();
 
