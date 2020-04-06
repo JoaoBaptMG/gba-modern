@@ -24,3 +24,9 @@ fixed<signed32<Ty>, (N+1)/2> sqrt(fixed<Ty, N> v)
     if constexpr (N%2 == 0) return fixed<signed32<Ty>, (N+1)/2>(direct, isqrt64(v.raw()));
     if constexpr (N%2 != 0) return fixed<signed32<Ty>, (N+1)/2>(direct, isqrt64(v.raw() << 1));
 }
+
+template <typename Ty, std::size_t N>
+fixed<Ty, 32-N> reciprocal(fixed<Ty, N> v)
+{
+    return fixed<Ty, 32-N>(direct, reciprocal(signed32<Ty>(v.raw())));
+}

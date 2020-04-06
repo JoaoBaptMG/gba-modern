@@ -6,7 +6,7 @@
 #pragma once
 
 #include "math/stdfixed.hpp"
-#include "math/sqrtfixed.hpp"
+#include "math/fixedmath.hpp"
 #include "math/vec2.hpp"
 #include "util/type_traits.hpp"
 
