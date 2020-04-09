@@ -16,7 +16,7 @@ class Enemy;
 class GameScene;
 
 // The script that controls the enemy
-using EnemyScript = void(*)(Enemy&);
+using EnemyScript = void(*)(Enemy&, GameScene&);
 enum class ScriptTermination { Terminate, Continue };
 #define HANDLE_TERM(expr) do { if ((expr) == ScriptTermination::Terminate) return; } while (false)
 
@@ -38,7 +38,7 @@ private:
     STACKPTR std::byte ctxStack[512];    // 512 bytes
 
 public:
-    Enemy(EnemyScript script);
+    Enemy(EnemyScript script, GameScene* gameScene);
     void update();
     void pushGraphics();
     ~Enemy();

@@ -8,7 +8,7 @@
 #include "GameScene.hpp"
 #include "data/sprites/player.hpp"
 
-constexpr int PlayerPriority = 4;
+constexpr int PlayerPriority = 8;
 constexpr s32f16 PlayerSpeed = 1.0; // pixels per frame
 constexpr int CommonCooldown = 8; // frames
 constexpr s16f7 ProjectileSpeed = 4.0; // pixels per frame

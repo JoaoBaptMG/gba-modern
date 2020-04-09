@@ -10,6 +10,7 @@ constexpr auto EnemyPriority = 6;
 struct EnemyArgs
 {
     Enemy* enemy;
+    GameScene* gameScene;
     EnemyScript scriptToRun;
 };
 
@@ -18,15 +19,15 @@ context_t enemyContext(context_t ctx, void* arg)
     auto args = *reinterpret_cast<EnemyArgs*>(arg);
 
     args.enemy->curCtx = ctx;
-    args.scriptToRun(*args.enemy);
+    args.scriptToRun(*args.enemy, *args.gameScene);
 
     return args.enemy->curCtx;
 }
 
-Enemy::Enemy(EnemyScript script) : pos(), vel(), acc(), size()
+Enemy::Enemy(EnemyScript script, GameScene* gameScene) : pos(), vel(), acc(), size()
 {
     // Build the args
-    EnemyArgs args{this, script};
+    EnemyArgs args{this, gameScene, script};
 
     // Create the new context and run it for a first time
     curCtx = context_new(ctxStack+sizeof(ctxStack), enemyContext, &args);

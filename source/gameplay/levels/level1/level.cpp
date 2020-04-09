@@ -12,12 +12,12 @@ void level1(LevelContext& level)
 {
     level.levelLength(30);
 
-    level.at(5);
-    for (int i = 0; i < 6; i++)
+    level.at(4);
+    for (int i = 0; i < 7; i++)
     {
         level.gameScene().addEnemy(wobblingEnemyUp);
         level.gameScene().addEnemy(wobblingEnemyDown);
-        level.after(0.8);
+        level.after(0.5);
     }
 
     level.atEndOfLevel();

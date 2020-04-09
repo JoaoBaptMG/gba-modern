@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------
-// PlayerProjectiles.hpp
+// EnemyProjectiles.hpp
 //--------------------------------------------------------------------------------
-// The class that manages the player projectiles
+// The class that manages the projectiles fired by the enemies
 //--------------------------------------------------------------------------------
 #pragma once
 
@@ -14,9 +14,9 @@
 
 class GameScene;
 
-class PlayerProjectiles final
+class EnemyProjectiles final
 {
-    constexpr static u32 MaxProjectiles = 64;
+    constexpr static u32 MaxProjectiles = 128;
 
     GameScene& gameScene();
 

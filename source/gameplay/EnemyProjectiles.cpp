@@ -1,20 +1,20 @@
 //--------------------------------------------------------------------------------
-// PlayerProjectiles.cpp
+// EnemyProjectiles.cpp
 //--------------------------------------------------------------------------------
-// The class that manages the player projectiles
+// The class that manages the projectiles fired by the enemies
 //--------------------------------------------------------------------------------
-#include "PlayerProjectiles.hpp"
+#include "EnemyProjectiles.hpp"
 
 #include "GameScene.hpp"
 #include <algorithm>
 
-#include "data/sprites/player-projectiles.hpp"
+#include "data/sprites/enemy-projectiles.hpp"
 
-constexpr int PlayerProjectilePriority = 7;
+constexpr int EnemyProjectilePriority = 5;
 
-static SinglePaletteAllocator palette EWRAM_BSS(data::sprites::player_projectiles.png.palette);
+static SinglePaletteAllocator palette EWRAM_BSS(data::sprites::enemy_projectiles.png.palette);
 
-void PlayerProjectiles::init()
+void EnemyProjectiles::init()
 {
     // Set everything to zero
     memset32(projectiles, 0, sizeof(projectiles)/sizeof(u32));
@@ -22,12 +22,12 @@ void PlayerProjectiles::init()
 
     // Initialize the graphics pointers
     tilePtr = ObjectTilePointer(SpriteSize::s8x8_4bpp);
-    tilePtr.setData(data::sprites::player_projectiles.png.tiles);
+    tilePtr.setData(data::sprites::enemy_projectiles.png.tiles);
 
     palPtr = SinglePalettePointer(palette);
 }
 
-void PlayerProjectiles::update()
+void EnemyProjectiles::update()
 {
     // Update each position and check if it's offscreen
     for (u32 i = 0; i < numProjectiles;)
@@ -42,23 +42,23 @@ void PlayerProjectiles::update()
     }
 }
 
-void PlayerProjectiles::pushGraphics()
+void EnemyProjectiles::pushGraphics()
 {
     // Add a sprite for each projectile on screen
     for (u32 i = 0; i < numProjectiles; i++)
     {
         auto dp = vec2<int>(projectiles[i].pos) - vec2(4, 4);
         graphics::oam.pushRegular(dp, SpriteSize::s8x8_4bpp, tilePtr.getTileId(),
-            palPtr.getPalette(), 0, PlayerProjectilePriority);
+            palPtr.getPalette(), 0, EnemyProjectilePriority);
     }
 }
 
-GameScene& PlayerProjectiles::gameScene()
+GameScene& EnemyProjectiles::gameScene()
 {
     // Don't worry, I know what I'm doing
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
     return *reinterpret_cast<GameScene*>(
-        reinterpret_cast<std::byte*>(this) - offsetof(GameScene, playerProjectiles));
+        reinterpret_cast<std::byte*>(this) - offsetof(GameScene, enemyProjectiles));
 #pragma GCC diagnostic pop
 }

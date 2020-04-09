@@ -7,5 +7,5 @@
 
 #include "gameplay/Enemy.hpp"
 
-void wobblingEnemyUp(Enemy& enemy);
-void wobblingEnemyDown(Enemy& enemy);
+void wobblingEnemyUp(Enemy& enemy, GameScene& gameScene);
+void wobblingEnemyDown(Enemy& enemy, GameScene& gameScene);

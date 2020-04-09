@@ -66,6 +66,7 @@ udiv32pastzero:
 
     @ here, r0 = num << (r3 + 1), r1 = num >> (32-r3), r2 = -denom
     @ now, the real iteration part
+    .global divIteration
 divIteration:
     .rept 32
     adcs    r1, r2, r1, lsl #1

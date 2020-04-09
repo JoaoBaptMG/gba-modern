@@ -27,8 +27,9 @@ GameScene::GameScene()
     // Initialize the player
     player.init(PlayerWidth + 8, SCREEN_HEIGHT/2);
 
-    // Initialize the projectile container
+    // Initialize the projectile containers
     playerProjectiles.init();
+    enemyProjectiles.init();
 
     // Initialize the hud
     hud.init();
@@ -59,6 +60,8 @@ void GameScene::update()
             enemies.remove(&enemy);
     }
 
+    enemyProjectiles.update();
+
     background.offset.x += s32f8(0.5);
 
     // Push the graphics
@@ -67,4 +70,6 @@ void GameScene::update()
 
     for (auto& enemy : enemies)
         enemy.pushGraphics();
+
+    enemyProjectiles.pushGraphics();
 }

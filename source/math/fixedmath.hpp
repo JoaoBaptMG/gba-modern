@@ -28,5 +28,5 @@ fixed<signed32<Ty>, (N+1)/2> sqrt(fixed<Ty, N> v)
 template <typename Ty, std::size_t N>
 fixed<Ty, 32-N> reciprocal(fixed<Ty, N> v)
 {
-    return fixed<Ty, 32-N>(direct, reciprocal(signed32<Ty>(v.raw())));
+    return fixed<Ty, 32-N>(direct, reciprocal32(signed32<Ty>(v.raw())));
 }

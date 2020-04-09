@@ -49,6 +49,12 @@ public:
     constexpr std::size_t exp() const { return N; }
     constexpr Ty raw() const { return value; }
 
+    template<typename Ty2>
+    constexpr fixed<Ty2, N> with_type() const { return fixed<Ty2, N>(*this); }
+
+    template<std::size_t M>
+    constexpr fixed<Ty, M> with_exp() const { return fixed<Ty, M>(*this); }
+
     template <typename U, typename = std::enable_if_t<std::is_integral_v<U>>>
     constexpr operator U() const { return value >> N; }
 
