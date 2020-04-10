@@ -17,6 +17,7 @@
 
 #include "math/fixed.hpp"
 #include "memory/allocator.hpp"
+#include "text/mGBADebugging.hpp"
 
 SceneStack scene EWRAM_BSS;
 bool popScene EWRAM_BSS;
@@ -41,7 +42,8 @@ int main()
 	scene.push<GameScene>();
 
 	//mmStart(MOD_RPGLAST, MM_PLAY_ONCE);
-	
+	bool enableDebugging = mgba::enable();
+
 	while (1)
 	{
 		// The effect of this loop is the following: if the program manages
@@ -63,6 +65,14 @@ int main()
 		{
 			scene.pop();
 			popScene = false;
+		}
+
+		if (enableDebugging)
+		{
+			auto vcount = REG_VCOUNT;
+			if (vcount >= 160) vcount -= 160;
+			else vcount += 228 - 160;
+			mgba::log(mgba::Log::Debug, "estimated CPU load: ", 100 * vcount / 228, "%");
 		}
 	}
 }
