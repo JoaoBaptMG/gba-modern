@@ -29,17 +29,7 @@ void EnemyProjectiles::init()
 
 void EnemyProjectiles::update()
 {
-    // Update each position and check if it's offscreen
-    for (u32 i = 0; i < numProjectiles;)
-    {
-        projectiles[i].pos += projectiles[i].vel;
-
-        // If it's offscreen, swap with a final projectile
-        auto pos = projectiles[i].pos;
-        if (pos.x < -2 || pos.x > SCREEN_WIDTH + 2 || pos.y < -2 || pos.y > SCREEN_HEIGHT + 2)
-            std::swap(projectiles[i], projectiles[--numProjectiles]);
-        else i++;
-    }
+    numProjectiles = updateProjectiles(projectiles, numProjectiles);
 }
 
 void EnemyProjectiles::pushGraphics()
@@ -48,7 +38,8 @@ void EnemyProjectiles::pushGraphics()
     for (u32 i = 0; i < numProjectiles; i++)
     {
         auto dp = vec2<int>(projectiles[i].pos) - vec2(4, 4);
-        graphics::oam.pushRegular(dp, SpriteSize::s8x8_4bpp, tilePtr.getTileId(),
+        graphics::oam.pushRegular(dp, SpriteSize::s8x8_4bpp,
+            tilePtr.getTileId() + projectiles[i].tileId,
             palPtr.getPalette(), 0, EnemyProjectilePriority);
     }
 }

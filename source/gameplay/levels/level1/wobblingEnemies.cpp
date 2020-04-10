@@ -44,7 +44,7 @@ void shootTowardsPlayer(Enemy& enemy, GameScene& gameScene)
     for (auto vec : { diff, diffp, diffm })
     {
         auto vel = vec * WobblingProjectileSpeed;
-        gameScene.enemyProjectiles.add(vec2<s16f7>(enemy.pos), vec2<s16f7>(vel));
+        gameScene.enemyProjectiles.add(vec2<s16f7>(enemy.pos), vec2<s16f7>(vel), vec2<s16f7>(2, 2), 0);
     }
 }
 

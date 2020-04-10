@@ -7,8 +7,7 @@
 
 #include <tonc.h>
 
-#include "math/stdfixed.hpp"
-#include "math/vec2.hpp"
+#include "Projectile.hpp"
 #include "graphics/ObjectTilePointer.hpp"
 #include "graphics/PalettePointer.hpp"
 
@@ -19,11 +18,6 @@ class PlayerProjectiles final
     constexpr static u32 MaxProjectiles = 64;
 
     GameScene& gameScene();
-
-    struct Projectile
-    {
-        vec2<s16f7> pos, vel;
-    };
 
     Projectile projectiles[MaxProjectiles];
     u32 numProjectiles;
@@ -36,10 +30,10 @@ public:
     void update();
     void pushGraphics();
 
-    void add(vec2<s16f7> pos, vec2<s16f7> vel)
+    void add(vec2<s16f7> pos, vec2<s16f7> vel, vec2<s16f7> size, u16 tileId)
     {
         ASSERT(numProjectiles < MaxProjectiles);
-        projectiles[numProjectiles++] = { pos, vel };
+        projectiles[numProjectiles++] = { pos, vel, size, tileId };
     }
 };
 

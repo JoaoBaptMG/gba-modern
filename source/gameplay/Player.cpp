@@ -12,6 +12,7 @@ constexpr int PlayerPriority = 8;
 constexpr s32f16 PlayerSpeed = 1.0; // pixels per frame
 constexpr int CommonCooldown = 8; // frames
 constexpr s16f7 ProjectileSpeed = 4.0; // pixels per frame
+constexpr s16f7 ProjectileSize = 4.0; // pixels
 
 static SinglePaletteAllocator palette EWRAM_BSS(data::sprites::player.png.palette);
 
@@ -49,7 +50,7 @@ void Player::update()
         {
             shootCooldown = CommonCooldown;
             gameScene().playerProjectiles.add(vec2<s16f7>(pos) + vec2(PlayerWidth/2, 0),
-                vec2<s16f7>(ProjectileSpeed, 0));
+                vec2<s16f7>(ProjectileSpeed, 0), vec2<s16f7>(ProjectileSize, ProjectileSize), 0);
         }
     }
 }
