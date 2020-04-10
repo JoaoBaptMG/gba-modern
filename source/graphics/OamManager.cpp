@@ -5,7 +5,6 @@
 // as sorting them
 //--------------------------------------------------------------------------------
 #include "OamManager.hpp"
-#include <algorithm>
 
 //#define DISABLE_OAM_SORTING
 void OamManager::pushAttrs(u16 attr0, u16 attr1, u16 attr2, u16 prio)
@@ -18,12 +17,13 @@ void OamManager::pushAttrs(u16 attr0, u16 attr1, u16 attr2, u16 prio)
     objCount++;
 }
 
+void sortOAM(OBJ_ATTR* shadowOAM, u32 objCount) IWRAM_CODE;
+
 void OamManager::copyToOAM()
 {
 #ifndef DISABLE_OAM_SORTING
     // Sort the objects
-    std::sort(shadowOAM, shadowOAM + objCount,
-        [](const OBJ_ATTR& o1, const OBJ_ATTR& o2) { return o1.fill < o2.fill; });
+    sortOAM(shadowOAM, objCount);
 #endif
 
     // Copy the shadow OAM
