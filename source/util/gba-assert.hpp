@@ -10,5 +10,6 @@
 #ifdef DISABLE_ASSERT
 #define ASSERT(expr)
 #else
-#define ASSERT(expr) if (expr); else asm volatile("mov r11, r11" ::: "r11")
+#include "text/mGBADebugging.hpp"
+#define ASSERT(expr) if (expr); else { mgba::log(mgba::Log::Fatal, "Assertion failed: " #expr " at " __FILE__); for (;;); }
 #endif
