@@ -21,13 +21,13 @@ constexpr std::size_t numCharsInTempBuffer()
 }
 
 template <std::size_t N>
-class StringBuilder final
+class InplaceStringBuilder
 {
     std::size_t cur;
-    char buffer[N+1];
+    char* buffer;
 
 public:
-    StringBuilder() : cur(0) { buffer[0] = 0; }
+    InplaceStringBuilder(char* buffer) : cur(0), buffer(buffer) { buffer[0] = 0; }
 
     void append(char ch)
     {
@@ -90,4 +90,13 @@ public:
         buffer[cur] = 0;
         return buffer;
     }
+};
+
+template <std::size_t N>
+class StringBuilder final : public InplaceStringBuilder<N>
+{
+    char inBuffer[N+1];
+
+public:
+    StringBuilder() : InplaceStringBuilder<N>(inBuffer) {}
 };
