@@ -118,11 +118,11 @@ build/data/fonts/%.s build/data/fonts/%.hpp: data/fonts/%.ttf data/fonts/%.ttf.j
 	tools/tools font-export $(filter %.ttf,$^) $(basename $@).s $(basename $@).hpp
 
 # Source files
-build/%.niwram.o: %.niwram.cpp
+build/%.iwram.o: %.iwram.cpp
 	@mkdir -p $(@D)
 	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
 
-build/%.niwram.o: %.niwram.c
+build/%.iwram.o: %.iwram.c
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
 
