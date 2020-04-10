@@ -8,6 +8,8 @@
 #include "GameScene.hpp"
 #include <algorithm>
 
+#include "text/mGBADebugging.hpp"
+
 #include "data/sprites/player-projectiles.hpp"
 
 constexpr int PlayerProjectilePriority = 7;
@@ -29,7 +31,8 @@ void PlayerProjectiles::init()
 
 void PlayerProjectiles::update()
 {
-    numProjectiles = updateProjectiles(projectiles, numProjectiles);
+    numProjectiles = updateProjectiles(numProjectiles, projectiles);
+    sortProjectiles(numProjectiles, projectiles);
 }
 
 void PlayerProjectiles::pushGraphics()

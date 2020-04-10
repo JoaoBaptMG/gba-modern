@@ -29,7 +29,7 @@ void EnemyProjectiles::init()
 
 void EnemyProjectiles::update()
 {
-    numProjectiles = updateProjectiles(projectiles, numProjectiles);
+    numProjectiles = updateProjectiles(numProjectiles, projectiles);
 
     auto ppos = gameScene().player.pos;
     for (u32 i = 0; i < numProjectiles; i++)

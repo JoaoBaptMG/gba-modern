@@ -38,11 +38,11 @@ int main()
 	// Force a VBlank
 	REG_DISPCNT = DCNT_BLANK;
 
+	bool enableDebugging = mgba::enable();
 	// Change to the main game scene
 	scene.push<GameScene>();
 
 	//mmStart(MOD_RPGLAST, MM_PLAY_ONCE);
-	bool enableDebugging = mgba::enable();
 
 	while (1)
 	{
