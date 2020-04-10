@@ -35,7 +35,6 @@ public:
 
 private:
     context_t curCtx;                    // 4 bytes
-    STACKPTR std::byte ctxStack[512];    // 512 bytes
 
 public:
     Enemy(EnemyScript script, GameScene* gameScene);

@@ -4,6 +4,14 @@
 // "Holder" class for every enemy in the game
 //--------------------------------------------------------------------------------
 #include "Enemy.hpp"
+#include "util/UnorderedList.hpp"
+#include "GameScene.hpp"
+#include <array>
+#include <cstddef>
+
+// Provide outside storage for the stack
+using Stack = std::array<std::byte, 256>;
+STACKPTR UnorderedList<Stack, NumEnemies> allStacks EWRAM_BSS;
 
 constexpr auto EnemyPriority = 6;
 
@@ -29,8 +37,11 @@ Enemy::Enemy(EnemyScript script, GameScene* gameScene) : pos(), vel(), acc(), si
     // Build the args
     EnemyArgs args{this, gameScene, script};
 
+    // Allocate a new stack
+    auto& newStack = allStacks.add();
+
     // Create the new context and run it for a first time
-    curCtx = context_new(ctxStack+sizeof(ctxStack), enemyContext, &args);
+    curCtx = context_new(newStack.data()+newStack.size(), enemyContext, &args);
     curCtx = context_switch(curCtx);
 }
 
