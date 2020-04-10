@@ -30,6 +30,20 @@ void EnemyProjectiles::init()
 void EnemyProjectiles::update()
 {
     numProjectiles = updateProjectiles(projectiles, numProjectiles);
+
+    auto ppos = gameScene().player.pos;
+    for (u32 i = 0; i < numProjectiles; i++)
+    {
+        auto pos = projectiles[i].pos;
+        auto size = projectiles[i].size;
+
+        if (pos.x + size.x/2 < ppos.x - PlayerTargetSize/2 || pos.x - size.x/2 >= ppos.x + PlayerTargetSize/2
+            || pos.y + size.y/2 < ppos.y - PlayerTargetSize/2 || pos.y - size.y/2 >= ppos.y + PlayerTargetSize/2)
+            continue;
+        
+        gameScene().player.damage();
+        return;
+    }
 }
 
 void EnemyProjectiles::pushGraphics()
