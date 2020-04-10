@@ -72,7 +72,9 @@ int main()
 			auto vcount = REG_VCOUNT;
 			if (vcount >= 160) vcount -= 160;
 			else vcount += 228 - 160;
-			mgba::log(mgba::Log::Debug, "estimated CPU load: ", 100 * vcount / 228, "%");
+
+			// 25/57 is equal to 100/228 aka 100% * vcount * number of lines in a frame
+			mgba::log(mgba::Log::Debug, "estimated CPU load: ", 25 * vcount / 57, "%");
 		}
 	}
 }
