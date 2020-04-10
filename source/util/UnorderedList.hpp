@@ -38,7 +38,7 @@ public:
     }
 
     template <typename... Ts>
-    void add(Ts&&... ts)
+    T& add(Ts&&... ts)
     {
         ASSERT(firstFreeCell);
 
@@ -46,6 +46,8 @@ public:
         firstFreeCell = cell->nextFreeCell;
         new (&cell->obj) T(std::forward<Ts>(ts)...);
         usedCells.set(cell - cells);
+
+        return cell->obj;
     }
 
     std::size_t indexOf(T* obj) // figure out a way of removing UB
