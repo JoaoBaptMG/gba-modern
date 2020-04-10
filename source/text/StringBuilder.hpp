@@ -43,20 +43,6 @@ public:
         }
     }
 
-    template <std::size_t M>
-    void append(const char str[M])
-    {
-        std::size_t tsize = std::min(N-cur, M-1);
-        std::size_t words = tsize/sizeof(u32);
-        std::size_t bytes = words*sizeof(u32);
-
-        if (words > 0) memcpy32(buffer+cur, str, words);
-        tsize -= bytes;
-        cur += bytes;
-
-        while (tsize--) buffer[cur++] = str[bytes++];
-    }
-
     template <typename T>
     constexpr std::enable_if_t<std::is_unsigned_v<T>>
     append(T v)
@@ -78,6 +64,13 @@ public:
         append(std::make_unsigned_t<T>(v));
     }
 
+    template <std::size_t M>
+    void append(const InplaceStringBuilder<M>& sb2)
+    {
+        for (std::size_t i = 0; i < sb2.cur && cur < N; i++, cur++)
+            buffer[cur] = sb2.buffer[i];
+    }
+
     template <typename... Ts>
     std::enable_if_t<sizeof...(Ts) != 0>
     append(Ts&&... vs)
@@ -95,7 +88,7 @@ public:
 template <std::size_t N>
 class StringBuilder final : public InplaceStringBuilder<N>
 {
-    char inBuffer[N+1];
+    alignas(void*) char inBuffer[N+1];
 
 public:
     StringBuilder() : InplaceStringBuilder<N>(inBuffer) {}
