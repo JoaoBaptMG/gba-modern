@@ -14,6 +14,7 @@
 #include "util/UnorderedList.hpp"
 #include "Enemy.hpp"
 #include "EnemyProjectiles.hpp"
+#include "Explosions.hpp"
 
 constexpr int HudSize = 16;
 constexpr int NumEnemies = 64;
@@ -32,6 +33,7 @@ public:
     Hud hud;
     Background background;
     EnemyProjectiles enemyProjectiles;
+    Explosions explosions;
 
     UnorderedList<Enemy, NumEnemies> enemies;
     inline void addEnemy(EnemyScript script) { enemies.add(script, this); }

@@ -48,13 +48,20 @@ void Player::update()
     {
         if (key_held(KEY_A))
         {
+            constexpr s32f16 Cos5 = 0.99619469809;
+            constexpr s32f16 Sin5 = 0.08715574274;
+
             shootCooldown = CommonCooldown;
             gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2, pos.y),
                 vec2<s16f7>(ProjectileSpeed, 0), vec2<s16f7>(ProjectileSize, ProjectileSize), 0);
-            gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2 - 4, pos.y - 6),
-                vec2<s16f7>(ProjectileSpeed, 0), vec2<s16f7>(ProjectileSize, ProjectileSize), 0);
+            
             gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2 - 4, pos.y + 6),
-                vec2<s16f7>(ProjectileSpeed, 0), vec2<s16f7>(ProjectileSize, ProjectileSize), 0);
+                vec2<s16f7>(Cos5 * ProjectileSpeed, Sin5 * ProjectileSpeed),
+                vec2<s16f7>(ProjectileSize, ProjectileSize), 0);
+            
+            gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2 - 4, pos.y - 6),
+                vec2<s16f7>(Cos5 * ProjectileSpeed, -Sin5 * ProjectileSpeed),
+                vec2<s16f7>(ProjectileSize, ProjectileSize), 0);
         }
     }
 }

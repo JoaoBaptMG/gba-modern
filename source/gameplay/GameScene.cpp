@@ -31,6 +31,9 @@ GameScene::GameScene()
     playerProjectiles.init();
     enemyProjectiles.init();
 
+    // Initialize the explosion container
+    explosions.init();
+
     // Initialize the hud
     hud.init();
 
@@ -61,6 +64,7 @@ void GameScene::update()
     }
 
     enemyProjectiles.update();
+    explosions.update();
 
     background.offset.x += s32f8(0.5);
 
@@ -72,4 +76,5 @@ void GameScene::update()
         enemy.pushGraphics();
 
     enemyProjectiles.pushGraphics();
+    explosions.pushGraphics();
 }

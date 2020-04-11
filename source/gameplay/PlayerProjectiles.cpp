@@ -48,7 +48,10 @@ void PlayerProjectiles::update()
             if (diffsq < sumr*sumr)
             {
                 if (enemy.damage())
+                {
+                    gameScene().explosions.addSmallExplosion(epos);
                     gameScene().enemies.remove(&enemy);
+                }
                 projectiles[i].tileId = graphics::NoTile;
                 break;
             }
