@@ -33,6 +33,30 @@ void PlayerProjectiles::update()
 {
     numProjectiles = updateProjectiles(numProjectiles, projectiles);
     sortProjectiles(numProjectiles, projectiles);
+
+    for (auto& enemy : gameScene().enemies)
+    {
+        auto epos = vec2<s16f7>(enemy.pos);
+        auto eradius = s16f7(enemy.size.x)/2;
+
+        for (u32 i = 0; i < numProjectiles; i++)
+        {
+            if (projectiles[i].tileId == graphics::NoTile) continue;
+
+            auto diffsq = (epos - projectiles[i].pos).lensq();
+            auto sumr = eradius + projectiles[i].size.x/2;
+            if (diffsq < sumr*sumr)
+            {
+                if (enemy.damage())
+                    gameScene().enemies.remove(&enemy);
+                projectiles[i].tileId = graphics::NoTile;
+                break;
+            }
+        }
+    }
+
+    numProjectiles = std::remove_if(projectiles, projectiles+numProjectiles,
+        [](const Projectile& proj) { return proj.tileId == graphics::NoTile; }) - projectiles;
 }
 
 void PlayerProjectiles::pushGraphics()

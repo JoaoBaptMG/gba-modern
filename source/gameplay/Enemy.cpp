@@ -57,13 +57,17 @@ void Enemy::update()
     // Simple integration
     pos += vel;
     vel += acc;
+
+    // Update the invCounter
+    if (invCounter > 0) invCounter--;
 }
 
 void Enemy::pushGraphics()
 {
-    // Push the sprite
+    // Push the sprite, but only if the invCounter is not active
     auto dp = vec2<int>(pos) - size/2;
-    graphics::oam.pushRegular(dp, sprSize, imagePtr.getTileId(), palPtr.getPalette(), 0, EnemyPriority);
+    if (!invCounter)
+        graphics::oam.pushRegular(dp, sprSize, imagePtr.getTileId(), palPtr.getPalette(), 0, EnemyPriority);
 }
 
 ScriptTermination Enemy::waitForFrames(u16 frames)
@@ -72,6 +76,19 @@ ScriptTermination Enemy::waitForFrames(u16 frames)
     curCtx = context_switch(curCtx);
     return scriptWaitTime == -1 ? ScriptTermination::Terminate
         : ScriptTermination::Continue;
+}
+
+bool Enemy::damage(int amount)
+{
+    if (amount == 0) return false;
+
+    if (health > amount)
+    {
+        health -= amount;
+        invCounter = 2;
+        return false;
+    }
+    else return true;
 }
 
 Enemy::~Enemy()

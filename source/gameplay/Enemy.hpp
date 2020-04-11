@@ -25,16 +25,16 @@ class Enemy final
 public:
     vec2<s32f16> pos, vel, acc, size;    // 32 bytes
 
-private:
-    u16 scriptWaitTime;                  // 2 bytes
-
 public:
+    u16 health;
     SpriteSize sprSize;                  // 2 bytes
     StillImagePointer imagePtr;          // 4 bytes
     SinglePalettePointer palPtr;         // 4 bytes
 
 private:
     context_t curCtx;                    // 4 bytes
+    u16 scriptWaitTime;                  // 2 bytes
+    u16 invCounter;                      // 2 bytes
 
 public:
     Enemy(EnemyScript script, GameScene* gameScene);
@@ -64,6 +64,8 @@ public:
         return pos.x < -size.x/2 || pos.x > SCREEN_WIDTH + size.x/2 ||
             pos.y < -size.y/2 || pos.y > SCREEN_HEIGHT + size.y/2;
     }
+
+    bool damage(int amount = 1);
 
     friend context_t enemyContext(context_t ctx, void* arg);
 };

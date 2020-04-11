@@ -23,6 +23,7 @@ void wobblingEnemyCommon(Enemy& enemy)
     enemy.sprSize = SpriteSize::s16x16_4bpp;
     enemy.imagePtr = StillImagePointer(image);
     enemy.palPtr = SinglePalettePointer(palette);
+    enemy.health = 3;
 }
 
 constexpr s16f7 WobblingProjectileSpeed = 3;
