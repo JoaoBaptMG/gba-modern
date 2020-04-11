@@ -12,7 +12,7 @@
 void Background::init()
 {
     // Set BG1 as our background
-    REG_BG1CNT = BG_CBB(0) | BG_SBB(30) | BG_REG_32x32;
+    REG_BG1CNT = BG_CBB(0) | BG_SBB(30) | BG_REG_32x32 | BG_PRIO(1);
 
     offset = vec2<s32f8>();
 }

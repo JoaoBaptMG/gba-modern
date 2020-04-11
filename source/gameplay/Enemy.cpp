@@ -67,7 +67,7 @@ void Enemy::pushGraphics()
     // Push the sprite, but only if the invCounter is not active
     auto dp = vec2<int>(pos) - size/2;
     if (!invCounter)
-        graphics::oam.pushRegular(dp, sprSize, imagePtr.getTileId(), palPtr.getPalette(), 0, EnemyPriority);
+        graphics::oam.pushRegular(dp, sprSize, imagePtr.getTileId(), palPtr.getPalette(), 1, EnemyPriority);
 }
 
 ScriptTermination Enemy::waitForFrames(u16 frames)

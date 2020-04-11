@@ -66,15 +66,6 @@ void Player::update()
     }
 }
 
-void Player::pushGraphics()
-{
-    // Push the sprite
-    auto dp = vec2<int>(pos) - PlayerSize/2;
-
-    if (!(invCounter & 1))
-        graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, playerPtr.getTileId(), palPtr.getPalette(), 0, PlayerPriority);
-}
-
 void Player::heal(int amount)
 {
     if (amount == 0) return;
@@ -100,6 +91,15 @@ void Player::damage(int amount)
         // TODO: die
         for (;;); // Just hang up
     }
+}
+
+void Player::pushGraphics()
+{
+    // Push the sprite
+    auto dp = vec2<int>(pos) - PlayerSize/2;
+
+    if (!(invCounter & 1))
+        graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, playerPtr.getTileId(), palPtr.getPalette(), 1, PlayerPriority);
 }
 
 GameScene& Player::gameScene()

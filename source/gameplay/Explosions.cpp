@@ -48,6 +48,6 @@ void Explosions::pushGraphics()
         auto frame = explosions[i].counter / FramesPerFrame;
         graphics::oam.pushRegular(pos, SpriteSize::s16x16_4bpp,
             smallExplosion[frame].getTileId(),
-            smallPtr.getPalette(), 0, ExplosionPriority);
+            smallPtr.getPalette(), 1, ExplosionPriority);
     }
 }

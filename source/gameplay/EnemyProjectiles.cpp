@@ -53,7 +53,7 @@ void EnemyProjectiles::pushGraphics()
         auto dp = vec2<int>(projectiles[i].pos) - vec2(4, 4);
         graphics::oam.pushRegular(dp, SpriteSize::s8x8_4bpp,
             tilePtr.getTileId() + projectiles[i].tileId,
-            palPtr.getPalette(), 0, EnemyProjectilePriority);
+            palPtr.getPalette(), 1, EnemyProjectilePriority);
     }
 }
 
