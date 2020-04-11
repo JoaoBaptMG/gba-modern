@@ -52,8 +52,8 @@ void wobblingEnemyDown(Enemy& enemy, GameScene& gameScene)
 
 constexpr s16f7 WobblingProjectileSpeed = 3;
 
-constexpr s32f<10> Cos30 = 0.86602540378;
-constexpr s32f<10> Sin30 = 0.5;
+constexpr s32f<10> Cos15 = 0.9659258262890682867497431997289;
+constexpr s32f<10> Sin15 = 0.25881904510252076234889883762405;
 
 void shootTowardsPlayer(Enemy& enemy, GameScene& gameScene)
 {
@@ -63,8 +63,8 @@ void shootTowardsPlayer(Enemy& enemy, GameScene& gameScene)
     auto recdist = reciprocal(sqrt(distsq)).with_exp<8>();
     diff *= recdist;
 
-    auto diffp = vec2<s32f16>(diff.x * Cos30 + diff.y * Sin30, -diff.x * Sin30 + diff.y * Cos30);
-    auto diffm = vec2<s32f16>(diff.x * Cos30 - diff.y * Sin30, diff.x * Sin30 + diff.y * Cos30);
+    auto diffp = vec2<s32f16>(diff.x * Cos15 + diff.y * Sin15, -diff.x * Sin15 + diff.y * Cos15);
+    auto diffm = vec2<s32f16>(diff.x * Cos15 - diff.y * Sin15, diff.x * Sin15 + diff.y * Cos15);
 
     for (auto vec : { diff, diffp, diffm })
     {
