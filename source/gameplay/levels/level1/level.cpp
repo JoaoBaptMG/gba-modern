@@ -17,7 +17,7 @@ void level1(LevelContext& level)
     {
         level.gameScene().addEnemy(wobblingEnemyUp);
         level.gameScene().addEnemy(wobblingEnemyDown);
-        level.after(0.5);
+        level.after(1.0 / 3.0);
     }
 
     level.atEndOfLevel();

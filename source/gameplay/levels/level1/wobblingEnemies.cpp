@@ -16,14 +16,38 @@
 static StillImageAllocator image EWRAM_BSS(data::sprites::wobbling_enemy.png.tiles, SpriteSize::s16x16_4bpp);
 static SinglePaletteAllocator palette EWRAM_BSS(data::sprites::wobbling_enemy.png.palette);
 
+constexpr s32f16 Acceleration = 1.0 / 128;
+
 void wobblingEnemyCommon(Enemy& enemy)
 {
-    enemy.vel.x = -1;
+    enemy.vel.x = -1.5;
     enemy.size = vec2<s32f16>(16, 16);
     enemy.sprSize = SpriteSize::s16x16_4bpp;
     enemy.imagePtr = StillImagePointer(image);
     enemy.palPtr = SinglePalettePointer(palette);
     enemy.health = 3;
+}
+
+void shootTowardsPlayer(Enemy& enemy, GameScene& gameScene);
+
+void wobblingEnemyUp(Enemy& enemy, GameScene& gameScene)
+{
+    wobblingEnemyCommon(enemy);
+
+    enemy.pos = vec2<s32f16>(SCREEN_WIDTH + 16, 44);
+    HANDLE_TERM(enemy.waitForFrames(40));
+    shootTowardsPlayer(enemy, gameScene);
+    enemy.acc.y = -Acceleration;
+}
+
+void wobblingEnemyDown(Enemy& enemy, GameScene& gameScene)
+{
+    wobblingEnemyCommon(enemy);
+
+    enemy.pos = vec2<s32f16>(SCREEN_WIDTH + 16, SCREEN_HEIGHT - 44);
+    HANDLE_TERM(enemy.waitForFrames(40));
+    shootTowardsPlayer(enemy, gameScene);
+    enemy.acc.y = Acceleration;
 }
 
 constexpr s16f7 WobblingProjectileSpeed = 3;
@@ -47,24 +71,4 @@ void shootTowardsPlayer(Enemy& enemy, GameScene& gameScene)
         auto vel = vec * WobblingProjectileSpeed;
         gameScene.enemyProjectiles.add(vec2<s16f7>(enemy.pos), vec2<s16f7>(vel), vec2<s16f7>(2, 2), 0);
     }
-}
-
-void wobblingEnemyUp(Enemy& enemy, GameScene& gameScene)
-{
-    wobblingEnemyCommon(enemy);
-
-    enemy.pos = vec2<s32f16>(SCREEN_WIDTH + 16, 40);
-    HANDLE_TERM(enemy.waitForFrames(60));
-    shootTowardsPlayer(enemy, gameScene);
-    enemy.acc.y = -(s32f16::epsilon << 9);
-}
-
-void wobblingEnemyDown(Enemy& enemy, GameScene& gameScene)
-{
-    wobblingEnemyCommon(enemy);
-
-    enemy.pos = vec2<s32f16>(SCREEN_WIDTH + 16, SCREEN_HEIGHT - 40);
-    HANDLE_TERM(enemy.waitForFrames(60));
-    shootTowardsPlayer(enemy, gameScene);
-    enemy.acc.y = s32f16::epsilon << 9;
 }
