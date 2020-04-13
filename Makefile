@@ -17,6 +17,7 @@ LDFLAGS	= -g $(ARCH) -Wl,--gc-sections -Wl,-Map,gba.map
 TONC := tonclib/code/tonclib
 LIBRARIES := -nodefaultlibs -ltonc
 LIBDIRS := $(TONC)
+INCDIRS := external/gcem/include
 
 # Source files
 C_FILES := $(call rwildcard, source/, *.c)
@@ -41,7 +42,7 @@ RSRC_HFILES := $(addprefix build/, $(SPR_FILES:.png=.hpp) $(BKG_FILES:.png=.hpp)
 OFILES := $(RSRC_OFILES) $(SRC_OFILES)
 DFILES := $(OFILES:.o=.d)
 LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
-INCLUDE	:= $(foreach dir,$(LIBDIRS),-isystem $(dir)/include) -iquote build -iquote source
+INCLUDE	:= $(foreach dir,$(LIBDIRS),-isystem $(dir)/include) $(foreach dir,$(INCDIRS), -isystem $(dir)) -iquote build -iquote source
 
 # Links to Tonc
 TONC_URL := http://www.coranac.com/files/tonc-code.zip
