@@ -10,6 +10,7 @@
 #include "graphics/PalettePointer.hpp"
 
 #include "math/fixedmath.hpp"
+#include "math/gcem-degrees.hpp"
 #include "gameplay/GameScene.hpp"
 
 // Declaration
@@ -52,8 +53,8 @@ void wobblingEnemyDown(Enemy& enemy, GameScene& gameScene)
 
 constexpr s16f7 WobblingProjectileSpeed = 3;
 
-constexpr s32f<10> Cos15 = 0.9659258262890682867497431997289;
-constexpr s32f<10> Sin15 = 0.25881904510252076234889883762405;
+constexpr s32f<10> Cos15 = gcem_d::cos(15);
+constexpr s32f<10> Sin15 = gcem_d::sin(15);
 
 void shootTowardsPlayer(Enemy& enemy, GameScene& gameScene)
 {

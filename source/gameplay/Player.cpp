@@ -7,6 +7,7 @@
 
 #include "GameScene.hpp"
 #include "data/sprites/player.hpp"
+#include "math/gcem-degrees.hpp"
 
 constexpr int PlayerPriority = 8;
 constexpr s32f16 PlayerSpeed = 1.0; // pixels per frame
@@ -48,8 +49,8 @@ void Player::update()
     {
         if (key_held(KEY_A))
         {
-            constexpr s32f16 Cos5 = 0.99619469809;
-            constexpr s32f16 Sin5 = 0.08715574274;
+            constexpr s32f16 Cos5 = gcem_d::cos(5);
+            constexpr s32f16 Sin5 = gcem_d::sin(5);
 
             shootCooldown = CommonCooldown;
             gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2, pos.y),
