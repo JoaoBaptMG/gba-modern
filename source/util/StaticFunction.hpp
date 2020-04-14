@@ -9,7 +9,9 @@
 #include <cstdint>
 #include <cstddef>
 #include <new>
+#include <functional>
 #include <type_traits>
+#include "gba-assert.hpp"
 
 // Utility function
 namespace detail

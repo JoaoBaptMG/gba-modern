@@ -11,7 +11,10 @@
 #include <cstddef>
 #include <new>
 #include <type_traits>
+#include <functional>
+#include <array>
 #include <tonc.h>
+#include "gba-assert.hpp"
 
 // Utility function
 namespace detail
@@ -22,6 +25,9 @@ namespace detail
     template <typename T>
     inline static const T* as(const void* ptr) { return std::launder(reinterpret_cast<const T*>(ptr)); }
 }
+
+// Determined empirically as GCC defaults to memcpy after that (and I think my memcpy might be bugged)
+constexpr std::size_t DirectCopyMax = 48;
 
 template <std::size_t Size, typename Sig>
 class TrivialStaticFunction;
@@ -53,7 +59,7 @@ class TrivialStaticFunction<Size, R(Args...)>
     Invoker invoker;
 
     // And finally the storage
-    alignas(void*) std::byte storage[Size];
+    alignas(void*) std::array<std::byte, Size> storage;
 
 public:
     // A trivial default constructor
@@ -63,7 +69,7 @@ public:
     TrivialStaticFunction(R (*f)(Args...)) : invoker(fptrInvoker)
     {
         // Copy the function pointer
-        *reinterpret_cast<R(**)(Args...)>(storage) = f;
+        *reinterpret_cast<R(**)(Args...)>(storage.data()) = f;
     }
 
     // A templated constructor for any callable object
@@ -82,11 +88,13 @@ public:
         // Copy the functor
         if constexpr (sizeof(Functor) > 0)
         {
-            if constexpr (sizeof(Functor) % 4 == 0 && alignof(Functor) % 4 == 0)
-                memcpy32(storage, &f, sizeof(Functor)/sizeof(u32));
+            if constexpr (sizeof(Functor) < DirectCopyMax)
+                *reinterpret_cast<Functor*>(storage.data()) = f;
+            else if constexpr (sizeof(Functor) % 4 == 0 && alignof(Functor) % 4 == 0)
+                memcpy32(storage.data(), &f, sizeof(Functor)/sizeof(u32));
             else if constexpr (sizeof(Functor) % 2 == 0 && alignof(Functor) % 2 == 0)
-                memcpy16(storage, &f, sizeof(Functor)/sizeof(u16));
-            else memcpy(storage, &f, sizeof(Functor));
+                memcpy16(storage.data(), &f, sizeof(Functor)/sizeof(u16));
+            else memcpy(storage.data(), &f, sizeof(Functor));
         }
     }
 
@@ -94,11 +102,12 @@ public:
     TrivialStaticFunction(const TrivialStaticFunction& other) : invoker(other.invoker)
     {
         // Replace this one storage with the other
-        if constexpr (Size % 4 == 0)
-            memcpy32(storage, other.storage, Size/sizeof(u32));
+        if constexpr (Size < DirectCopyMax) storage = other.storage;
+        else if constexpr (Size % 4 == 0)
+            memcpy32(storage.data(), other.storage.data(), Size/sizeof(u32));
         else if constexpr (Size % 2 == 0)
-            memcpy16(storage, other.storage, Size/sizeof(u16));
-        else memcpy(storage, other.storage, Size);
+            memcpy16(storage.data(), other.storage.data(), Size/sizeof(u16));
+        else memcpy(storage.data(), other.storage.data(), Size);
     }
 
     // A copy operator for function pointers
@@ -106,7 +115,7 @@ public:
     {
         // Copy the function pointer
         invoker = fptrInvoker;
-        *reinterpret_cast<R(**)(Args...)>(storage) = f;
+        *reinterpret_cast<R(**)(Args...)>(storage.data()) = f;
         return *this;
     }
 
@@ -127,11 +136,13 @@ public:
         invoker = genericInvoker<Functor>;
         if constexpr (sizeof(Functor) > 0)
         {
-            if constexpr (sizeof(Functor) % 4 == 0 && alignof(Functor) % 4 == 0)
-                memcpy32(storage, &f, sizeof(Functor)/sizeof(u32));
+            if constexpr (sizeof(Functor) < DirectCopyMax)
+                *reinterpret_cast<Functor*>(storage.data()) = f;
+            else if constexpr (sizeof(Functor) % 4 == 0 && alignof(Functor) % 4 == 0)
+                memcpy32(storage.data(), &f, sizeof(Functor)/sizeof(u32));
             else if constexpr (sizeof(Functor) % 2 == 0 && alignof(Functor) % 2 == 0)
-                memcpy16(storage, &f, sizeof(Functor)/sizeof(u16));
-            else memcpy(storage, &f, sizeof(Functor));
+                memcpy16(storage.data(), &f, sizeof(Functor)/sizeof(u16));
+            else memcpy(storage.data(), &f, sizeof(Functor));
         }
         return *this;
     }
@@ -141,11 +152,12 @@ public:
     {
         invoker = other.invoker;
         // Replace this one storage with the other
-        if constexpr (Size % 4 == 0)
-            memcpy32(storage, other.storage, Size/sizeof(u32));
+        if constexpr (Size < DirectCopyMax) other.storage = storage;
+        else if constexpr (Size % 4 == 0)
+            memcpy32(storage.data(), other.storage.data(), Size/sizeof(u32));
         else if constexpr (Size % 2 == 0)
-            memcpy16(storage, other.storage, Size/sizeof(u16));
-        else memcpy(storage, other.storage, Size);
+            memcpy16(storage.data(), other.storage.data(), Size/sizeof(u16));
+        else memcpy(storage.data(), other.storage.data(), Size);
         return *this;
     }
 
@@ -153,7 +165,7 @@ public:
     R operator()(Args... args)
     {
         ASSERT(invoker);
-        return invoker(storage, std::forward<Args>(args)...);
+        return invoker(storage.data(), std::forward<Args>(args)...);
     }
 
     // Destructor
