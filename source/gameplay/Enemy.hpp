@@ -8,6 +8,7 @@
 #include <tonc.h>
 #include "math/stdfixed.hpp"
 #include "util/context.h"
+#include "util/TrivialStaticFunction.hpp"
 #include "graphics/SpriteSize.hpp"
 #include "graphics/PalettePointer.hpp"
 #include "graphics/StillImagePointer.hpp"
@@ -16,25 +17,26 @@ class Enemy;
 class GameScene;
 
 // The script that controls the enemy
-using EnemyScript = void(*)(Enemy&, GameScene&);
+using EnemyScript = TrivialStaticFunction<12, void(Enemy&, GameScene&)>;
+using MovementFunction = TrivialStaticFunction<12, void(Enemy&)>;
 enum class ScriptTermination { Terminate, Continue };
 #define HANDLE_TERM(expr) do { if ((expr) == ScriptTermination::Terminate) return; } while (false)
 
 class Enemy final
 {
 public:
-    vec2<s32f16> pos, vel, acc, size;    // 32 bytes
-
-public:
-    u16 health;
+    vec2<s32f16> pos;                    // 8 bytes
+    s32f16 radius;                       // 4 bytes
+    u16 health;                          // 2 bytes
     SpriteSize sprSize;                  // 2 bytes
     StillImagePointer imagePtr;          // 4 bytes
     SinglePalettePointer palPtr;         // 4 bytes
+    MovementFunction movementFunction;   // 16 bytes
 
 private:
     context_t curCtx;                    // 4 bytes
     u16 scriptWaitTime;                  // 2 bytes
-    u16 invCounter;                      // 2 bytes
+    u8 invCounter;                       // 1 byte
 
 public:
     Enemy(EnemyScript script, GameScene* gameScene);
@@ -45,24 +47,12 @@ public:
     // Called by script
     [[nodiscard]] ScriptTermination waitForFrames(u16 frames);
 
-    // Utility functions
-    [[nodiscard]] inline ScriptTermination moveTo(vec2<s32f16> dest, u16 frames)
-    {
-        acc = vec2<s32f16>();
-        vel = dest / frames;
-        if (waitForFrames(frames) == ScriptTermination::Terminate)
-            return ScriptTermination::Terminate;
-        pos = dest;
-
-        return ScriptTermination::Continue;
-    }
-
     inline bool done() const
     { 
         if (curCtx) return false;
         
-        return pos.x < -size.x/2 || pos.x > SCREEN_WIDTH + size.x/2 ||
-            pos.y < -size.y/2 || pos.y > SCREEN_HEIGHT + size.y/2;
+        return pos.x < -radius/2 || pos.x > SCREEN_WIDTH + radius/2 ||
+            pos.y < -radius/2 || pos.y > SCREEN_HEIGHT + radius/2;
     }
 
     bool damage(int amount = 1);

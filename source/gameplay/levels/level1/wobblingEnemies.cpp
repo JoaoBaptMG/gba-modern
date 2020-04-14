@@ -17,12 +17,13 @@
 static StillImageAllocator image EWRAM_BSS(data::sprites::wobbling_enemy.png.tiles, SpriteSize::s16x16_4bpp);
 static SinglePaletteAllocator palette EWRAM_BSS(data::sprites::wobbling_enemy.png.palette);
 
+constexpr s32f16 MoveSpeed = 1.5;
 constexpr s32f16 Acceleration = 1.0 / 128;
 
 void wobblingEnemyCommon(Enemy& enemy)
 {
-    enemy.vel.x = -1.5;
-    enemy.size = vec2<s32f16>(16, 16);
+    enemy.movementFunction = [](Enemy& enemy) { enemy.pos.x -= MoveSpeed; };
+    enemy.radius = 16;
     enemy.sprSize = SpriteSize::s16x16_4bpp;
     enemy.imagePtr = StillImagePointer(image);
     enemy.palPtr = SinglePalettePointer(palette);
@@ -38,7 +39,12 @@ void wobblingEnemyUp(Enemy& enemy, GameScene& gameScene)
     enemy.pos = vec2<s32f16>(SCREEN_WIDTH + 16, 44);
     HANDLE_TERM(enemy.waitForFrames(40));
     shootTowardsPlayer(enemy, gameScene);
-    enemy.acc.y = -Acceleration;
+
+    enemy.movementFunction = [vy = s32f16()](Enemy& enemy) mutable
+    { 
+        vy -= Acceleration;
+        enemy.pos += vec2(-MoveSpeed, vy);
+    };
 }
 
 void wobblingEnemyDown(Enemy& enemy, GameScene& gameScene)
@@ -48,7 +54,12 @@ void wobblingEnemyDown(Enemy& enemy, GameScene& gameScene)
     enemy.pos = vec2<s32f16>(SCREEN_WIDTH + 16, SCREEN_HEIGHT - 44);
     HANDLE_TERM(enemy.waitForFrames(40));
     shootTowardsPlayer(enemy, gameScene);
-    enemy.acc.y = Acceleration;
+
+    enemy.movementFunction = [vy = s32f16()](Enemy& enemy) mutable
+    { 
+        vy += Acceleration;
+        enemy.pos += vec2(-MoveSpeed, vy);
+    };
 }
 
 constexpr s16f7 WobblingProjectileSpeed = 3;

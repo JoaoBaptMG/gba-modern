@@ -32,7 +32,7 @@ context_t enemyContext(context_t ctx, void* arg)
     return args.enemy->curCtx;
 }
 
-Enemy::Enemy(EnemyScript script, GameScene* gameScene) : pos(), vel(), acc(), size()
+Enemy::Enemy(EnemyScript script, GameScene* gameScene) : pos(), radius()
 {
     // Build the args
     EnemyArgs args{this, gameScene, script};
@@ -54,9 +54,7 @@ void Enemy::update()
         else curCtx = context_switch(curCtx);
     }
 
-    // Simple integration
-    pos += vel;
-    vel += acc;
+    movementFunction(*this);
 
     // Update the invCounter
     if (invCounter > 0) invCounter--;
@@ -65,7 +63,7 @@ void Enemy::update()
 void Enemy::pushGraphics()
 {
     // Push the sprite, but only if the invCounter is not active
-    auto dp = vec2<int>(pos) - size/2;
+    auto dp = vec2<int>(pos) - SizeUtils::pixelSize(sprSize)/2;
     if (!invCounter)
         graphics::oam.pushRegular(dp, sprSize, imagePtr.getTileId(), palPtr.getPalette(), 1, EnemyPriority);
 }

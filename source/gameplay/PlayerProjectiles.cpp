@@ -37,12 +37,13 @@ void PlayerProjectiles::update()
     for (auto& enemy : gameScene().enemies)
     {
         auto epos = vec2<s16f7>(enemy.pos);
-        auto eradius = s16f7(enemy.size.x)/2;
+        auto eradius = s16f7(enemy.radius)/2;
 
         for (u32 i = 0; i < numProjectiles; i++)
         {
             if (projectiles[i].tileId == graphics::NoTile) continue;
 
+            // size misused as radius here, I have to think a better way
             auto diffsq = (epos - projectiles[i].pos).lensq();
             auto sumr = eradius + projectiles[i].size.x/2;
             if (diffsq < sumr*sumr)
@@ -58,6 +59,8 @@ void PlayerProjectiles::update()
         }
     }
 
+    // std::remove_if returns the pointer to the last element after the removal
+    // so I just subtract the original pointer from it to get the number of projectiles
     numProjectiles = std::remove_if(projectiles, projectiles+numProjectiles,
         [](const Projectile& proj) { return proj.tileId == graphics::NoTile; }) - projectiles;
 }
