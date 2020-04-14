@@ -22,7 +22,7 @@ s32 sreciprocal32(s32 x) IWRAM_CODE;
 #ifdef __cplusplus
 }
 
-u32 reciprocal32(u32 x) { return ureciprocal32(x); }
-s32 reciprocal32(s32 x) { return sreciprocal32(x); }
+inline static u32 reciprocal32(u32 x) { return ureciprocal32(x); }
+inline static s32 reciprocal32(s32 x) { return sreciprocal32(x); }
 
 #endif

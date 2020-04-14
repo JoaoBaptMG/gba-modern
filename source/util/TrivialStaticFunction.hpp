@@ -88,8 +88,7 @@ public:
         // Copy the functor
         if constexpr (sizeof(Functor) > 0)
         {
-            if constexpr (sizeof(Functor) < DirectCopyMax)
-                *reinterpret_cast<Functor*>(storage.data()) = f;
+            if constexpr (sizeof(Functor) < DirectCopyMax) new(storage.data()) Functor(f);
             else if constexpr (sizeof(Functor) % 4 == 0 && alignof(Functor) % 4 == 0)
                 memcpy32(storage.data(), &f, sizeof(Functor)/sizeof(u32));
             else if constexpr (sizeof(Functor) % 2 == 0 && alignof(Functor) % 2 == 0)
@@ -136,8 +135,7 @@ public:
         invoker = genericInvoker<Functor>;
         if constexpr (sizeof(Functor) > 0)
         {
-            if constexpr (sizeof(Functor) < DirectCopyMax)
-                *reinterpret_cast<Functor*>(storage.data()) = f;
+            if constexpr (sizeof(Functor) < DirectCopyMax) new(storage.data()) Functor(f);
             else if constexpr (sizeof(Functor) % 4 == 0 && alignof(Functor) % 4 == 0)
                 memcpy32(storage.data(), &f, sizeof(Functor)/sizeof(u32));
             else if constexpr (sizeof(Functor) % 2 == 0 && alignof(Functor) % 2 == 0)
