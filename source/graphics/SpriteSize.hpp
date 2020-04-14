@@ -7,6 +7,7 @@
 #pragma once
 
 #include <tonc.h>
+#include "math/vec2.hpp"
 
 // Sprite size enum
 enum class SpriteSize : u16
@@ -122,5 +123,25 @@ namespace SizeUtils
             case SpriteSize::s32x64_4bpp: case SpriteSize::s32x64_8bpp: return ATTR1_SIZE_32x64;
         }
         return 0;
+    }
+
+    constexpr vec2<int> pixelSize(SpriteSize size)
+    {
+        switch (size)
+        {
+            case SpriteSize::s8x8_4bpp: case SpriteSize::s8x8_8bpp: return vec2(8, 8);
+            case SpriteSize::s16x16_4bpp: case SpriteSize::s16x16_8bpp: return vec2(16, 16);
+            case SpriteSize::s32x32_4bpp: case SpriteSize::s32x32_8bpp: return vec2(32, 32);
+            case SpriteSize::s64x64_4bpp: case SpriteSize::s64x64_8bpp: return vec2(64, 64);
+            case SpriteSize::s16x8_4bpp: case SpriteSize::s16x8_8bpp: return vec2(16, 8);
+            case SpriteSize::s32x16_4bpp: case SpriteSize::s32x16_8bpp: return vec2(32, 16);
+            case SpriteSize::s32x8_4bpp: case SpriteSize::s32x8_8bpp: return vec2(32, 8);
+            case SpriteSize::s64x32_4bpp: case SpriteSize::s64x32_8bpp: return vec2(64, 32);
+            case SpriteSize::s8x16_4bpp: case SpriteSize::s8x16_8bpp: return vec2(8, 16);
+            case SpriteSize::s16x32_4bpp: case SpriteSize::s16x32_8bpp: return vec2(16, 32);
+            case SpriteSize::s8x32_4bpp: case SpriteSize::s8x32_8bpp: return vec2(8, 32);
+            case SpriteSize::s32x64_4bpp: case SpriteSize::s32x64_8bpp: return vec2(32, 64);
+        }
+        return vec2<int>();
     }
 }
