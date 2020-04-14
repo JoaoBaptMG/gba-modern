@@ -152,7 +152,7 @@ public:
     {
         invoker = other.invoker;
         // Replace this one storage with the other
-        if constexpr (Size < DirectCopyMax) other.storage = storage;
+        if constexpr (Size < DirectCopyMax) storage = other.storage;
         else if constexpr (Size % 4 == 0)
             memcpy32(storage.data(), other.storage.data(), Size/sizeof(u32));
         else if constexpr (Size % 2 == 0)
