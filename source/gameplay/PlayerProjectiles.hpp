@@ -30,10 +30,16 @@ public:
     void update();
     void pushGraphics();
 
-    void add(vec2<s16f7> pos, vec2<s16f7> vel, vec2<s16f7> size, u16 tileId)
+    void add(vec2<s16f7> pos, vec2<s16f7> vel, u16 type)
     {
         ASSERT(numProjectiles < MaxProjectiles);
-        projectiles[numProjectiles++] = { pos, vel, size, tileId };
+        projectiles[numProjectiles++] = { pos, vel, type };
+    }
+
+    void add(vec2<s16f7> pos, vec2<s16f7> vel, u16 type, u16 arg)
+    {
+        ASSERT(numProjectiles < MaxProjectiles);
+        projectiles[numProjectiles++] = { pos, vel, type, arg };
     }
 };
 

@@ -17,7 +17,7 @@ constexpr int PlayerWidth = 16;
 constexpr int PlayerHeight = 16;
 constexpr vec2 PlayerSize(PlayerWidth, PlayerHeight);
 
-constexpr int PlayerTargetSize = 6;
+constexpr int PlayerTargetRadius = 3;
 
 class Player final
 {

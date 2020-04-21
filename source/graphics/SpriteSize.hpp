@@ -10,7 +10,7 @@
 #include "math/vec2.hpp"
 
 // Sprite size enum
-enum class SpriteSize : u16
+enum class SpriteSize : u8
 {
     // 4bpp sizes
     s8x8_4bpp, s16x16_4bpp, s32x32_4bpp, s64x64_4bpp,

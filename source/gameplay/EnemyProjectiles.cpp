@@ -10,6 +10,19 @@
 
 #include "data/sprites/enemy-projectiles.hpp"
 
+struct EnemyProjectileType
+{
+    u16 tileId;
+    SpriteSize spriteSize;
+    u8 shape;
+    vec2<s16f7> halfSize;
+};
+
+const EnemyProjectileType ProjectileTypes[] =
+{
+    { 0, SpriteSize::s8x8_4bpp, 0, vec2<s16f7>(2, 2) }
+};
+
 constexpr int EnemyProjectilePriority = 5;
 
 static SinglePaletteAllocator palette EWRAM_BSS(data::sprites::enemy_projectiles.png.palette);
@@ -29,19 +42,23 @@ void EnemyProjectiles::init()
 
 void EnemyProjectiles::update()
 {
+    setProjectileSortMode(SortMode::Ascending);
     numProjectiles = updateProjectiles(numProjectiles, projectiles);
+    sortProjectiles(numProjectiles, projectiles);
 
     auto ppos = vec2<s16f7>(gameScene().player.pos);
     for (u32 i = 0; i < numProjectiles; i++)
     {
-        auto pos = projectiles[i].pos;
-        auto size = projectiles[i].size;
+        auto radius = ProjectileTypes[projectiles[i].type].halfSize.x;
+        auto diff = (ppos - projectiles[i].pos).lensq();
+        auto sumr = radius + PlayerTargetRadius;
 
-        if (abs(pos.x - ppos.x) > (size.x + PlayerTargetSize)/2) continue;
-        if (abs(pos.y - ppos.y) > (size.y + PlayerTargetSize)/2) continue;
-        
-        gameScene().player.damage();
-        projectiles[i] = projectiles[--numProjectiles];
+        if (diff < sumr*sumr)
+        {
+            gameScene().player.damage();
+            projectiles[i] = projectiles[--numProjectiles];
+            return;
+        }
     }
 }
 
@@ -50,9 +67,9 @@ void EnemyProjectiles::pushGraphics()
     // Add a sprite for each projectile on screen
     for (u32 i = 0; i < numProjectiles; i++)
     {
-        auto dp = vec2<int>(projectiles[i].pos) - vec2(4, 4);
-        graphics::oam.pushRegular(dp, SpriteSize::s8x8_4bpp,
-            tilePtr.getTileId() + projectiles[i].tileId,
+        const auto& ptype = ProjectileTypes[projectiles[i].type];
+        auto dp = vec2<int>(projectiles[i].pos) - SizeUtils::pixelSize(ptype.spriteSize)/2;
+        graphics::oam.pushRegular(dp, ptype.spriteSize, tilePtr.getTileId() + ptype.tileId,
             palPtr.getPalette(), 1, EnemyProjectilePriority);
     }
 }

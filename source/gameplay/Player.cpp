@@ -54,15 +54,13 @@ void Player::update()
 
             shootCooldown = CommonCooldown;
             gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2, pos.y),
-                vec2<s16f7>(ProjectileSpeed, 0), vec2<s16f7>(ProjectileSize, ProjectileSize), 0);
+                vec2<s16f7>(ProjectileSpeed, 0), 0);
             
             gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2 - 4, pos.y + 6),
-                vec2<s16f7>(Cos5 * ProjectileSpeed, Sin5 * ProjectileSpeed),
-                vec2<s16f7>(ProjectileSize, ProjectileSize), 0);
+                vec2<s16f7>(Cos5 * ProjectileSpeed, Sin5 * ProjectileSpeed), 0);
             
             gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2 - 4, pos.y - 6),
-                vec2<s16f7>(Cos5 * ProjectileSpeed, -Sin5 * ProjectileSpeed),
-                vec2<s16f7>(ProjectileSize, ProjectileSize), 0);
+                vec2<s16f7>(Cos5 * ProjectileSpeed, -Sin5 * ProjectileSpeed), 0);
         }
     }
 }
