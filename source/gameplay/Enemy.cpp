@@ -72,7 +72,7 @@ ScriptTermination Enemy::waitForFrames(u16 frames)
 {
     scriptWaitTime = frames;
     curCtx = context_switch(curCtx);
-    return scriptWaitTime == -1 ? ScriptTermination::Terminate
+    return scriptWaitTime == (u16)-1 ? ScriptTermination::Terminate
         : ScriptTermination::Continue;
 }
 
