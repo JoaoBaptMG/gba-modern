@@ -22,9 +22,10 @@ void level1(LevelContext& level)
     }
 
     level.at(8);
-    for (int i = 0; i < 12; i++)
+    for (u32 i = 0; i < 12; i++)
     {
-        level.gameScene().addEnemy(wavingEnemy);
+        level.gameScene().addEnemy([fts = (12 + 25*i) & 127](Enemy& enemy, GameScene& gameScene)
+            { wavingEnemy(enemy, gameScene, fts); });
         level.after(0.3);
     }
 

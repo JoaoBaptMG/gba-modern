@@ -7,4 +7,4 @@
 
 #include "gameplay/Enemy.hpp"
 
-void wavingEnemy(Enemy& enemy, GameScene& gameScene);
+void wavingEnemy(Enemy& enemy, GameScene& gameScene, u32 frameToShoot);

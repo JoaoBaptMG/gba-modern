@@ -21,10 +21,12 @@ static SinglePaletteAllocator palette EWRAM_BSS(data::sprites::waving_enemy.png.
 constexpr u32 WavingPeriod = 112;
 constexpr auto WavingAmplitude = 48;
 constexpr s32f16 Speed = 1.5;
+constexpr s16f7 ProjectileSpeed = 4.0;
 
-void wavingEnemy(Enemy& enemy, GameScene& gameScene)
+void wavingEnemy(Enemy& enemy, GameScene& gameScene, u32 frameToShoot)
 {
-    enemy.radius = 16;
+    enemy.shape = CollisionShape::Box;
+    enemy.halfSize = vec2<s16f7>(8, 8);
     enemy.sprSize = SpriteSize::s16x16_4bpp;
     enemy.imagePtr = StillImagePointer(image);
     enemy.palPtr = SinglePalettePointer(palette);
@@ -42,4 +44,9 @@ void wavingEnemy(Enemy& enemy, GameScene& gameScene)
         enemy.pos.y = MoveYs[i];
         if (++i == WavingPeriod) i = 0;
     };
+
+    HANDLE_TERM(enemy.waitForFrames(frameToShoot));
+
+    gameScene.enemyProjectiles.add(vec2<s16f7>(enemy.pos + vec2(-11, -7)), vec2<s16f7>(-ProjectileSpeed, 0), 1);
+    gameScene.enemyProjectiles.add(vec2<s16f7>(enemy.pos + vec2(-11, 7)), vec2<s16f7>(-ProjectileSpeed, 0), 1);
 }

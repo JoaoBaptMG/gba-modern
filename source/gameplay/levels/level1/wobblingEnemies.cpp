@@ -23,7 +23,8 @@ constexpr s32f16 Acceleration = 1.0 / 128;
 void wobblingEnemyCommon(Enemy& enemy)
 {
     enemy.movementFunction = [](Enemy& enemy) { enemy.pos.x -= MoveSpeed; };
-    enemy.radius = 16;
+    enemy.shape = CollisionShape::Circle;
+    enemy.radius = 8;
     enemy.sprSize = SpriteSize::s16x16_4bpp;
     enemy.imagePtr = StillImagePointer(image);
     enemy.palPtr = SinglePalettePointer(palette);

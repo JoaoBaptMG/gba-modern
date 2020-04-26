@@ -7,6 +7,7 @@
 
 #include "GameScene.hpp"
 #include <algorithm>
+#include "collision.hpp"
 
 #include "text/mGBADebugging.hpp"
 
@@ -18,13 +19,13 @@ struct PlayerProjectileType
 {
     u16 tileId;
     SpriteSize spriteSize;
-    u8 shape;
+    CollisionShape shape;
     vec2<s16f7> halfSize;
 };
 
 const PlayerProjectileType ProjectileTypes[] =
 {
-    { 0, SpriteSize::s8x8_4bpp, 0, vec2<s16f7>(2, 2) }
+    { 0, SpriteSize::s8x8_4bpp, CollisionShape::Circle, vec2<s16f7>(2, 2) }
 };
 
 constexpr int PlayerProjectilePriority = 7;
@@ -53,15 +54,23 @@ void PlayerProjectiles::update()
     for (auto& enemy : gameScene().enemies)
     {
         auto epos = vec2<s16f7>(enemy.pos);
-        auto eradius = s16f7(enemy.radius)/2;
 
         for (u32 i = 0; i < numProjectiles; i++)
         {
             if (projectiles[i].type == NoProjectile) continue;
 
-            auto diffsq = (epos - projectiles[i].pos).lensq();
-            auto sumr = eradius + ProjectileTypes[projectiles[i].type].halfSize.x;
-            if (diffsq < sumr*sumr)
+            const auto& ptype = ProjectileTypes[projectiles[i].type];
+            using CollisionFunction = bool(*)(vec2<s16f7> pos1, s16f7 r1, vec2<s16f7> pos2, const void* payload2);
+            CollisionFunction collision;
+
+            switch (enemy.shape)
+            {
+                case CollisionShape::Circle: collision = reinterpret_cast<CollisionFunction>(circleCircleCollision); break;
+                case CollisionShape::Box: collision = reinterpret_cast<CollisionFunction>(circleBoxCollision); break;
+                case CollisionShape::Polygon: break;
+            }
+
+            if (collision(projectiles[i].pos, ptype.halfSize.x, epos, enemy.polygonData))
             {
                 if (enemy.damage())
                 {

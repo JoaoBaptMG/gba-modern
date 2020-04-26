@@ -31,7 +31,7 @@ int main()
     // Force a VBlank
     REG_DISPCNT = DCNT_BLANK;
 
-    bool enableDebugging = mgba::enable();
+    mgba::enable();
     // Change to the main game scene
     scene.push<GameScene>();
 
@@ -57,7 +57,7 @@ int main()
             popScene = false;
         }
 
-        if (enableDebugging)
+        if (mgba::isEnabled())
         {
             auto vcount = REG_VCOUNT;
             if (vcount >= 160) vcount -= 160;

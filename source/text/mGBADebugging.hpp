@@ -7,17 +7,21 @@
 
 #include "StringBuilder.hpp"
 
-#define REG_DEBUG_ENABLE (vu16*) 0x4FFF780
-#define REG_DEBUG_FLAGS (vu16*) 0x4FFF700
-#define REG_DEBUG_STRING (char*) 0x4FFF600
+#define REG_DEBUG_ENABLE (vu16*)0x4FFF780
+#define REG_DEBUG_FLAGS (vu16*)0x4FFF700
+#define REG_DEBUG_STRING (char*)0x4FFF600
 
 namespace mgba
 {
     enum class Log : u16 { Fatal = 0, Error, Warn, Info, Debug };
 
-    inline static bool enable()
+    inline static void enable()
     {
         *REG_DEBUG_ENABLE = 0xC0DE;
+    }
+
+    inline static bool isEnabled()
+    {
         return *REG_DEBUG_ENABLE == 0x1DEA;
     }
 

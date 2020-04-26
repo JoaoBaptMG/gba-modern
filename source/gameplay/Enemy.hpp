@@ -13,6 +13,8 @@
 #include "graphics/PalettePointer.hpp"
 #include "graphics/StillImagePointer.hpp"
 
+#include "collision.hpp"
+
 class Enemy;
 class GameScene;
 
@@ -26,9 +28,17 @@ class Enemy final
 {
 public:
     vec2<s32f16> pos;                    // 8 bytes
-    s32f16 radius;                       // 4 bytes
     u16 health;                          // 2 bytes
-    SpriteSize sprSize;                  // 2 bytes
+    SpriteSize sprSize;                  // 1 bytes
+    CollisionShape shape;                // 1 byte
+
+    union                                // 4 bytes
+    {
+        s16f7 radius;
+        vec2<s16f7> halfSize;
+        const PolygonData* polygonData;
+    };
+    
     StillImagePointer imagePtr;          // 4 bytes
     SinglePalettePointer palPtr;         // 4 bytes
     MovementFunction movementFunction;   // 16 bytes
