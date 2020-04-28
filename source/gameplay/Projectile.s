@@ -174,3 +174,51 @@ setProjectileSortMode:          @ r0 is the mnemonic to put in, 0xCA for bgt and
     strb    r0, .cmpLabel3+3
     strb    r0, .cmpLabel4+3
     bx      lr
+
+@===================================================================================
+    .section .iwram, "ax", %progbits
+    .align 2
+    .arm
+    .global pushProjectilesToOam
+    .type pushProjectilesToOam STT_FUNC
+pushProjectilesToOam:
+    cmp     r0, #0                  @ check if there are projectiles around
+    bxeq    lr                      @ and bail out if not
+
+                                    @ r0 is the number of projectiles, r1 is the array,
+    push    {r4-r10}                @ r2 is the first entry in the OAM, r3 is the projectile type array
+    ldr     r10, [sp, #28]          @ sp+28 is the precomputed attr2add and the previous numObjects
+
+    add     r3, #8                  @ adjust the projectile type so it's offset to the base
+    mov     r9, #255                @ build the flag mask
+    orr     r9, r9, #255 << 16  
+    orr     r9, r9, #256 << 16
+
+.sendProjectile:
+    @ r4: projectile pos, r6: projectile type (and arg), r5-r7 are the attributes
+    ldmia   r1!, {r4-r6}            @ load the projectile data
+    mov     r6, r6, lsl #16         @ mask the last 16 bits
+    orr     r6, r6, r6, lsr #2      @ now r6 = (20 * id) << 12
+    add     r6, r3, r6, lsr #12     @ now r6 = &ptypeArray[id]
+    ldm     r6, {r5-r7}             @ load attr0:attr1, attr2:prio, hsizex:hsizey
+
+    @ subtract the position and account for carry
+    mov     r8, r4, lsl #16         @ r8:H = pos.x
+    cmp     r8, r7, lsl #16         @ compare pos.x and hsizex
+    sub     r4, r4, r7
+    addlo   r4, r4, #1 << 16        @ add back the borrow if pos.x < hsizex
+
+    @ now move the position to the right place
+    mov     r8, r4, lsr #23         @ the y should be in the low part
+    orr     r8, r4, lsl #9          @ and the x in the right part
+    and     r8, r8, r9              @ mask the values with the precomputed mask
+    orr     r5, r5, r8              @ and put them in the attr0:attr1 thing
+    add     r6, r6, r10             @ add the attr2add plus the object number
+    stmia   r2!, {r5-r6}            @ and push it to the OAM
+    
+    add     r10, # 1 << 16          @ increase the current object number by one
+    subs    r0, #1                  @ reduce by one the number of iterations
+    bne     .sendProjectile         @ and go back if there are still more
+
+    pop     {r4-r10}
+    bx      lr

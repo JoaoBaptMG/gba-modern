@@ -14,21 +14,12 @@
 #include "data/sprites/player-projectiles.hpp"
 
 constexpr u16 NoProjectile = -1;
-
-struct PlayerProjectileType
-{
-    u16 tileId;
-    SpriteSize spriteSize;
-    CollisionShape shape;
-    vec2<s16f7> halfSize;
-};
-
-const PlayerProjectileType ProjectileTypes[] =
-{
-    { 0, SpriteSize::s8x8_4bpp, CollisionShape::Circle, vec2<s16f7>(2, 2) }
-};
-
 constexpr int PlayerProjectilePriority = 7;
+
+static const ProjectileType ProjectileTypes[] =
+{
+    { CollisionShape::Circle, vec2<s16f7>(2, 2), buildSpriteAttrsFor(0, SpriteSize::s8x8_4bpp, PlayerProjectilePriority) }
+};
 
 static SinglePaletteAllocator palette EWRAM_BSS(data::sprites::player_projectiles.png.palette);
 
@@ -91,14 +82,10 @@ void PlayerProjectiles::update()
 
 void PlayerProjectiles::pushGraphics()
 {
-    // Add a sprite for each projectile on screen
-    for (u32 i = 0; i < numProjectiles; i++)
-    {
-        const auto& ptype = ProjectileTypes[projectiles[i].type];
-        auto dp = vec2<int>(projectiles[i].pos) - SizeUtils::pixelSize(ptype.spriteSize)/2;
-        graphics::oam.pushRegular(dp, ptype.spriteSize, tilePtr.getTileId() + ptype.tileId,
-            palPtr.getPalette(), 1, PlayerProjectilePriority);
-    }
+    u32 attr2add = tilePtr.getTileId() + ATTR2_PALBANK(palPtr.getPalette()) + (graphics::oam.objCount << 16);
+    pushProjectilesToOam(numProjectiles, projectiles, graphics::oam.shadowOAM + graphics::oam.objCount, ProjectileTypes, attr2add);
+    graphics::oam.objCount += numProjectiles;
+    ASSERT(graphics::oam.objCount <= MaxObjs);
 }
 
 GameScene& PlayerProjectiles::gameScene()

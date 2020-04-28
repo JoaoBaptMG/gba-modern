@@ -20,16 +20,16 @@ enum class GfxMode { None, AlphaBlending, Window };
 
 class OamManager final
 {
-    // The required array and size
-    OBJ_ATTR shadowOAM[MaxObjs];
-    u32 objCount;
-
-    void pushAttrs(u16 attr0, u16 attr1, u16 attr2, u16 prio = 0);
-
 public:
+    // The required array and size
+    u32 objCount;
+    alignas(void*) OBJ_ATTR shadowOAM[MaxObjs];
+
     OamManager() {}
     void init() { oam_init(shadowOAM, MaxObjs); }
     void copyToOAM();
+
+    void pushAttrs(u16 attr0, u16 attr1, u16 attr2, u16 prio = 0);
 
     void pushRegular(vec2<int> pos, SpriteSize size, int tileId, int palIndex,
         int bgPrio, SpriteFlip flip, GfxMode mode, bool mosaic, int objPrio = 0)
