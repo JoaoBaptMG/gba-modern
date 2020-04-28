@@ -4,10 +4,10 @@
 @ Provides an API for context switching (a primitive form of coroutines)
 @--------------------------------------------------------------------------------
 
-@ [context_t, void*] context_switch_asm(context_t ctx, void* arg)
+@ context_t context_switch_asm(context_t ctx)
 @ switches to the context ctx, passing arg through it, returning the original
 @ context on the other side
-@ ctx: r0, arg: r1
+@ ctx: r0
     .section .iwram, "ax", %progbits
     .align 2
     .arm
