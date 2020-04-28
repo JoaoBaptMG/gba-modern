@@ -51,17 +51,16 @@ void PlayerProjectiles::update()
             if (projectiles[i].type == NoProjectile) continue;
 
             const auto& ptype = ProjectileTypes[projectiles[i].type];
-            using CollisionFunction = bool(*)(vec2<s16f7> pos1, s16f7 r1, vec2<s16f7> pos2, const void* payload2);
+            using CollisionFunction = bool(*)(vec2<s16f7>, s16f7, vec2<s16f7>, vec2<s16f7>);
             CollisionFunction collision;
 
             switch (enemy.shape)
             {
                 case CollisionShape::Circle: collision = reinterpret_cast<CollisionFunction>(circleCircleCollision); break;
                 case CollisionShape::Box: collision = reinterpret_cast<CollisionFunction>(circleBoxCollision); break;
-                case CollisionShape::Polygon: break;
             }
 
-            if (collision(projectiles[i].pos, ptype.halfSize.x, epos, enemy.polygonData))
+            if (collision(projectiles[i].pos, ptype.halfSize.x, epos, enemy.halfSize))
             {
                 if (enemy.damage())
                 {

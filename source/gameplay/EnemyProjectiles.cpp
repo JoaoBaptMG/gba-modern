@@ -54,7 +54,6 @@ void EnemyProjectiles::update()
         {
             case CollisionShape::Circle: collision = reinterpret_cast<CollisionFunction>(circleCircleCollision); break;
             case CollisionShape::Box: collision = reinterpret_cast<CollisionFunction>(circleBoxCollision); break;
-            case CollisionShape::Polygon: break;
         }
 
         if (collision(ppos, PlayerTargetRadius, projectiles[i].pos, ptype.halfSize))

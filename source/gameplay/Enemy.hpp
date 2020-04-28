@@ -36,7 +36,6 @@ public:
     {
         s16f7 radius;
         vec2<s16f7> halfSize;
-        const PolygonData* polygonData;
     };
     
     StillImagePointer imagePtr;          // 4 bytes
