@@ -18,7 +18,7 @@ int backgroundExport(int argc, char **argv)
     std::string outh = argv[4];
 
     // Load the image
-    auto image = convertPngToCharacters8bpp(in);
+    auto image = convertImageToCharacters8bpp(loadPngToImage(in));
 
     // Load the companion .json file
     std::ifstream inf;

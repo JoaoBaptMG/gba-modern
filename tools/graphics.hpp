@@ -8,6 +8,18 @@ inline static constexpr Color makeColor(std::uint8_t r, std::uint8_t g, std::uin
     return (r >> 3) | ((g >> 3) << 5) | ((b >> 3) << 10);
 }
 
+struct Image8bpp
+{
+    std::vector<std::uint8_t> image;
+    unsigned int width, height;
+    std::vector<Color> palette;
+
+    std::uint8_t operator()(std::size_t x, std::size_t y) const
+    {
+        return image[width*y + x];
+    }
+};
+
 constexpr std::size_t CharSize4bpp = 32;
 using Character4bpp = std::array<std::uint8_t, CharSize4bpp>;
 
@@ -27,8 +39,16 @@ enum class Reverse { None, Horizontal, Vertical, HorizontalVertical };
 using CharacterData4bpp = CharacterData<CharSize4bpp, 16>;
 using CharacterData8bpp = CharacterData<CharSize8bpp, 256>;
 
-CharacterData4bpp convertPngToCharacters4bpp(std::string filename, std::size_t maxColors = 16, bool preserveOrder = false);
-CharacterData8bpp convertPngToCharacters8bpp(std::string filename, std::size_t maxColors = 256, bool preserveOrder = false);
+struct Bitmask
+{
+    std::vector<std::uint16_t> data;
+    std::size_t hwidth, hheight;
+};
+
+Image8bpp loadPngToImage(std::string filename);
+CharacterData4bpp convertImageToCharacters4bpp(const Image8bpp& image, std::size_t maxColors = 16, bool preserveOrder = false);
+CharacterData8bpp convertImageToCharacters8bpp(const Image8bpp& image, std::size_t maxColors = 256, bool preserveOrder = false);
+Bitmask generateImageBitmask(const Image8bpp& image);
 
 Character4bpp reverseCharacter(Character4bpp ch, Reverse reverse);
 Character8bpp reverseCharacter(Character8bpp ch, Reverse reverse);

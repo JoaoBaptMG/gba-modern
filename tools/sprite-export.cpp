@@ -31,14 +31,16 @@ void from_json(const nlohmann::json& j, AnimationPose& af)
 template <typename T>
 void writeCharData(std::ostream& of, const State& state, const T& charData);
 template <typename T>
-void writeHeaderData(std::ostream& hof, const State& state, const T& charData);
+void writeHeaderData(std::ostream& hof, const State& state, const T& charData, bool generateBitmask);
 
 void writeCharAnimationData(std::ofstream& of, const State& state, std::size_t totalNumFrames);
 
 using AnimationData = std::map<std::string, AnimationPose>;
 template <typename T>
 void writeAnimatedHeaderData(std::ostream &hof, const State &state, const T& charData,
-    const AnimationData &animations, std::size_t frameStep, std::size_t totalNumFrames);
+    const AnimationData &animations, std::size_t frameStep, std::size_t totalNumFrames, bool generateBitmask);
+
+void writeBitmaskData(std::ostream& of, const Bitmask& bitmask);
 
 int spriteExport(int argc, char **argv)
 {
@@ -55,6 +57,7 @@ int spriteExport(int argc, char **argv)
     std::size_t maxColors = 16;
     bool preserveOrder = false;
     bool exportAnimation = false;
+    bool generateBitmask = false;
     AnimationData animations;
     std::size_t frameStep;
     if (mdin.good())
@@ -68,6 +71,7 @@ int spriteExport(int argc, char **argv)
         if (j.contains("max-colors")) j.at("max-colors").get_to(maxColors);
         if (j.contains("preserve-order")) j.at("preserve-order").get_to(preserveOrder);
         if (j.contains("export-palette")) j.at("export-palette").get_to(state.exportPalette);
+        if (j.contains("generate-bitmask")) j.at("generate-bitmask").get_to(generateBitmask);
         if (j.contains("animation-poses") && j.contains("animation-frames"))
         {
             exportAnimation = true;
@@ -109,18 +113,21 @@ int spriteExport(int argc, char **argv)
         charData.palette[0] = 0;
         writeCharData(of, state, charData);
 
-        if (!exportAnimation) writeHeaderData(hof, state, charData);
+        if (!exportAnimation) writeHeaderData(hof, state, charData, generateBitmask);
         else
         {
             auto framesX = (charData.chars.width() + state.groupWidth - 1) / state.groupWidth;
             auto framesY = (charData.chars.height() + state.groupHeight - 1) / state.groupHeight;
             writeCharAnimationData(of, state, framesX * framesY);
-            writeAnimatedHeaderData(hof, state, charData, animations, frameStep, framesX * framesY);
+            writeAnimatedHeaderData(hof, state, charData, animations, frameStep, framesX * framesY, generateBitmask);
         } 
     };
 
-    if (!is8bpp) exportChars(convertPngToCharacters4bpp(in, maxColors, preserveOrder));
-    else exportChars(convertPngToCharacters8bpp(in, maxColors, preserveOrder));
+    auto image = loadPngToImage(in);
+    if (!is8bpp) exportChars(convertImageToCharacters4bpp(image, maxColors, preserveOrder));
+    else exportChars(convertImageToCharacters8bpp(image, maxColors, preserveOrder));
+
+    if (generateBitmask) writeBitmaskData(of, generateImageBitmask(image));
 
     of.close();
     hof.close();
@@ -161,7 +168,7 @@ void writeCharData(std::ostream& of, const State& state, const T& charData)
         std::size_t index = 0;
         for (Color c : charData.palette)
         {
-            if (index % 16 == 0) of << std::endl << "    .hword ";
+            if (index % 8 == 0) of << std::endl << "    .hword ";
             else of << ", ";
             of << toHex(c, 4);
             index++;
@@ -180,7 +187,7 @@ void writeCharAnimationData(std::ofstream& of, const State& state, std::size_t t
 }
 
 template <typename T>
-void writeHeaderData(std::ostream& hof, const State& state, const T& charData)
+void writeHeaderData(std::ostream& hof, const State& state, const T& charData, bool generateBitmask)
 {
     hof << "namespace " << state.name.nmspace << std::endl;
     hof << '{' << std::endl;
@@ -188,7 +195,8 @@ void writeHeaderData(std::ostream& hof, const State& state, const T& charData)
     std::size_t charSize = charData.chars.width() * charData.chars.height() * charData.chars.at(0, 0).size();
     std::size_t paletteSize = state.exportPalette ? charData.palette.size() : 0;
 
-    hof << "    extern const DataPng<" << charSize << ',' << paletteSize << "> ";
+    auto structName = generateBitmask ? "BitmaskPng" : "DataPng";
+    hof << "    extern const " << structName << "<" << charSize << ", " << paletteSize << "> ";
     hof << state.name.fileName << ';' << std::endl;
 
     hof << '}' << std::endl << std::endl;
@@ -196,7 +204,7 @@ void writeHeaderData(std::ostream& hof, const State& state, const T& charData)
 
 template <typename T>
 void writeAnimatedHeaderData(std::ostream &hof, const State &state, const T& charData,
-    const AnimationData &animations, std::size_t frameStep, std::size_t totalNumFrames)
+    const AnimationData &animations, std::size_t frameStep, std::size_t totalNumFrames, bool generateBitmask)
 {
     hof << "namespace " << state.name.nmspace << std::endl;
     hof << '{' << std::endl;
@@ -215,8 +223,24 @@ void writeAnimatedHeaderData(std::ostream &hof, const State &state, const T& cha
     std::size_t charSize = charData.chars.width() * charData.chars.height() * charData.chars.at(0, 0).size();
     std::size_t paletteSize = state.exportPalette ? charData.palette.size() : 0;
 
-    hof << "    extern const AnimatedPng<" << charSize << ',' << paletteSize << ',' << totalNumFrames;
+    auto structName = generateBitmask ? "AnimatedBitmaskPng" : "AnimatedPng";
+    hof << "    extern const " << structName << "<" << charSize << ", " << paletteSize << ", " << totalNumFrames;
     hof << ", __animation_" << state.name.fileName << "> " << state.name.fileName << ';' << std::endl;
 
     hof << '}' << std::endl << std::endl;
+}
+
+void writeBitmaskData(std::ostream& of, const Bitmask& bitmask)
+{
+    of << "    .hword " << toHex(bitmask.hwidth << 7, 4) << ", " << toHex(bitmask.hheight << 7, 4);
+
+    std::size_t index = 0;
+    for (std::uint16_t d : bitmask.data)
+    {
+        if (index % 8 == 0) of << std::endl << "    .hword ";
+        else of << ", ";
+        of << toHex(d, 4);
+        index++;
+    }
+    of << std::endl;
 }

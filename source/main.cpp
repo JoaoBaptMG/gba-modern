@@ -7,7 +7,7 @@
 
 #include "scenes/IScene.hpp"
 #include "gameplay/GameScene.hpp"
-#include "scenes/ContextTestScene.hpp"
+#include "scenes/BitmaskTestScene.hpp"
 #include "graphics/graphics.hpp"
 #include "math/fixed.hpp"
 #include "memory/allocator.hpp"
@@ -33,7 +33,7 @@ int main()
 
     mgba::enable();
     // Change to the main game scene
-    scene.push<GameScene>();
+    scene.push<BitmaskTestScene>();
 
     while (1)
     {
