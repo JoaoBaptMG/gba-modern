@@ -9,8 +9,7 @@
 #include "graphics/StillImagePointer.hpp"
 #include "graphics/PalettePointer.hpp"
 
-#include "math/fixedmath.hpp"
-#include "math/gcem-degrees.hpp"
+#include "gameplay/vecUtils.hpp"
 #include "gameplay/GameScene.hpp"
 
 // Declaration
@@ -65,19 +64,12 @@ void wobblingEnemyDown(Enemy& enemy, GameScene& gameScene)
 
 constexpr s16f7 WobblingProjectileSpeed = 3;
 
-constexpr s32f<10> Cos15 = gcem_d::cos(15);
-constexpr s32f<10> Sin15 = gcem_d::sin(15);
-
 void shootTowardsPlayer(Enemy& enemy, GameScene& gameScene)
 {
     // get the difference and normalize it
-    auto diff = gameScene.player.pos - enemy.pos;
-    auto distsq = vec2<s32f8>(diff).lensq();
-    auto recdist = reciprocal(sqrt(distsq)).with_exp<8>();
-    diff *= recdist;
-
-    auto diffp = vec2<s32f16>(diff.x * Cos15 + diff.y * Sin15, -diff.x * Sin15 + diff.y * Cos15);
-    auto diffm = vec2<s32f16>(diff.x * Cos15 - diff.y * Sin15, diff.x * Sin15 + diff.y * Cos15);
+    auto diff = vec_utils::normalizeLowp(gameScene.player.pos - enemy.pos);
+    auto diffp = vec_utils::rotate_d<15>(diff);
+    auto diffm = vec_utils::rotate_d<-15>(diff);
 
     for (auto vec : { diff, diffp, diffm })
     {

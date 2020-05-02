@@ -33,7 +33,7 @@ int main()
 
     mgba::enable();
     // Change to the main game scene
-    scene.push<BitmaskTestScene>();
+    scene.push<GameScene>();
 
     while (1)
     {

@@ -8,6 +8,7 @@
 
 #include "wobblingEnemies.hpp"
 #include "wavingEnemy.hpp"
+#include "bigLurker.hpp"
 
 void level1(LevelContext& level)
 {
@@ -28,6 +29,9 @@ void level1(LevelContext& level)
             { wavingEnemy(enemy, gameScene, fts); });
         level.after(0.3);
     }
+
+    level.at(16);
+    level.gameScene().addEnemy([](Enemy& enemy, GameScene& gameScene) { bigLurker(enemy, gameScene, 40); });
 
     level.atEndOfLevel();
 }

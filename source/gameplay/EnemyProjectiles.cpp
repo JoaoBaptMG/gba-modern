@@ -19,6 +19,7 @@ static const ProjectileType ProjectileTypes[] =
 {
     { CollisionShape::Circle, vec2<s16f7>(2, 2), buildSpriteAttrsFor(0, SpriteSize::s8x8_4bpp, EnemyProjectilePriority) },
     { CollisionShape::Box, vec2<s16f7>(3, 1), buildSpriteAttrsFor(1, SpriteSize::s8x8_4bpp, EnemyProjectilePriority) },
+    { CollisionShape::Circle, vec2<s16f7>(3, 3), buildSpriteAttrsFor(2, SpriteSize::s8x8_4bpp, EnemyProjectilePriority) },
 };
 
 static SinglePaletteAllocator palette EWRAM_BSS(data::sprites::enemy_projectiles.png.palette);
@@ -30,7 +31,7 @@ void EnemyProjectiles::init()
     numProjectiles = 0;
 
     // Initialize the graphics pointers
-    tilePtr = ObjectTilePointer(SpriteSize::s16x8_4bpp);
+    tilePtr = ObjectTilePointer(SpriteSize::s32x8_4bpp);
     tilePtr.setData(data::sprites::enemy_projectiles.png.tiles);
 
     palPtr = SinglePalettePointer(palette);

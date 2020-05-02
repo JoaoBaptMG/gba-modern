@@ -36,6 +36,7 @@ public:
     {
         s16f7 radius;
         vec2<s16f7> halfSize;
+        const BitmaskData* bitmask;
     };
     
     StillImagePointer imagePtr;          // 4 bytes
@@ -59,10 +60,10 @@ public:
     inline bool done() const
     { 
         if (curCtx) return false;
-        
-        return pos.x < -radius/2 || pos.x > SCREEN_WIDTH + radius/2 ||
-            pos.y < -radius/2 || pos.y > SCREEN_HEIGHT + radius/2;
+        return !onScreen();
     }
+
+    bool onScreen() const;
 
     bool damage(int amount = 1);
 

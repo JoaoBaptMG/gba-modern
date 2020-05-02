@@ -25,8 +25,8 @@ constexpr s16f7 ProjectileSpeed = 4.0;
 
 void wavingEnemy(Enemy& enemy, GameScene& gameScene, u32 frameToShoot)
 {
-    enemy.shape = CollisionShape::Box;
-    enemy.halfSize = vec2<s16f7>(8, 8);
+    enemy.shape = CollisionShape::Bitmask;
+    enemy.bitmask = &data::sprites::waving_enemy.png.bitmask;
     enemy.sprSize = SpriteSize::s16x16_4bpp;
     enemy.imagePtr = StillImagePointer(image);
     enemy.palPtr = SinglePalettePointer(palette);

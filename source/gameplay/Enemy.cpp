@@ -89,6 +89,23 @@ bool Enemy::damage(int amount)
     else return true;
 }
 
+bool Enemy::onScreen() const
+{
+    switch (shape)
+    {
+        case CollisionShape::Circle:
+            return abs(pos.x - SCREEN_WIDTH/2) < SCREEN_WIDTH/2 + radius && 
+                abs(pos.y - SCREEN_HEIGHT/2) < SCREEN_HEIGHT/2 + radius;
+        case CollisionShape::Box:
+            return abs(pos.x - SCREEN_WIDTH/2) < SCREEN_WIDTH/2 + halfSize.x && 
+                abs(pos.y - SCREEN_HEIGHT/2) < SCREEN_HEIGHT/2 + halfSize.y;
+        case CollisionShape::Bitmask:
+            return abs(pos.x - SCREEN_WIDTH/2) < SCREEN_WIDTH/2 + bitmask->halfSize.x && 
+                abs(pos.y - SCREEN_HEIGHT/2) < SCREEN_HEIGHT/2 + bitmask->halfSize.y;
+        default: return false;
+    }
+}
+
 Enemy::~Enemy()
 {
     if (curCtx)
