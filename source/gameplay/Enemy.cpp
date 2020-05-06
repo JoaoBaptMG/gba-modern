@@ -91,19 +91,18 @@ bool Enemy::damage(int amount)
 
 bool Enemy::onScreen() const
 {
+    vec2<s16f7> comparison{};
+
     switch (shape)
     {
-        case CollisionShape::Circle:
-            return abs(pos.x - SCREEN_WIDTH/2) < SCREEN_WIDTH/2 + radius && 
-                abs(pos.y - SCREEN_HEIGHT/2) < SCREEN_HEIGHT/2 + radius;
-        case CollisionShape::Box:
-            return abs(pos.x - SCREEN_WIDTH/2) < SCREEN_WIDTH/2 + halfSize.x && 
-                abs(pos.y - SCREEN_HEIGHT/2) < SCREEN_HEIGHT/2 + halfSize.y;
-        case CollisionShape::Bitmask:
-            return abs(pos.x - SCREEN_WIDTH/2) < SCREEN_WIDTH/2 + bitmask->halfSize.x && 
-                abs(pos.y - SCREEN_HEIGHT/2) < SCREEN_HEIGHT/2 + bitmask->halfSize.y;
+        case CollisionShape::Circle: comparison = vec2(radius, radius); break;
+        case CollisionShape::Box: comparison = halfSize; break;
+        case CollisionShape::Bitmask: comparison = bitmask->halfSize; break;
         default: return false;
     }
+
+    return abs(pos.x - SCREEN_WIDTH/2) < SCREEN_WIDTH/2 + comparison.x && 
+        abs(pos.y - SCREEN_HEIGHT/2) < SCREEN_HEIGHT/2 + comparison.y;
 }
 
 Enemy::~Enemy()
