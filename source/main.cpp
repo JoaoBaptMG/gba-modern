@@ -12,6 +12,7 @@
 #include "math/fixed.hpp"
 #include "memory/allocator.hpp"
 #include "text/mGBADebugging.hpp"
+#include "audio/audio.hpp"
 
 SceneStack scene EWRAM_BSS;
 bool popScene EWRAM_BSS;
@@ -27,6 +28,9 @@ int main()
 
     // Init the graphics module
     graphics::init();
+
+    // Init the audio module
+    audio::init();
 
     // Force a VBlank
     REG_DISPCNT = DCNT_BLANK;
@@ -47,6 +51,7 @@ int main()
         scene.top()->vblank();
 
         graphics::update();
+        audio::mix();
         key_poll();
 
         // Update the scene and change scenes if required

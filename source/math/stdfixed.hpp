@@ -40,3 +40,6 @@ using s64f32 = s64f<32>;
 
 // Used for position of the player, enemies and projectiles
 using s16f7 = s16f<7>;
+
+// Used for audio positioning
+using u32f12 = u32f<12>;

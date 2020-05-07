@@ -31,12 +31,16 @@ SRC_OFILES = $(addprefix build/, $(C_FILES:.c=.o) $(CPP_FILES:.cpp=.o) $(S_FILES
 SPR_FILES := $(call rwildcard, data/sprites/, *.png)
 BKG_FILES := $(call rwildcard, data/backgrounds/, *.png)
 FNT_FILES := $(call rwildcard, data/fonts/, *.ttf)
+AUS_FILES := data/audio.json
+SND_FILES := $(call rwildcard, data/sounds/, *.wav)
 
 # Resource objects
-RSRC_OFILES := $(addprefix build/, $(SPR_FILES:.png=.o) $(BKG_FILES:.png=.o) $(FNT_FILES:.ttf=.o)) 
+RSRC_OFILES := $(addprefix build/, $(SPR_FILES:.png=.o) $(BKG_FILES:.png=.o) $(FNT_FILES:.ttf=.o)\
+	$(SND_FILES:.wav=.o)) 
 
 # Resource headers
-RSRC_HFILES := $(addprefix build/, $(SPR_FILES:.png=.hpp) $(BKG_FILES:.png=.hpp) $(FNT_FILES:.ttf=.hpp))
+RSRC_HFILES := $(addprefix build/, $(SPR_FILES:.png=.hpp) $(BKG_FILES:.png=.hpp) $(FNT_FILES:.ttf=.hpp)\
+	data/audio-settings.hpp $(SND_FILES:.wav=.hpp))
 
 # Helper variables
 OFILES := $(RSRC_OFILES) $(SRC_OFILES)
@@ -94,7 +98,7 @@ bin/game.gba: download-deps build-tools tools/tools bin/game.elf
 	@$(ARMOC) -O binary $(@:.gba=.elf) $@
 	@tools/tools rom-sanitize $@ gba.json $@
 
-bin/game.elf: $(OFILES)
+bin/game.elf: build/data/audio-settings.hpp $(OFILES)
 	@mkdir -p bin
 	@echo "Linking"
 	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) $(LIBRARIES) -o $@
@@ -117,6 +121,14 @@ build/data/backgrounds/%.s build/data/backgrounds/%.hpp: data/backgrounds/%.png 
 build/data/fonts/%.s build/data/fonts/%.hpp: data/fonts/%.ttf data/fonts/%.ttf.json tools/tools
 	@mkdir -p $(@D)
 	tools/tools font-export $(filter %.ttf,$^) $(basename $@).s $(basename $@).hpp
+
+build/data/audio-settings.hpp build/data/audio-settings.json: data/audio.json tools/tools 
+	@mkdir -p $(@D)
+	tools/tools audio-export-settings $(filter %.json,$^) $(basename $@).hpp $(basename $@).json
+
+build/data/sounds/%.s build/data/sounds/%.hpp: data/sounds/%.wav build/data/audio-settings.json tools/tools
+	@mkdir -p $(@D)
+	tools/tools sound-export $(filter %.wav,$^) $(basename $@).s $(basename $@).hpp build/data/audio-settings.json
 
 # Source files
 build/%.iwram.o: %.iwram.cpp

@@ -6,13 +6,17 @@ int spriteExport(int argc, char **argv);
 int backgroundExport(int argc, char **argv);
 int fontExport(int argc, char **argv);
 int romSanitize(int argc, char **argv);
+int audioExportSettings(int argc, char **argv);
+int soundExport(int argc, char **argv);
 
 const std::map<std::string, Tool> toolList =
 {
     { "sprite-export", spriteExport },
     { "background-export", backgroundExport },
     { "font-export", fontExport },
-    { "rom-sanitize", romSanitize }
+    { "rom-sanitize", romSanitize },
+    { "audio-export-settings", audioExportSettings },
+    { "sound-export", soundExport }
 };
 
 int main(int argc, char **argv)
