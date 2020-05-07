@@ -9,6 +9,9 @@
 #include "data/sprites/player.hpp"
 #include "math/gcem-degrees.hpp"
 
+#include "audio/audio.hpp"
+#include "data/sounds/player-shot.hpp"
+
 constexpr int PlayerPriority = 8;
 constexpr s32f16 PlayerSpeed = 1.0; // pixels per frame
 constexpr int CommonCooldown = 8; // frames
@@ -61,6 +64,8 @@ void Player::update()
             
             gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2 - 4, pos.y - 6),
                 vec2<s16f7>(Cos5 * ProjectileSpeed, -Sin5 * ProjectileSpeed), 0);
+
+            audio::playSound(data::sounds::player_shot.wav);
         }
     }
 }
