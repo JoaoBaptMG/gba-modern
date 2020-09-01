@@ -10,17 +10,19 @@ C_FILES   		:= $(wildcard *.c)
 CPP_FILES 		:= $(wildcard *.cpp)
 O_FILES			:= $(C_FILES:%.c=obj/%.o) $(CPP_FILES:%.cpp=obj/%.o)
 
-C_FLAGS		:= -Wall -g -I/usr/include/freetype2
+C_FLAGS		:= -Wall -g -I/usr/include/freetype2 -I../libsamplerate-install/include
 CPP_FLAGS	:= $(C_FLAGS) -std=c++17
-LIBS 		:= -lfreetype
+LIBS 		:= -lfreetype ../libsamplerate-install/lib/libsamplerate.a
 
 PCH_SRC		:= pch.hpp
 PCH_INC		:= grid.hpp lodepng.h nlohmann/json.hpp util.hpp
 PCH_OUT		:= pch.hpp.gch
 
+LSRC_INSTALL_FOLDER = $(dir $(CURDIR))libsamplerate-install
+
 .PHONY: all clean
 
-all: objdir tools
+all: tools
 
 $(PCH_OUT): $(PCH_SRC) $(PCH_INC)
 	$(CXX) $(CPP_FLAGS) -o $@ $<
@@ -28,16 +30,18 @@ $(PCH_OUT): $(PCH_SRC) $(PCH_INC)
 -include obj/*.d
 
 obj/%.o: %.c $(PCH_OUT)
+	@mkdir -p obj
 	$(CC) -MMD $(C_FLAGS) -include $(PCH_SRC) -c -o $@ $<
 
 obj/%.o: %.cpp $(PCH_OUT)
+	@mkdir -p obj
 	$(CXX) -MMD $(CPP_FLAGS) -include $(PCH_SRC) -c -o $@ $<
 
-tools: $(O_FILES)
-	$(CXX) $(CPP_FLAGS) -o $@ $^ $(LIBS)
+tools: ../libsamplerate-install $(O_FILES)
+	$(CXX) $(CPP_FLAGS) -o $@ $(O_FILES) $(LIBS)
 
-objdir:
-	@mkdir -p obj
+../libsamplerate-install: ../libsamplerate
+	cd ../libsamplerate && ./configure --prefix $(LSRC_INSTALL_FOLDER) && make && make install
 
 clean:
 	@rm -rf obj

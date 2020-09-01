@@ -67,6 +67,10 @@ ifeq ($(UNAME_S),Darwin)
 endif
 GCC_DEST := gcc-arm-none-eabi-9-2019-q4-major
 
+# Link to libsamplerate
+LSRC_VERSION = 0.1.9
+LSRC_URL = http://www.mega-nerd.com/SRC/libsamplerate-$(LSRC_VERSION).tar.gz
+
 # Path to the tools used
 ARMCC := $(GCC_DEST)/bin/arm-none-eabi-gcc
 ARMCPP := $(GCC_DEST)/bin/arm-none-eabi-g++
@@ -151,7 +155,7 @@ build/%.o: %.s
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
 
-download-deps: $(GCC_DEST) tonc
+download-deps: $(GCC_DEST) tonc libsamplerate
 
 # Pull tonc
 tonc: tonc.zip
@@ -170,10 +174,18 @@ endif
 gcc.tar.bz2:
 	wget $(GCC_URL) -O gcc.tar.bz2
 
+# Pull libsamplerate
+libsamplerate: libsamplerate.tar.gz
+	mkdir libsamplerate
+	tar xzf libsamplerate.tar.gz -C libsamplerate --strip-components 1
+
+libsamplerate.tar.gz:
+	wget $(LSRC_URL) -O libsamplerate.tar.gz
+
 # Tools
 tools/tools: build-tools
 
-build-tools:
+build-tools: libsamplerate
 	$(MAKE) -C tools
 
 clean:
@@ -185,4 +197,4 @@ clean-everything:
 
 clean-downloads:
 	$(MAKE) -C tools clean
-	rm -rf bin build tonc* gcc*
+	rm -rf bin build tonc* gcc* libsamplerate
