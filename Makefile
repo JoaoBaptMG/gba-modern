@@ -56,26 +56,28 @@ UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	UNAME_P := $(shell uname -p)
 	ifeq ($(UNAME_P),x86_64)
-		GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2
+		GCC_PLATFORM := x86_64-linux
 	endif
 	ifneq ($(filter arm%,$(UNAME_P)),)
-		GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-aarch64-linux.tar.bz2
+		GCC_PLATFORM := aarch64-linux
 	endif
 endif
 ifeq ($(UNAME_S),Darwin)
-	GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-mac.tar.bz2
+	GCC_PLATFORM := mac
 endif
-GCC_DEST := gcc-arm-none-eabi-9-2019-q4-major
+GCC_PREFIX := 10-2020q2
+GCC_NAME := gcc-arm-none-eabi-10-2020-q2-preview
+GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu-rm/$(GCC_PREFIX)/$(GCC_NAME)-$(GCC_PLATFORM).tar.bz2
 
 # Link to libsamplerate
 LSRC_VERSION = 0.1.9
 LSRC_URL = http://www.mega-nerd.com/SRC/libsamplerate-$(LSRC_VERSION).tar.gz
 
 # Path to the tools used
-ARMCC := $(GCC_DEST)/bin/arm-none-eabi-gcc
-ARMCPP := $(GCC_DEST)/bin/arm-none-eabi-g++
-ARMOC := $(GCC_DEST)/bin/arm-none-eabi-objcopy
-ARMOD := $(GCC_DEST)/bin/arm-none-eabi-objdump
+ARMCC := gcc/bin/arm-none-eabi-gcc
+ARMCPP := gcc/bin/arm-none-eabi-g++
+ARMOC := gcc/bin/arm-none-eabi-objcopy
+ARMOD := gcc/bin/arm-none-eabi-objdump
 
 # Get the right linker
 ifeq ($(strip $(CPPFILES)),)
@@ -155,7 +157,7 @@ build/%.o: %.s
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
 
-download-deps: $(GCC_DEST) tonc libsamplerate
+download-deps: gcc tonc libsamplerate
 
 # Pull tonc
 tonc: tonc.zip
@@ -165,19 +167,18 @@ tonc.zip:
 	wget $(TONC_URL) -O tonc.zip
 
 # Pull gcc
-$(GCC_DEST): gcc.tar.bz2
-ifeq (,$(GCC_URL))
-	$(error "This platform does not have a prebuilt arm-none-eabi; try to compile it from source and place it at $(GCC_DEST)")
+gcc: gcc.tar.bz2
+ifeq (,$(GCC_PLATFORM))
+	$(error "This platform does not have a prebuilt arm-none-eabi; try to compile it from source and place it at $(GCC_NAME)")
 endif
-	tar xjf gcc.tar.bz2
+	mkdir gcc && tar xjf gcc.tar.bz2 -C gcc --strip-components 1
 
 gcc.tar.bz2:
 	wget $(GCC_URL) -O gcc.tar.bz2
 
 # Pull libsamplerate
 libsamplerate: libsamplerate.tar.gz
-	mkdir libsamplerate
-	tar xzf libsamplerate.tar.gz -C libsamplerate --strip-components 1
+	mkdir libsamplerate && tar xzf libsamplerate.tar.gz -C libsamplerate --strip-components 1
 
 libsamplerate.tar.gz:
 	wget $(LSRC_URL) -O libsamplerate.tar.gz
@@ -197,4 +198,4 @@ clean-everything:
 
 clean-downloads:
 	$(MAKE) -C tools clean
-	rm -rf bin build tonc* gcc* libsamplerate
+	rm -rf bin build tonc* gcc* libsamplerate*
