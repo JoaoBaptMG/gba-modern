@@ -1,4 +1,5 @@
 #include "pch.hpp"
+#include "resample.hpp"
 
 bool checkMagic(std::ifstream& in, const char* magic)
 {
@@ -63,8 +64,7 @@ int soundExport(int argc, char  **argv)
          throw std::domain_error("File " + in + " must have a single channel!");
 
     auto sourceSampleRate = readFrom<std::uint32_t>(win);
-    if (sourceSampleRate != samplingFreq)
-        throw std::domain_error("File " + in + " must have a matching sampling rate (" + std::to_string(samplingFreq) + " Hz)!");
+    bool changeSampleRate = sourceSampleRate != samplingFreq;
 
     auto byteRate = readFrom<std::uint32_t>(win);
     auto blockAlign = readFrom<std::uint16_t>(win);
@@ -90,15 +90,18 @@ int soundExport(int argc, char  **argv)
         throw std::domain_error("Inconsistent size for file " + in + "!");
 
     auto numSamples = dataSize / (bitsPerSample / 8);
-    std::vector<int> originalData(numSamples);
+    std::vector<float> soundData(numSamples);
 
-    for (int& val : originalData)
+    for (float& val : soundData)
     {
         if (bitsPerSample == 8)
-            val = readFrom<std::uint8_t>(win) - 128;
+            val = (readFrom<std::int8_t>(win) - 128) / 256.0;
         else if (bitsPerSample == 16)
-            val = readFrom<std::int16_t>(win) / 256;
+            val = (readFrom<std::int16_t>(win) / 32767.0);
     }
+
+    if (changeSampleRate)
+        soundData = resampleMono(soundData, sourceSampleRate, samplingFreq);
 
     auto name = deriveSpecialName(in);
 
@@ -116,11 +119,13 @@ int soundExport(int argc, char  **argv)
         of << "    .hidden " << name.mangledName << std::endl;
         of << name.mangledName << ':' << std::endl;
 
-        of << "    .word " << toHex(numSamples << 12) << ", 0";
+        of << "    .word " << toHex(soundData.size() << 12) << ", 0";
 
         std::size_t index = 0;
-        for (int& v : originalData)
+        for (float& sample : soundData)
         {
+            int v = sample * 127.0f;
+
             if (index % 16 == 0) of << std::endl << "    .byte ";
             else of << ", ";
             of << toHex(v & 0xFF, 2);
