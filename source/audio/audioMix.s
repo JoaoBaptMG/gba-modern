@@ -60,6 +60,9 @@ audioMix:
 
     ldr     r8, [r4], #8            @ load the loop size
     mov     r9, #BUFFER_SIZE        @ get the buffer size
+    mla     r10, r6, r9, r5         @ compute the final position
+    cmp     r10, r8                 @ check if it will be less than the final size
+    blt     .perSampleOptimized     @ go to the optimized routine if so
 
 .perSample:
     mov     r10, r5, lsr #12        
@@ -82,6 +85,18 @@ audioMix:
 .continueProcessing:
     subs    r9, #1                  @ subtract one in the number of iterations
     bne     .perSample              @ and go back if there's still work to do
+    b       .finishProcessing
+
+.perSampleOptimized:                @ an optimized version that does not check every time for the size
+    mov     r10, r5, lsr #12        
+    ldrsb   r10, [r4, r10]          @ get the next sample
+    mul     r10, r7, r10            @ modulate it
+    ldrh    r11, [r0]               @ get the current value
+    add     r11, r10, asr #6        @ add the modulated value to it
+    strh    r11, [r0], #2           @ and store back to the buffer
+    add     r5, r5, r6              @ add the increment
+    subs    r9, #1                  @ subtract one in the number of iterations
+    bne     .perSampleOptimized     @ and go back if there's still work to do
 
 .finishProcessing:
     str     r5, [r2, #-12]          @ store the position back
