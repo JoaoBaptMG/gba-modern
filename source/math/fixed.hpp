@@ -28,7 +28,7 @@ public:
     template <typename T2, std::size_t M>
     friend class fixed;
 
-    static constexpr fixed epsilon = fixed(direct, 1);
+    static constexpr auto epsilon() noexcept { return fixed(direct, 1); }
 
     constexpr fixed() = default;
     constexpr fixed(const Ty& v) : value(v << N) {}
@@ -595,7 +595,4 @@ namespace std
 {
     template <typename Ty, std::size_t N>
     struct is_arithmetic<fixed<Ty, N>> : std::true_type {};
-
-    template <typename Ty, std::size_t N>
-    struct is_integral<fixed<Ty, N>> : std::true_type {};
 }

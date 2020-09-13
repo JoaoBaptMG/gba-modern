@@ -10,7 +10,7 @@
 template <typename T>
 struct vec2 final
 {
-    static_assert(std::is_integral_v<T>, "vec2 only works properly with integral types (including fixed)!");
+    static_assert(std::is_arithmetic_v<T>, "vec2 only works properly with arithmetic types (including fixed)!");
 
     T x, y;
 
