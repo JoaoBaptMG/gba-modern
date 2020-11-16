@@ -11,6 +11,7 @@
 
 #include "audio/audio.hpp"
 #include "data/sounds/player-shot.hpp"
+#include "data/sounds/player-dmg.hpp"
 
 constexpr int PlayerPriority = 8;
 constexpr s32f16 PlayerSpeed = 1.0; // pixels per frame
@@ -65,7 +66,7 @@ void Player::update()
             gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2 - 4, pos.y - 6),
                 vec2<s16f7>(Cos5 * ProjectileSpeed, -Sin5 * ProjectileSpeed), 0);
 
-            audio::playSound(data::sounds::player_shot.wav);
+            audio::playSound(data::sounds::player_shot.wav, 12);
         }
     }
 }
@@ -89,6 +90,7 @@ void Player::damage(int amount)
     {
         health -= amount;
         invCounter = 120;
+        audio::playSound(data::sounds::player_dmg.wav, 12);
     }
     else
     {

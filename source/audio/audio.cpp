@@ -22,8 +22,7 @@ static u32 curFrame;
 struct AudioChannel
 {
     const Sound* sound;
-    u32f12 pos, inc;
-    u32 volume;
+    u32 pos, volume;
 };
 
 AudioChannel audioChannels[audio::NumChannels];
@@ -33,6 +32,11 @@ static void audioVblank();
 
 void audio::init()
 {
+    // Clear all the memory
+    memset32(&audioMixBuffers[0][0], 0, audio::BufferSize / sizeof(u32));
+    curAudioMixBuffer = &audioMixBuffers[0][0];
+    curFrame = 0;
+
     // Use only a single DMA
     REG_DMA1CNT = DMA_DST_FIXED | DMA_REPEAT | DMA_32 | DMA_AT_FIFO | DMA_ENABLE;
     REG_DMA1DAD = (u32)&REG_FIFO_A;
@@ -43,10 +47,6 @@ void audio::init()
     // Set the sound registers: direct sound on mono
     REG_SNDSTAT = SSTAT_ENABLE;
     REG_SNDDSCNT = SDS_DMG100 | SDS_A100 | SDS_AL | SDS_AR | SDS_ATMR0 | SDS_ARESET;
-
-    // Clear all the memory
-    curAudioMixBuffer = &audioMixBuffers[0][0];
-    curFrame = 0;
 
     // Install the interrupt
     irq_add(II_VBLANK, audioVblank);
@@ -75,7 +75,7 @@ void audioVblank()
     }
 }
 
-u32 audio::playSound(const Sound& sound, u32 volume, u32f12 inc)
+u32 audio::playSound(const Sound& sound, u32 volume)
 {
     int channel;
     for (channel = 0; channel < NumChannels; channel++)
@@ -92,7 +92,6 @@ u32 audio::playSound(const Sound& sound, u32 volume, u32f12 inc)
     {
         audioChannels[channel].sound = &sound;
         audioChannels[channel].pos = 0;
-        audioChannels[channel].inc = inc;
         audioChannels[channel].volume = volume;
     }
 

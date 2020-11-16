@@ -9,8 +9,8 @@
 
 struct Sound
 {
-    u32f12 length, loopLength;
-    // And after that comes the data in s8 chunks
+    u32 length, loopLength;
+    // And after that comes the data in u8 chunks
 };
 
 struct SoundHandle

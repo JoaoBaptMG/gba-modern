@@ -95,13 +95,16 @@ int soundExport(int argc, char  **argv)
     for (float& val : soundData)
     {
         if (bitsPerSample == 8)
-            val = (readFrom<std::int8_t>(win) - 128) / 256.0;
+            val = (readFrom<std::uint8_t>(win) - 128) / 127.0;
         else if (bitsPerSample == 16)
             val = (readFrom<std::int16_t>(win) / 32767.0);
     }
 
     if (changeSampleRate)
         soundData = resampleMono(soundData, sourceSampleRate, samplingFreq);
+
+    // Pad the sound data to 4 bytes
+    soundData.resize((soundData.size() + 3) & ~3, 0.0f);
 
     auto name = deriveSpecialName(in);
 
@@ -119,12 +122,14 @@ int soundExport(int argc, char  **argv)
         of << "    .hidden " << name.mangledName << std::endl;
         of << name.mangledName << ':' << std::endl;
 
-        of << "    .word " << toHex(soundData.size() << 12) << ", 0";
+        of << "    .word " << soundData.size() << ", 0";
 
         std::size_t index = 0;
         for (float& sample : soundData)
         {
+            // The format is 8-bit unsigned PCM
             int v = sample * 127.0f;
+            v += 128;
 
             if (index % 16 == 0) of << std::endl << "    .byte ";
             else of << ", ";

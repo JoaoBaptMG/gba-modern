@@ -68,8 +68,8 @@ void EnemyProjectiles::update()
 
     if (mgba::isEnabled())
     {
-        mgba::log(mgba::Log::Debug, "Enemy projectile update: ", cyclesUpdate, " cycles.");
-        mgba::log(mgba::Log::Debug, "Enemy projectile collision: ", collisionUpdate, " cycles.");
+        //mgba::log(mgba::Log::Debug, "Enemy projectile update: ", cyclesUpdate, " cycles.");
+        //mgba::log(mgba::Log::Debug, "Enemy projectile collision: ", collisionUpdate, " cycles.");
     }
 }
 
@@ -84,8 +84,8 @@ void EnemyProjectiles::pushGraphics()
     auto renderingUpdate = profile::end32();
     if (mgba::isEnabled())
     {
-        mgba::log(mgba::Log::Debug, "Enemy projectile rendering: ", renderingUpdate, " cycles.");
-        mgba::log(mgba::Log::Debug, '(', numProjectiles, " enemy projectiles on screen)");
+        //mgba::log(mgba::Log::Debug, "Enemy projectile rendering: ", renderingUpdate, " cycles.");
+        //mgba::log(mgba::Log::Debug, '(', numProjectiles, " enemy projectiles on screen)");
     }
 }
 
