@@ -25,7 +25,7 @@ __aeabi_idivmod:
 __aeabi_idiv:
     @ Test division by zero
     cmp     r1, #0
-    bxeq    lr
+    beq     __aeabi_idiv0
 
     @ Move the lr to r12 and make the numbers positive
     mov     r12, lr
