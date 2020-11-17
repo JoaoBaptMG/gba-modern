@@ -36,5 +36,4 @@ public:
     Explosions explosions;
 
     UnorderedList<Enemy, NumEnemies> enemies;
-    inline void addEnemy(EnemyScript script) { enemies.add(script, this); }
 };

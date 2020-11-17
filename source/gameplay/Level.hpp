@@ -7,6 +7,7 @@
 
 #include <tonc.h>
 #include "util/context.h"
+#include "Enemy.hpp"
 
 class GameScene;
 class Level;
@@ -21,12 +22,11 @@ public:
     void atFrames(u16 time);
     void afterFrames(u16 offset);
     void atEndOfLevel();
+    void addEnemy(EnemyScript script);
 
     inline void levelLength(double secs) { levelLengthFrames(60 * secs); }
     inline void at(double secs) { atFrames(60 * secs); }
     inline void after(double secs) { afterFrames(60 * secs); }
-
-    GameScene& gameScene();
 
     friend class Level;
 };

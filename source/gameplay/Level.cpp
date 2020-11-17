@@ -46,7 +46,7 @@ void Level::update()
     // The level should take care of setting the next switch time
     if (nextSwitch == -1) return;
 
-    // If the next switch is atteint, switch to the level context
+    // If the next switch is attained, switch to the level context
     if (curLevelCounter == nextSwitch)
         curCtx = context_switch(curCtx);
     curLevelCounter++;
@@ -85,9 +85,10 @@ void LevelContext::atEndOfLevel()
     level().curCtx = context_switch(level().curCtx);
 }
 
-GameScene& LevelContext::gameScene()
+void LevelContext::addEnemy(EnemyScript script)
 {
-    return level().gameScene();
+    auto& scene = level().gameScene();
+    scene.enemies.add(script, &scene);
 }
 
 Level& LevelContext::level()

@@ -17,21 +17,21 @@ void level1(LevelContext& level)
     level.at(4);
     for (int i = 0; i < 7; i++)
     {
-        level.gameScene().addEnemy(wobblingEnemyUp);
-        level.gameScene().addEnemy(wobblingEnemyDown);
+        level.addEnemy(wobblingEnemyUp);
+        level.addEnemy(wobblingEnemyDown);
         level.after(1.0 / 3.0);
     }
 
     level.at(8);
     for (u32 i = 0; i < 12; i++)
     {
-        level.gameScene().addEnemy([fts = (12 + 25*i) & 127](Enemy& enemy, GameScene& gameScene)
+        level.addEnemy([fts = (12 + 25*i) & 127](Enemy& enemy, GameScene& gameScene)
             { wavingEnemy(enemy, gameScene, fts); });
         level.after(0.3);
     }
 
     level.at(16);
-    level.gameScene().addEnemy([](Enemy& enemy, GameScene& gameScene) { bigLurker(enemy, gameScene, 40); });
+    level.addEnemy([](Enemy& enemy, GameScene& gameScene) { bigLurker(enemy, gameScene, 40); });
 
     level.atEndOfLevel();
 }
