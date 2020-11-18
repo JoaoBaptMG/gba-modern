@@ -4,7 +4,7 @@
 struct Offset { int x, y; };
 
 template <typename Character>
-void writeBackground(std::ostream& of, const SpecialName& name, const State<Character>& state, const std::vector<Palette>& palettes);
+void writeBackground(std::ostream& of, const SpecialName& name, const BackgroundState<Character>& state, const std::vector<Palette>& palettes);
 
 int backgroundExport(int argc, char **argv)
 {
@@ -33,7 +33,7 @@ int backgroundExport(int argc, char **argv)
         if (j.contains("is8bpp")) j.at("is8bpp").get_to(is8bpp);
     }
 
-    State<Character8bpp> state;
+    BackgroundState<Character8bpp> state;
     auto width = image.chars.width(), height = image.chars.height();
     state.tiles.resize(width, height);
 
@@ -102,7 +102,7 @@ int backgroundExport(int argc, char **argv)
 }
 
 template <typename Character>
-void writeBackground(std::ostream& of, const SpecialName& name, const State<Character>& state, const std::vector<Palette>& palettes)
+void writeBackground(std::ostream& of, const SpecialName& name, const BackgroundState<Character>& state, const std::vector<Palette>& palettes)
 {
     // The main structure
     of << "    .section .rodata" << std::endl;
