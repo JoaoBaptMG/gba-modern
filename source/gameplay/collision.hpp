@@ -6,9 +6,9 @@
 #pragma once
 
 #include <algorithm>
-#include "math/stdfixed.hpp"
-#include "math/vec2.hpp"
-#include "data/BitmaskData.hpp"
+#include "../math/stdfixed.hpp"
+#include "../math/vec2.hpp"
+#include "../data/BitmaskData.hpp"
 
 enum class CollisionShape : u8 { Circle, Box, Bitmask };
 

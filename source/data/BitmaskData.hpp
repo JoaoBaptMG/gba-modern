@@ -6,8 +6,8 @@
 #pragma once
 
 #include <cstdint>
-#include "math/stdfixed.hpp"
-#include "math/vec2.hpp"
+#include "../math/stdfixed.hpp"
+#include "../math/vec2.hpp"
 
 struct BitmaskData { vec2<s16f7> halfSize; };
 // The bitmask data is only used in ARM assembly, so it is not a big deal.

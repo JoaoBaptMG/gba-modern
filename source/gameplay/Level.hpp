@@ -6,7 +6,7 @@
 #pragma once
 
 #include <tonc.h>
-#include "util/context.h"
+#include "../util/context.h"
 #include "Enemy.hpp"
 
 class GameScene;

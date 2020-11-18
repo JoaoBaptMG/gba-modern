@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "gameplay/Enemy.hpp"
+#include "../../Enemy.hpp"
 
 void wobblingEnemyUp(Enemy& enemy, GameScene& gameScene);
 void wobblingEnemyDown(Enemy& enemy, GameScene& gameScene);

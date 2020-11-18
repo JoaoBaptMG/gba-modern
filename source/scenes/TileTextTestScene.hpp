@@ -7,8 +7,8 @@
 
 #include "IScene.hpp"
 
-#include "text/TextWriter.hpp"
-#include "text/Tile4bppGlyphWriter.hpp"
+#include "../text/TextWriter.hpp"
+#include "../text/Tile4bppGlyphWriter.hpp"
 
 class TileTextTestScene final : public IScene
 {

@@ -5,6 +5,6 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "gameplay/Enemy.hpp"
+#include "../../Enemy.hpp"
 
 void bigLurker(Enemy& enemy, GameScene& gameScene, s32f16 y);

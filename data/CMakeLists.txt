@@ -10,7 +10,7 @@ set(SPR_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/sprites/player-projectiles.png
 	${CMAKE_CURRENT_SOURCE_DIR}/sprites/small-explosion.png
 	${CMAKE_CURRENT_SOURCE_DIR}/sprites/waving-enemy.png
-	${CMAKE_CURRENT_SOURCE_DIR}/sprites/wobbling-enemy.png PARENT_SCOPE)
+	${CMAKE_CURRENT_SOURCE_DIR}/sprites/wobbling-enemy.png)
 
 set(SPR_S
 	${CMAKE_CURRENT_BINARY_DIR}/sprites/big-lurker.s
@@ -21,7 +21,7 @@ set(SPR_S
 	${CMAKE_CURRENT_BINARY_DIR}/sprites/player-projectiles.s
 	${CMAKE_CURRENT_BINARY_DIR}/sprites/small-explosion.s
 	${CMAKE_CURRENT_BINARY_DIR}/sprites/waving-enemy.s
-	${CMAKE_CURRENT_BINARY_DIR}/sprites/wobbling-enemy.s PARENT_SCOPE)
+	${CMAKE_CURRENT_BINARY_DIR}/sprites/wobbling-enemy.s)
 
 set(SPR_HPP
 	${CMAKE_CURRENT_BINARY_DIR}/sprites/big-lurker.hpp
@@ -32,53 +32,53 @@ set(SPR_HPP
 	${CMAKE_CURRENT_BINARY_DIR}/sprites/player-projectiles.hpp
 	${CMAKE_CURRENT_BINARY_DIR}/sprites/small-explosion.hpp
 	${CMAKE_CURRENT_BINARY_DIR}/sprites/waving-enemy.hpp
-	${CMAKE_CURRENT_BINARY_DIR}/sprites/wobbling-enemy.hpp PARENT_SCOPE)
+	${CMAKE_CURRENT_BINARY_DIR}/sprites/wobbling-enemy.hpp)
 
 # Background Files
 set(BKG_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/backgrounds/level1.png PARENT_SCOPE)
+	${CMAKE_CURRENT_SOURCE_DIR}/backgrounds/level1.png)
 
 set(BKG_S
-	${CMAKE_CURRENT_BINARY_DIR}/backgrounds/level1.s PARENT_SCOPE)
+	${CMAKE_CURRENT_BINARY_DIR}/backgrounds/level1.s)
 
 set(BKG_HPP
-	${CMAKE_CURRENT_BINARY_DIR}/backgrounds/level1.hpp PARENT_SCOPE)
+	${CMAKE_CURRENT_BINARY_DIR}/backgrounds/level1.hpp)
 
 # Font Files
 set(FNT_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/fonts/monogram_extended.ttf PARENT_SCOPE)
+	${CMAKE_CURRENT_SOURCE_DIR}/fonts/monogram_extended.ttf)
 
 set(FNT_S
-	${CMAKE_CURRENT_BINARY_DIR}/fonts/monogram_extended.s PARENT_SCOPE)
+	${CMAKE_CURRENT_BINARY_DIR}/fonts/monogram_extended.s)
 
 set(FNT_HPP
-	${CMAKE_CURRENT_BINARY_DIR}/fonts/monogram_extended.hpp PARENT_SCOPE)
+	${CMAKE_CURRENT_BINARY_DIR}/fonts/monogram_extended.hpp)
 
 # Audio Settings
 set(AUS_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/audio.json PARENT_SCOPE)
+	${CMAKE_CURRENT_SOURCE_DIR}/audio.json)
 
 set(AUS_HPP
-	${CMAKE_CURRENT_BINARY_DIR}/audio-settings.hpp PARENT_SCOPE)
+	${CMAKE_CURRENT_BINARY_DIR}/audio-settings.hpp)
 
 set(AUS_JSON
-	${CMAKE_CURRENT_BINARY_DIR}/audio-settings.json PARENT_SCOPE)
+	${CMAKE_CURRENT_BINARY_DIR}/audio-settings.json)
 
 # Sound Files
 set(SND_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/sounds/player-dmg.wav
 	${CMAKE_CURRENT_SOURCE_DIR}/sounds/player-heal.wav
-	${CMAKE_CURRENT_SOURCE_DIR}/sounds/player-shot.wav PARENT_SCOPE)
+	${CMAKE_CURRENT_SOURCE_DIR}/sounds/player-shot.wav)
 
 set(SND_S
 	${CMAKE_CURRENT_BINARY_DIR}/sounds/player-dmg.s
 	${CMAKE_CURRENT_BINARY_DIR}/sounds/player-heal.s
-	${CMAKE_CURRENT_BINARY_DIR}/sounds/player-shot.s PARENT_SCOPE)
+	${CMAKE_CURRENT_BINARY_DIR}/sounds/player-shot.s)
 
 set(SND_HPP
 	${CMAKE_CURRENT_BINARY_DIR}/sounds/player-dmg.hpp
 	${CMAKE_CURRENT_BINARY_DIR}/sounds/player-heal.hpp
-	${CMAKE_CURRENT_BINARY_DIR}/sounds/player-shot.hpp PARENT_SCOPE)
+	${CMAKE_CURRENT_BINARY_DIR}/sounds/player-shot.hpp)
 	
 #build sprites
 list(APPEND SPR_FILES_L ${SPR_FILES})
@@ -128,3 +128,15 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/sounds)
 foreach(x y z IN ZIP_LISTS SND_FILES_L SND_S_L SND_HPP_L)
 	execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools sound-export ${x} ${y} ${z} ${CMAKE_BINARY_DIR}/data/audio-settings.json)
 endforeach()
+
+add_library(RESOURCES OBJECT
+	${SPR_S}
+	${SPR_HPP}
+	${BKG_S}
+	${BKG_HPP}
+	${FNT_S}
+	${FNT_HPP}
+	${AUS_HPP}
+	${AUS_JSON}
+	${SND_S}
+	${SND_HPP})

@@ -6,9 +6,9 @@
 #pragma once
 
 #include <tonc.h>
-#include "graphics/ObjectTilePointer.hpp"
-#include "graphics/PalettePointer.hpp"
-#include "math/vec2.hpp"
+#include "../graphics/ObjectTilePointer.hpp"
+#include "../graphics/PalettePointer.hpp"
+#include "../math/vec2.hpp"
 
 constexpr u32 NumSmallExplosionFrames = 6;
 constexpr u32 MaxExplosions = 64;

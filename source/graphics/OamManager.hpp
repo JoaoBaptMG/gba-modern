@@ -8,8 +8,8 @@
 
 #include <tonc.h>
 #include "SpriteSize.hpp"
-#include "util/gba-assert.hpp"
-#include "math/vec2.hpp"
+#include "../util/gba-assert.hpp"
+#include "../math/vec2.hpp"
 
 // The maximum number of objects
 constexpr auto MaxObjs = 128;

@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "data/Font.hpp"
+#include "../data/Font.hpp"
 #include <tonc.h>
 #include "StringBuilder.hpp"
 

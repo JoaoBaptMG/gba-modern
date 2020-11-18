@@ -7,8 +7,8 @@
 
 #include <tonc.h>
 #include <cstdint>
-#include "util/gba-assert.hpp"
-#include "util/AllocatorPointer.hpp"
+#include "../util/gba-assert.hpp"
+#include "../util/AllocatorPointer.hpp"
 #include "graphics.hpp"
 
 template <std::size_t N>

@@ -6,12 +6,12 @@
 #pragma once
 
 #include <tonc.h>
-#include "math/stdfixed.hpp"
-#include "util/context.h"
-#include "util/TrivialStaticFunction.hpp"
-#include "graphics/SpriteSize.hpp"
-#include "graphics/PalettePointer.hpp"
-#include "graphics/StillImagePointer.hpp"
+#include "../math/stdfixed.hpp"
+#include "../util/context.h"
+#include "../util/TrivialStaticFunction.hpp"
+#include "../graphics/SpriteSize.hpp"
+#include "../graphics/PalettePointer.hpp"
+#include "../graphics/StillImagePointer.hpp"
 
 #include "collision.hpp"
 

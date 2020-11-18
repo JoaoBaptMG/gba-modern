@@ -6,9 +6,9 @@
 #pragma once
 
 #include <tonc.h>
-#include "graphics/ObjectTilePointer.hpp"
-#include "graphics/SpriteSize.hpp"
-#include "util/AllocatorPointer.hpp"
+#include "../graphics/ObjectTilePointer.hpp"
+#include "../graphics/SpriteSize.hpp"
+#include "../util/AllocatorPointer.hpp"
 
 class StillImageAllocator final : public Allocator<StillImageAllocator>
 {

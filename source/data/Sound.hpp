@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "math/stdfixed.hpp"
+#include "../math/stdfixed.hpp"
 
 struct Sound
 {

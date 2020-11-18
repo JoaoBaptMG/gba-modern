@@ -10,6 +10,6 @@
 #ifdef DISABLE_ASSERT
 #define ASSERT(expr)
 #else
-#include "text/mGBADebugging.hpp"
+#include "../text/mGBADebugging.hpp"
 #define ASSERT(expr) if (expr); else { mgba::log(mgba::Log::Fatal, "Assertion failed: " #expr " at " __FILE__); for (;;); }
 #endif

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "math/stdfixed.hpp"
-#include "math/vec2.hpp"
-#include "math/fixedmath.hpp"
-#include "math/gcem-degrees.hpp"
+#include "../math/stdfixed.hpp"
+#include "../math/vec2.hpp"
+#include "../math/fixedmath.hpp"
+#include "../math/gcem-degrees.hpp"
 
 namespace vec_utils
 {

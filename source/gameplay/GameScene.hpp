@@ -5,13 +5,13 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "scenes/IScene.hpp"
+#include "../scenes/IScene.hpp"
 #include "Player.hpp"
 #include "PlayerProjectiles.hpp"
 #include "Level.hpp"
 #include "Hud.hpp"
 #include "Background.hpp"
-#include "util/UnorderedList.hpp"
+#include "../util/UnorderedList.hpp"
 #include "Enemy.hpp"
 #include "EnemyProjectiles.hpp"
 #include "Explosions.hpp"

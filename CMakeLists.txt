@@ -19,10 +19,6 @@ set(GCC_NAME "gcc-arm-none-eabi-10-2020-q2-preview")
 set(GCC_URL 
 	"https://developer.arm.com/-/media/Files/downloads/gnu-rm/${GCC_PREFIX}/${GCC_NAME}-x86_64-linux.tar.bz2")
 
-# Set Tonc
-set(TONC_URL
-	"http://www.coranac.com/files/tonc-code.zip")
-
 # Libraries
 set(TONC_PATH "${CMAKE_SOURCE_DIR}/external/tonc/tonclib")
 set(LIBRARIES_ "-nodefaultlibs -ltonc")
@@ -37,56 +33,14 @@ add_subdirectory(source)
 
 # Helper variables
 add_library(OBJECT_FILES OBJECT
-	${SPR_S}
-	${SPR_HPP}
-	${BKG_S}
-	${BKG_HPP}
-	${FNT_S}
-	${FNT_HPP}
-	${AUS_HPP}
-	${AUS_JSON}
-	${SND_S}
-	${SND_HPP}
-	${GAME_C_FILES}
-	${GAME_CPP_FILES}
-	${GAME_S_FILES})
-#OFILES := $(RSRC_OFILES) $(SRC_OFILES)
+	$<TARGET_OBJECTS:GAME_OBJECTS>
+	$<TARGET_OBJECTS:RESOURCES>)
 #DFILES := $(OFILES:.o=.d)
 #LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 #INCLUDE	:= $(foreach dir,$(LIBDIRS),-isystem $(dir)/include) $(foreach dir,$(INCDIRS), -isystem $(dir)) -iquote build -iquote source
 
-# Path to the tools used
-set(ARMCC gcc/bin/arm-none-eabi-gcc CACHE PATH "ARMCC")
-#ARMCC := gcc/bin/arm-none-eabi-gcc
-set(ARMCPP gcc/bin/arm-none-eabi-g++ CACHE PATH "ARMCPP")
-#ARMCPP := gcc/bin/arm-none-eabi-g++
-set(ARMOC gcc/bin/arm-none-eabi-objcopy CACHE PATH "ARMOC")
-#ARMOC := gcc/bin/arm-none-eabi-objcopy
-set(ARMOD gcc/bin/arm-none-eabi-objdump CACHE PATH "ARMOD")
-#ARMOD := gcc/bin/arm-none-eabi-objdump
+find_package(LibSampleRate REQUIRED)
 
-# Get the right linker
-#ifeq ($(strip $(CPPFILES)),)
-#	ARMLD := $(ARMCC)
-#else
-#	ARMLD := $(ARMCPP)
-#endif
-
-#wget $(GCC_URL) -O gcc.tar.bz2
-#ifeq (,$(GCC_PLATFORM))
-#	$(error "This platform does not have a prebuilt arm-none-eabi; try to compile it from source and place it at $(GCC_NAME)")
-#endif
-#	mkdir gcc && tar xjf gcc.tar.bz2 -C gcc --strip-components 1
-
-#wget $(TONC_URL) -O tonc.zip
-#unzip -qq -n tonc.zip 'code/tonclib/*' -d tonclib
-
-#wget $(LSRC_URL) -O libsamplerate.tar.gz
-#mkdir libsamplerate && tar xzf libsamplerate.tar.gz -C libsamplerate --strip-components 1
-
-#$(MAKE) -C tools
-#@mkdir -p bin
-#@echo "Linking"
 #bin/game.elf: build/data/audio-settings.hpp $(OFILES)
 #	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) $(LIBRARIES) -o $@
 #	@$(ARMOD) -dCS $@ > $@.dump

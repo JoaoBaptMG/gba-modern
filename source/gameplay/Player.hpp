@@ -5,11 +5,11 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "graphics/graphics.hpp"
-#include "graphics/ObjectTilePointer.hpp"
-#include "graphics/PalettePointer.hpp"
-#include "math/stdfixed.hpp"
-#include "math/vec2.hpp"
+#include "../graphics/graphics.hpp"
+#include "../graphics/ObjectTilePointer.hpp"
+#include "../graphics/PalettePointer.hpp"
+#include "../math/stdfixed.hpp"
+#include "../math/vec2.hpp"
 
 class GameScene;
 
