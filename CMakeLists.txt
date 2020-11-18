@@ -102,22 +102,6 @@ set(ARMOD gcc/bin/arm-none-eabi-objdump CACHE PATH "ARMOD")
 #	@mkdir -p $(@D)
 #	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
 
-#build/data/backgrounds/%.s build/data/backgrounds/%.hpp: data/backgrounds/%.png tools/tools
-#	@mkdir -p $(@D)
-#	tools/tools background-export $(filter %.png,$^) $(basename $@).s $(basename $@).hpp
-
-#build/data/fonts/%.s build/data/fonts/%.hpp: data/fonts/%.ttf data/fonts/%.ttf.json tools/tools
-#	@mkdir -p $(@D)
-#	tools/tools font-export $(filter %.ttf,$^) $(basename $@).s $(basename $@).hpp
-
-#build/data/audio-settings.hpp build/data/audio-settings.json: data/audio.json tools/tools 
-#	@mkdir -p $(@D)
-#	tools/tools audio-export-settings $(filter %.json,$^) $(basename $@).hpp $(basename $@).json
-
-#build/data/sounds/%.s build/data/sounds/%.hpp: data/sounds/%.wav build/data/audio-settings.json tools/tools
-#	@mkdir -p $(@D)
-#	tools/tools sound-export $(filter %.wav,$^) $(basename $@).s $(basename $@).hpp build/data/audio-settings.json
-
 # Source files
 #build/%.iwram.o: %.iwram.cpp
 #	@mkdir -p $(@D)
