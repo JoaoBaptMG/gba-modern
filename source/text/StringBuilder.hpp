@@ -20,6 +20,13 @@ constexpr std::size_t numCharsInTempBuffer()
     return (num + 3) & ~3;
 }
 
+template <typename T>
+struct HexMarker { T v; };
+
+template <typename T>
+inline static std::enable_if_t<std::is_unsigned_v<T>, HexMarker<T>>
+hex(T v) { return {v}; }
+
 template <std::size_t N>
 class InplaceStringBuilder
 {
@@ -44,11 +51,29 @@ public:
     }
 
     template <typename T>
-    constexpr std::enable_if_t<std::is_unsigned_v<T>>
+    std::enable_if_t<std::is_unsigned_v<T>>
     append(T v)
     {
         char tmp[numCharsInTempBuffer<T>()];
         auto tmpv = uintDigits(tmp, v);
+        while (tmpv != tmp && cur < N) buffer[cur++] = '0' + *--tmpv;
+    }
+
+    template <typename T>
+    std::enable_if_t<std::is_unsigned_v<T>>
+    append(HexMarker<T> h)
+    {
+        char tmp[2 * sizeof(T)];
+        
+        auto tmpv = tmp;
+        do
+        {
+            *tmpv = h.v & 0xF;
+            if (*tmpv > 9) *tmpv += 'A' - ('9' + 1);
+            tmpv++;
+            h.v >>= 4;
+        } while (h.v);
+
         while (tmpv != tmp && cur < N) buffer[cur++] = '0' + *--tmpv;
     }
 
