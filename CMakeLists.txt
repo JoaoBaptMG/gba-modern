@@ -24,10 +24,10 @@ set(TONC_URL
 	"http://www.coranac.com/files/tonc-code.zip")
 
 # Libraries
-set(TONC_PATH "tonclib/code/tonclib")
+set(TONC_PATH "${CMAKE_SOURCE_DIR}/external/tonc/tonclib")
 set(LIBRARIES_ "-nodefaultlibs -ltonc")
 set(LIBDIRS ${TONC_PATH})
-set(INCDIRS "external/gcem/include")
+set(INCDIRS "${CMAKE_SOURCE_DIR}/external/gcem/include")
 
 
 add_subdirectory(tools)
@@ -35,22 +35,21 @@ add_subdirectory(data)
 add_subdirectory(source)
 
 
-# Source objects
-#add_library(SRC_OFILES OBJECT ${C_FILES} ${CPP_FILES} ${S_FILES})
-#SRC_OFILES = $(addprefix build/, $(C_FILES:.c=.o) $(CPP_FILES:.cpp=.o) $(S_FILES:.s=.o))
-
-
-
-# Resource objects
-#add_library(RSRC_OFILES OBJECT ${SPR_FILES} ${BKG_FILES} ${FNT_FILES} ${SND_FILES})
-#RSRC_OFILES := $(addprefix build/, $(SPR_FILES:.png=.o) $(BKG_FILES:.png=.o) $(FNT_FILES:.ttf=.o)\
-#	$(SND_FILES:.wav=.o)) 
-
-# Resource headers
-#RSRC_HFILES := $(addprefix build/, $(SPR_FILES:.png=.hpp) $(BKG_FILES:.png=.hpp) $(FNT_FILES:.ttf=.hpp)\
-#	data/audio-settings.hpp $(SND_FILES:.wav=.hpp))
-
 # Helper variables
+add_library(OBJECT_FILES OBJECT
+	${SPR_S}
+	${SPR_HPP}
+	${BKG_S}
+	${BKG_HPP}
+	${FNT_S}
+	${FNT_HPP}
+	${AUS_HPP}
+	${AUS_JSON}
+	${SND_S}
+	${SND_HPP}
+	${GAME_C_FILES}
+	${GAME_CPP_FILES}
+	${GAME_S_FILES})
 #OFILES := $(RSRC_OFILES) $(SRC_OFILES)
 #DFILES := $(OFILES:.o=.d)
 #LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
@@ -78,10 +77,13 @@ set(ARMOD gcc/bin/arm-none-eabi-objdump CACHE PATH "ARMOD")
 #	$(error "This platform does not have a prebuilt arm-none-eabi; try to compile it from source and place it at $(GCC_NAME)")
 #endif
 #	mkdir gcc && tar xjf gcc.tar.bz2 -C gcc --strip-components 1
+
 #wget $(TONC_URL) -O tonc.zip
 #unzip -qq -n tonc.zip 'code/tonclib/*' -d tonclib
+
 #wget $(LSRC_URL) -O libsamplerate.tar.gz
 #mkdir libsamplerate && tar xzf libsamplerate.tar.gz -C libsamplerate --strip-components 1
+
 #$(MAKE) -C tools
 #@mkdir -p bin
 #@echo "Linking"
@@ -122,14 +124,3 @@ set(ARMOD gcc/bin/arm-none-eabi-objdump CACHE PATH "ARMOD")
 #build/%.o: %.s
 #	@mkdir -p $(@D)
 #	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
-
-#clean:
-#	rm -rf bin build
-
-#clean-everything:
-#	$(MAKE) -C tools clean
-#	rm -rf bin build
-
-#clean-downloads:
-#	$(MAKE) -C tools clean
-#	rm -rf bin build tonc* gcc* libsamplerate*
