@@ -3,16 +3,22 @@ cmake_minimum_required (VERSION 3.1)
 
 project (pk3)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Running on windows is not supported
-#ifdef OS
-#	$(error "Making this project on Windows is not yet supported. Consider using WSL.")
-#endif
+add_subdirectory(tools)
 
-# Utility function
-#rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
+set(CMAKE_C_COMPILER /usr/bin/gcc)
+set(CMAKE_CXX_COMPILER /usr/bin/g++)
+function(download_file url filename)
+
+if(NOT EXISTS ${filename})
+	file(DOWNLOAD ${url} ${filename}
+		TIMEOUT 60
+		TLS_VERIFY ON)
+endif()
+
+endfunction(download_file)
 
 # Compilation flags
 #ARCH := -mthumb -mthumb-interwork
@@ -21,6 +27,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #ASFLAGS := -g $(ARCH)
 #LDFLAGS	= -g $(ARCH) -Wl,--gc-sections -Wl,-Map,gba.map
 
+set(GCC_PREFIX "10-2020q2")
+set(GCC_NAME "gcc-arm-none-eabi-10-2020-q2-preview")
+set(GCC_URL 
+	"https://developer.arm.com/-/media/Files/downloads/gnu-rm/${GCC_PREFIX}/${GCC_NAME}-x86_64-linux.tar.bz2")
+
+# Set Tonc
+set(TONC_URL
+	"http://www.coranac.com/files/tonc-code.zip")
+
+# Set libsamplerate
+set(LSRC_VERSION "0.1.9" CACHE STRING "LSRC_VERSION")
+set(LSRC_URL "http://www.mega-nerd.com/SRC/libsamplerate-${LSRC_VERSION}.tar.gz" CACHE STRING "LSRC_URL")
+
+
 # Libraries
 #TONC := tonclib/code/tonclib
 #LIBRARIES := -nodefaultlibs -ltonc
@@ -28,12 +48,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #INCDIRS := external/gcem/include
 
 # Source files
+# C Files
 set(C_FILES
 	source/math/gcd.c
 	source/util/libc-replacement.c
 	source/util/memmove.iwram.c
 	source/util/random.iwram.c)
-#C_FILES := $(call rwildcard, source/, *.c)
+# CPP Files
 set(CPP_FILES
 	source/main.cpp
 	source/audio/audio.cpp
@@ -68,7 +89,7 @@ set(CPP_FILES
 	source/util/dynamic.cpp
 	source/util/profile.cpp
 	source/util/virtual.cpp)
-#CPP_FILES := $(call rwildcard, source/, *.cpp)
+# S Files
 set(S_FILES
 	source/crt0.s
 	source/audio/audioMix.s
@@ -86,17 +107,36 @@ set(S_FILES
 	source/util/context.s
 	source/util/memops.s
 	source/util/uintDigits.s)
-#S_FILES := $(call rwildcard, source/, *.s)
 
 # Source objects
 #SRC_OFILES = $(addprefix build/, $(C_FILES:.c=.o) $(CPP_FILES:.cpp=.o) $(S_FILES:.s=.o))
 
 # Resources
-#SPR_FILES := $(call rwildcard, data/sprites/, *.png)
-#BKG_FILES := $(call rwildcard, data/backgrounds/, *.png)
-#FNT_FILES := $(call rwildcard, data/fonts/, *.ttf)
-#AUS_FILES := data/audio.json
-#SND_FILES := $(call rwildcard, data/sounds/, *.wav)
+# Sprite Files
+set(SPR_FILES
+	data/sprites/big-lurker.png
+	data/sprites/bitmask-test.png
+	data/sprites/enemy-projectiles.png
+	data/sprites/hud.png
+	data/sprites/player.png
+	data/sprites/player-projectiles.png
+	data/sprites/small-explosion.png
+	data/sprites/waving-enemy.png
+	data/sprites/wobbling-enemy.png)
+# Background Files
+set(BKG_FILES
+	data/backgrounds/level.png)
+# Font Files
+set(FNT_FILES
+	data/fonts/monogram_extended.ttf)
+# Audio Settings
+set(AUS_FILES
+	data/audio.json)
+# Sound Files
+set(SND_FILES
+	data/sounds/player-dmg.wav
+	data/sounds/player-heal.wav
+	data/sounds/player-shot.wav)
 
 # Resource objects
 #RSRC_OFILES := $(addprefix build/, $(SPR_FILES:.png=.o) $(BKG_FILES:.png=.o) $(FNT_FILES:.ttf=.o)\
@@ -111,33 +151,6 @@ set(S_FILES
 #DFILES := $(OFILES:.o=.d)
 #LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 #INCLUDE	:= $(foreach dir,$(LIBDIRS),-isystem $(dir)/include) $(foreach dir,$(INCDIRS), -isystem $(dir)) -iquote build -iquote source
-
-# Links to Tonc
-#TONC_URL := http://www.coranac.com/files/tonc-code.zip
-
-# Link to the GCC - use architecture to pull the right one
-#UNAME_S := $(shell uname -s)
-#ifeq ($(UNAME_S),Linux)
-#	UNAME_P := $(shell uname -p)
-#	ifeq ($(UNAME_P),x86_64)
-#		GCC_PLATFORM := x86_64-linux
-#	endif
-#	ifneq ($(filter arm%,$(UNAME_P)),)
-#		GCC_PLATFORM := aarch64-linux
-#	endif
-#endif
-#ifeq ($(UNAME_S),Darwin)
-#	GCC_PLATFORM := mac
-#endif
-#GCC_PREFIX := 10-2020q2
-#GCC_NAME := gcc-arm-none-eabi-10-2020-q2-preview
-#GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu-rm/$(GCC_PREFIX)/$(GCC_NAME)-$(GCC_PLATFORM).tar.bz2
-
-# Link to libsamplerate
-set(LSRC_VERSION "0.1.9" CACHE STRING "LSRC_VERSION")
-#LSRC_VERSION = 0.1.9
-set(LSRC_URL "http://www.mega-nerd.com/SRC/libsamplerate-$(LSRC_VERSION).tar.gz" CACHE STRING "LSRC_URL")
-#LSRC_URL = http://www.mega-nerd.com/SRC/libsamplerate-$(LSRC_VERSION).tar.gz
 
 # Path to the tools used
 set(ARMCC gcc/bin/arm-none-eabi-gcc CACHE PATH "ARMCC")
