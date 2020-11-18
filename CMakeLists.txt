@@ -1,31 +1,18 @@
 # Projects Settings
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.16)
 
-project (pk3)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "$CMAKE_SOURCE_DIR}")
+project (gbaModern)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_subdirectory(tools)
-
-set(CMAKE_C_COMPILER /usr/bin/gcc)
-set(CMAKE_CXX_COMPILER /usr/bin/g++)
-function(download_file url filename)
-
-if(NOT EXISTS ${filename})
-	file(DOWNLOAD ${url} ${filename}
-		TIMEOUT 60
-		TLS_VERIFY ON)
-endif()
-
-endfunction(download_file)
-
 # Compilation flags
-#ARCH := -mthumb -mthumb-interwork
-#CFLAGS := -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto $(ARCH)
-#CPPFLAGS := $(CFLAGS) -std=c++17 -fno-rtti -fno-exceptions
-#ASFLAGS := -g $(ARCH)
-#LDFLAGS	= -g $(ARCH) -Wl,--gc-sections -Wl,-Map,gba.map
+set(ARCH "-mthumb -mthumb-interwork")
+set(CFLAGS "-g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH}")
+set(CPPFLAGS "${CFLAGS} -std=c++17 -fno-rtti -fno-exceptions")
+set(ASFLAGS "-g ${ARCH}")
+set(LDFLAGS	"-g ${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map")
 
 set(GCC_PREFIX "10-2020q2")
 set(GCC_NAME "gcc-arm-none-eabi-10-2020-q2-preview")
@@ -36,109 +23,26 @@ set(GCC_URL
 set(TONC_URL
 	"http://www.coranac.com/files/tonc-code.zip")
 
-# Set libsamplerate
-set(LSRC_VERSION "0.1.9" CACHE STRING "LSRC_VERSION")
-set(LSRC_URL "http://www.mega-nerd.com/SRC/libsamplerate-${LSRC_VERSION}.tar.gz" CACHE STRING "LSRC_URL")
-
-
 # Libraries
-#TONC := tonclib/code/tonclib
-#LIBRARIES := -nodefaultlibs -ltonc
-#LIBDIRS := $(TONC)
-#INCDIRS := external/gcem/include
+set(TONC_PATH "tonclib/code/tonclib")
+set(LIBRARIES_ "-nodefaultlibs -ltonc")
+set(LIBDIRS ${TONC_PATH})
+set(INCDIRS "external/gcem/include")
 
-# Source files
-# C Files
-set(C_FILES
-	source/math/gcd.c
-	source/util/libc-replacement.c
-	source/util/memmove.iwram.c
-	source/util/random.iwram.c)
-# CPP Files
-set(CPP_FILES
-	source/main.cpp
-	source/audio/audio.cpp
-	source/gameplay/Background.cpp
-	source/gameplay/collisionCircleBitmaskGenerator.cpp
-	source/gameplay/Enemy.cpp
-	source/gameplay/EnemyProjectiles.cpp
-	source/gameplay/Explosions.cpp
-	source/gameplay/GameScene.cpp
-	source/gameplay/Hud.cpp
-	source/gameplay/Level.cpp
-	source/gameplay/Player.cpp
-	source/gameplay/PlayerProjectiles.cpp
-	source/gameplay/Projectile.iwram.cpp
-	source/gameplay/levels/level1/bigLurker.cpp
-	source/gameplay/levels/level1/level.cpp
-	source/gameplay/levels/level1/wavingEnemy.cpp
-	source/gameplay/levels/level1/wobblingEnemies.cpp
-	source/graphics/BuddyObjectAllocator.cpp
-	source/graphics/FrameAnimator.cpp
-	source/graphics/graphics.cpp
-	source/graphics/HblankDma.cpp
-	source/graphics/OamManager.cpp
-	source/graphics/OamManager.iwram.cpp
-	source/graphics/StreamAnimator.cpp
-	source/math/trapdiv0.cpp
-	source/memory/allocator.iwram.cpp
-	source/scenes/BitmaskTestScene.cpp
-	source/scenes/ContextTestScene.cpp
-	source/scenes/Mode3TextTestScene.cpp
-	source/scenes/TileTextTestScene.cpp
-	source/util/dynamic.cpp
-	source/util/profile.cpp
-	source/util/virtual.cpp)
-# S Files
-set(S_FILES
-	source/crt0.s
-	source/audio/audioMix.s
-	source/gameplay/collision.s
-	source/gameplay/collisionBitmask.s
-	source/gameplay/Projectile.s
-	source/math/clz.s
-	source/math/lmul.s
-	source/math/sdiv32.s
-	source/math/sqrt32.s
-	source/math/sqrt64.s
-	source/math/udiv32.s
-	source/text/mode3PutGlyph.s
-	source/text/tile4bppPutGlyph.s
-	source/util/context.s
-	source/util/memops.s
-	source/util/uintDigits.s)
+
+add_subdirectory(tools)
+add_subdirectory(data)
+add_subdirectory(source)
+
 
 # Source objects
+#add_library(SRC_OFILES OBJECT ${C_FILES} ${CPP_FILES} ${S_FILES})
 #SRC_OFILES = $(addprefix build/, $(C_FILES:.c=.o) $(CPP_FILES:.cpp=.o) $(S_FILES:.s=.o))
 
-# Resources
-# Sprite Files
-set(SPR_FILES
-	data/sprites/big-lurker.png
-	data/sprites/bitmask-test.png
-	data/sprites/enemy-projectiles.png
-	data/sprites/hud.png
-	data/sprites/player.png
-	data/sprites/player-projectiles.png
-	data/sprites/small-explosion.png
-	data/sprites/waving-enemy.png
-	data/sprites/wobbling-enemy.png)
-# Background Files
-set(BKG_FILES
-	data/backgrounds/level.png)
-# Font Files
-set(FNT_FILES
-	data/fonts/monogram_extended.ttf)
-# Audio Settings
-set(AUS_FILES
-	data/audio.json)
-# Sound Files
-set(SND_FILES
-	data/sounds/player-dmg.wav
-	data/sounds/player-heal.wav
-	data/sounds/player-shot.wav)
+
 
 # Resource objects
+#add_library(RSRC_OFILES OBJECT ${SPR_FILES} ${BKG_FILES} ${FNT_FILES} ${SND_FILES})
 #RSRC_OFILES := $(addprefix build/, $(SPR_FILES:.png=.o) $(BKG_FILES:.png=.o) $(FNT_FILES:.ttf=.o)\
 #	$(SND_FILES:.wav=.o)) 
 
@@ -169,39 +73,34 @@ set(ARMOD gcc/bin/arm-none-eabi-objdump CACHE PATH "ARMOD")
 #	ARMLD := $(ARMCPP)
 #endif
 
-# Keep all intermediary files (maps, assembly and such) around
-#.SECONDARY:
-
-# Enable second expansion rule
-#.SECONDEXPANSION:
-
-# Now, the actual rules
-#.PHONY: all clean clean-everything clean-downloads download-deps build-tools
-
-#all: bin/game.gba
-
-# Now, make the game
-#bin/game.gba: download-deps build-tools tools/tools bin/game.elf
+#wget $(GCC_URL) -O gcc.tar.bz2
+#ifeq (,$(GCC_PLATFORM))
+#	$(error "This platform does not have a prebuilt arm-none-eabi; try to compile it from source and place it at $(GCC_NAME)")
+#endif
+#	mkdir gcc && tar xjf gcc.tar.bz2 -C gcc --strip-components 1
+#wget $(TONC_URL) -O tonc.zip
+#unzip -qq -n tonc.zip 'code/tonclib/*' -d tonclib
+#wget $(LSRC_URL) -O libsamplerate.tar.gz
+#mkdir libsamplerate && tar xzf libsamplerate.tar.gz -C libsamplerate --strip-components 1
+#$(MAKE) -C tools
+#@mkdir -p bin
+#@echo "Linking"
+#bin/game.elf: build/data/audio-settings.hpp $(OFILES)
+#	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) $(LIBRARIES) -o $@
+#	@$(ARMOD) -dCS $@ > $@.dump
+#bin/game.gba:
 #	@mkdir -p bin
 #	@echo "Sanitizing final file"
 #	@$(ARMOC) -O binary $(@:.gba=.elf) $@
 #	@tools/tools rom-sanitize $@ gba.json $@
 
-#bin/game.elf: build/data/audio-settings.hpp $(OFILES)
-#	@mkdir -p bin
-#	@echo "Linking"
-#	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) $(LIBRARIES) -o $@
-#	@$(ARMOD) -dCS $@ > $@.dump
+
 
 #-include $(DFILES)
 
 #build/data/%.o: build/data/%.s
 #	@mkdir -p $(@D)
 #	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
-
-#build/data/sprites/%.s build/data/sprites/%.hpp: data/sprites/%.png tools/tools
-#	@mkdir -p $(@D)
-#	tools/tools sprite-export $(filter %.png,$^) $(basename $@).s $(basename $@).hpp
 
 #build/data/backgrounds/%.s build/data/backgrounds/%.hpp: data/backgrounds/%.png tools/tools
 #	@mkdir -p $(@D)
@@ -239,38 +138,6 @@ set(ARMOD gcc/bin/arm-none-eabi-objdump CACHE PATH "ARMOD")
 #build/%.o: %.s
 #	@mkdir -p $(@D)
 #	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
-
-#download-deps: gcc tonc libsamplerate
-
-# Pull tonc
-#tonc: tonc.zip
-#	unzip -qq -n tonc.zip 'code/tonclib/*' -d tonclib
-
-#tonc.zip:
-#	wget $(TONC_URL) -O tonc.zip
-
-# Pull gcc
-#gcc: gcc.tar.bz2
-#ifeq (,$(GCC_PLATFORM))
-#	$(error "This platform does not have a prebuilt arm-none-eabi; try to compile it from source and place it at $(GCC_NAME)")
-#endif
-#	mkdir gcc && tar xjf gcc.tar.bz2 -C gcc --strip-components 1
-
-#gcc.tar.bz2:
-#	wget $(GCC_URL) -O gcc.tar.bz2
-
-# Pull libsamplerate
-#libsamplerate: libsamplerate.tar.gz
-#	mkdir libsamplerate && tar xzf libsamplerate.tar.gz -C libsamplerate --strip-components 1
-
-#libsamplerate.tar.gz:
-#	wget $(LSRC_URL) -O libsamplerate.tar.gz
-
-# Tools
-#tools/tools: build-tools
-
-#build-tools: libsamplerate
-#	$(MAKE) -C tools
 
 #clean:
 #	rm -rf bin build

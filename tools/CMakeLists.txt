@@ -1,52 +1,42 @@
 # Projects Settings
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.16)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+project(gba-modern-tools)
+find_package(Freetype REQUIRED)
+find_package(LibSampleRate REQUIRED)
 
-set(CMAKE_C_COMPILER /usr/bin/gcc)
-set(CMAKE_CXX_COMPILER /usr/bin/g++)
+# CPP_FILES
+set(TOOLS_CPP_FILES
+	audio-export-settings.cpp
+	background-convert.cpp
+	background-export.cpp
+	font-export.cpp
+	graphics.cpp
+	lodepng.cpp
+	main.cpp
+	resample.cpp
+	rom-sanitize.cpp
+	sound-export.cpp
+	sprite-export.cpp
+	UnionFind.cpp
+	util.cpp
+	main.cpp)
 
-#CC				:= gcc
-#CXX				:= g++
+set(TOOLS_PCH_HEADERS
+	background-export-state.hpp
+	grid.hpp
+	lodepng.h
+	nlohmann/json.hpp
+	graphics.hpp
+	resample.hpp
+	${LIBSAMPLERATE_INCLUDE_DIRS}
+	UnionFind.hpp
+	split.hpp
+	util.hpp)
 
-#C_FILES   		:= $(wildcard *.c)
-#CPP_FILES 		:= $(wildcard *.cpp)
-#O_FILES			:= $(C_FILES:%.c=obj/%.o) $(CPP_FILES:%.cpp=obj/%.o)
-
-#C_FLAGS		:= -Wall -g -I/usr/include/freetype2 -I../libsamplerate-install/include
-#CPP_FLAGS	:= $(C_FLAGS) -std=c++17
-#LIBS 		:= -lfreetype ../libsamplerate-install/lib/libsamplerate.a
-
-#PCH_SRC		:= pch.hpp
-#PCH_INC		:= grid.hpp lodepng.h nlohmann/json.hpp util.hpp
-#PCH_OUT		:= pch.hpp.gch
-
-#LSRC_INSTALL_FOLDER = $(dir $(CURDIR))libsamplerate-install
-
-#.PHONY: all clean
-
-#all: tools
-
-#$(PCH_OUT): $(PCH_SRC) $(PCH_INC)
-#	$(CXX) $(CPP_FLAGS) -o $@ $<
-
-#-include obj/*.d
-
-#obj/%.o: %.c $(PCH_OUT)
-#	@mkdir -p obj
-#	$(CC) -MMD $(C_FLAGS) -include $(PCH_SRC) -c -o $@ $<
-
-#obj/%.o: %.cpp $(PCH_OUT)
-#	@mkdir -p obj
-#	$(CXX) -MMD $(CPP_FLAGS) -include $(PCH_SRC) -c -o $@ $<
-
-#tools: ../libsamplerate-install $(O_FILES)
-#	$(CXX) $(CPP_FLAGS) -o $@ $(O_FILES) $(LIBS)
-
-#../libsamplerate-install: ../libsamplerate
-#	cd ../libsamplerate && ./configure --prefix $(LSRC_INSTALL_FOLDER) && make && make install
-
-#clean:
-#	@rm -rf obj
-#	@rm -f tools pch.hpp.gch
+add_executable(tools ${TOOLS_CPP_FILES})
+target_link_libraries(tools ${FREETYPE_LIBRARIES})
+target_link_libraries(tools ${LIBSAMPLERATE_LIBRARY})
+target_include_directories(tools PRIVATE ${FREETYPE_INCLUDE_DIRS})
+target_include_directories(tools PRIVATE ${LIBSAMPLERATE_INCLUDE_DIRS})
+target_precompile_headers(tools PUBLIC pch.hpp PRIVATE ${TOOLS_PCH_HEADERS})
