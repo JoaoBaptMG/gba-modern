@@ -1,0 +1,1 @@
+<Project name="bm_modes"><Folder name="hdr"><File path="modes.h"></File><File path="toolbox.h"></File></Folder><Folder name="src"><File path="bm_modes.c"></File><File path="modes.c"></File><File path="toolbox.c"></File></Folder><Folder name="asm"></Folder><File path="Makefile"></File><File path="bm_modes.map"></File></Project>

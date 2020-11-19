@@ -1,0 +1,4 @@
+#
+# Background palette, LZ77 compressed.
+#
+-gB8 -g! -s bg -Zl

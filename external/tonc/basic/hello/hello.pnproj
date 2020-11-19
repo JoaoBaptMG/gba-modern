@@ -1,0 +1,11 @@
+<Project name="hello">
+  <Folder name="hdr">
+  </Folder>
+  <Folder name="src">
+    <File path="hello.c"></File>
+  </Folder>
+  <Folder name="asm">
+  </Folder>
+  <File path="Makefile"></File>
+  <File path="hello.map"></File>
+</Project>

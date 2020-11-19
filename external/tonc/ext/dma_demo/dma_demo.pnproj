@@ -1,0 +1,11 @@
+<Project name="dma_demo">
+  <Folder name="hdr">
+  </Folder>
+  <Folder name="src">
+    <File path="dma_demo.c"></File>
+  </Folder>
+  <Folder name="asm">
+  </Folder>
+  <File path="Makefile"></File>
+  <File path="dma_demo.map"></File>
+</Project>

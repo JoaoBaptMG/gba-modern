@@ -1,0 +1,5 @@
+#
+# nums.png : 8bpp tiles, with palette
+#
+
+-gt -gB8 -pn 32

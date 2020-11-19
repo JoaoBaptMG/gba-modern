@@ -1,0 +1,10 @@
+<Project name="[[PROJNAME]]">
+<MagicFolder excludeFolders="CVS;.svn;build" filter="*.h;*.inl" name="include" path="include\">
+</MagicFolder>
+<MagicFolder excludeFolders="CVS;.svn;build" filter="*.c;*.cpp" name="source" path="source\">
+</MagicFolder>
+<MagicFolder excludeFolders="CVS;.svn;build" filter="*.s;*.asm" name="asm" path="source\"></MagicFolder>
+<MagicFolder excludeFolders="CVS;.svn;build" filter="*.grit" name="gfx" path="gfx\"></MagicFolder>
+<File path="Makefile"></File>
+<File path="gfxmake"></File>
+<File path="build\[[PROJNAME]].map"></File></Project>

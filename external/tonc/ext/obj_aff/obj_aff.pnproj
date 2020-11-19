@@ -1,0 +1,11 @@
+<Project name="obj_aff">
+  <Folder name="hdr">
+  </Folder>
+  <Folder name="src">
+    <File path="obj_aff.c"></File>
+  </Folder>
+  <Folder name="asm">
+  </Folder>
+  <File path="Makefile"></File>
+  <File path="obj_aff.map"></File>
+</Project>

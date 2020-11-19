@@ -1,0 +1,11 @@
+<Project name="bld_demo">
+  <Folder name="hdr">
+  </Folder>
+  <Folder name="src">
+    <File path="bld_demo.c"></File>
+  </Folder>
+  <Folder name="asm">
+  </Folder>
+  <File path="Makefile"></File>
+  <File path="bld_demo.map"></File>
+</Project>

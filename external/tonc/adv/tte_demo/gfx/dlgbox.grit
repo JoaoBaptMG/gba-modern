@@ -1,0 +1,7 @@
+#
+# dlgbox tiles, column-major tile order.
+#
+# NOTE : with grit 0.8.1, column-major tiling can be done with -tc. 
+#   In older versions, you can fake it using -Mh(imgHeight/8).
+
+-gt -gB4 -pn16 -tc

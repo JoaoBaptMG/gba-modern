@@ -1,0 +1,1 @@
+<Workspace name="[[PROJNAME]]"><Project path="[[PROJNAME]].pnproj"></Project><Project path="[[LIBTONC]]\tonclib.pnproj"></Project></Workspace>

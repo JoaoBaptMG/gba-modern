@@ -1,0 +1,4 @@
+#
+# Bowser's Castle I sky : normal map, 64x32t, LZ77 compressed.
+#
+-gB4 -mLs -mR4 -ma 128 -p! -Zl

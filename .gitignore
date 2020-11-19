@@ -11,7 +11,6 @@ tools/pch.hpp.gch
 gba-modern.code-workspace
 bin
 gba.map
-tonc*
 gcc*
 libsamplerate*
 .vs/*

@@ -1,0 +1,86 @@
+
+         _______________________________________________________
+       //                                                       \\
+      ||      TTTT          q    cc        cc                    ||
+      ||     TT             qq  c  c      c  c                   ||
+      ||     TT             qq  c  c      c  c         ddd       ||
+      ||     TT      ooo  qqq    cc        cc    ooo  d     ee   ||
+      ||     TT     o       q   c  c      c  c  o     d      e   ||
+      ||     TT     o       q  c    c    c    c o      ddd   e   ||
+      ||  TTTTTTTTT  ooo    q c  cccc   c  cccc  ooo  d  d   e   ||
+      ||                                                         ||
+      ||                                                         ||
+      ||                                                         ||
+      ||=========================================================||
+      ||                                                         ||
+      ||             Tonc code: tonc projects and tonclib        ||
+      ||                         v1.4.2                          ||
+      ||              2003-10-01 - 2013-03-24, J Vijn            ||
+      ||                                                         ||
+       \\_______________________________________________________//
+
+       
+// === Description ===
+  Tonc is a tutorial for learning how to program for the GameBoy Advance
+(GBA). It covers most aspects of the GBA, often in great detail and 
+from an efficiency orientated viewpoint. Among other things, you'll 
+see all video modes (0-6), sprites, simple and advanced button 
+handling, Rotation/Scaling for backgrounds and sprites (covered the 
+_right_ way for a change), mode 7 and programming in ARM assembly.
+
+  Tonc consists of 3 parts: text, code and binaries. Tonc is part of
+http://www.coranac.com/ where you can find the on-line text, as
+well as zips for the three parts. This readme belongs to the code 
+part of the set.
+
+NOTE: this is still a only a beta, though should be close to the
+final version.
+
+// === Tonc code (tonc-code.zip) ---
+  This contains all the demo projects for tonc as well as the utility
+code library tonclib. The code is mainly meant for devkitPro r19 
+and higher; for earlier versions or other devkits you'd need to make 
+some adjustments.
+  The projects fall into 4 categories: basic, extended, advanced and 
+lab. The first three are ordered according to difficulty. The basic
+projects are fairly simple; they're completely self-contained using 
+simple makefiles. The extended projects start to use tonclib and 
+contail more advanced (but also more useful) makefiles. The advanced 
+projects use tonclib even more, use assembly for data and yet more 
+complex makefiles, derived from DKP's templates. The lab demos might 
+fall into this category as well, except that they might not be 
+completely finished yet. Still worth looking at though.
+  Tonclib contains a good number of utility code, taking care of simple
+and not so simple items. There's types and a complete memory map +
+bit definitions in tonc_memmap.h and tonc_memdef.h. It contains a 
+BIOS routines plus some extra, safe and safe memcpy and memset versions 
+for words and halfwords and an interrupt system that allows for 
+easy to use prioritized and nested interrupts. As this is a bit much 
+to take in at once, there's also a doxygen generated manual in 
+CHM format.
+
+// === Usage ===
+Each project has a Makefile and a .pnproj file for for easy 
+compilation. There are also Visual C++ 6 and Express projects for use 
+with thise IDEs. You can also run things for a DOS/msys-box like this:
+
+`make tonclib'          To build tonclib.a
+`make DEMO=foo'         To build the `foo' demo
+`make DEMO=foo clean'   To clean the `foo' demo
+`make build_all'        To build all demos
+`make clean_all'        To clean all demos
+
+// === Recent changes ===
+
+- 2013-03-24, jv:
+  + made ready for DKA r41 (uses arm-none-eabi iso arm-eabi-)
+- older
+  Too many to list here. Look at log.htm in the text.
+
+// === Contact Info ===
+
+  J.Vijn
+  cearn@coranac.com
+  http://www.coranac.com
+
+

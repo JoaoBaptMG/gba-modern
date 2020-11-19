@@ -1,0 +1,13 @@
+<Project name="win_demo">
+  <Folder name="hdr">
+    <File path="rocket.h"></File>
+  </Folder>
+  <Folder name="src">
+    <File path="rocket.c"></File>
+    <File path="win_demo.c"></File>
+  </Folder>
+  <Folder name="asm">
+  </Folder>
+  <File path="Makefile"></File>
+  <File path="win_demo.map"></File>
+</Project>

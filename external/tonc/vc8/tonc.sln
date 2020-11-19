@@ -1,0 +1,81 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tonc", "tonc.vcproj", "{1CC0315B-905D-4115-A584-84C1CEFC806E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tonclib", "..\tonclib\tonclib.vcproj", "{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vault", "vault.vcproj", "{838CD683-F696-4952-8872-CC6A51F88588}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Build All|Win32 = Build All|Win32
+		Build libtonc|Win32 = Build libtonc|Win32
+		Build Single|Win32 = Build Single|Win32
+		Build|Win32 = Build|Win32
+		Clean All|Win32 = Clean All|Win32
+		Clean Single|Win32 = Clean Single|Win32
+		Clean|Win32 = Clean|Win32
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Build All|Win32.ActiveCfg = Build All|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Build All|Win32.Build.0 = Build All|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Build libtonc|Win32.ActiveCfg = Build libtonc|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Build libtonc|Win32.Build.0 = Build libtonc|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Build Single|Win32.ActiveCfg = Build Single|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Build Single|Win32.Build.0 = Build Single|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Build|Win32.ActiveCfg = Build All|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Build|Win32.Build.0 = Build All|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Clean All|Win32.ActiveCfg = Clean All|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Clean All|Win32.Build.0 = Clean All|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Clean Single|Win32.ActiveCfg = Clean Single|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Clean Single|Win32.Build.0 = Clean Single|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Clean|Win32.ActiveCfg = Clean All|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Clean|Win32.Build.0 = Clean All|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Debug|Win32.ActiveCfg = Build All|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Debug|Win32.Build.0 = Build All|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Release|Win32.ActiveCfg = Build All|Win32
+		{1CC0315B-905D-4115-A584-84C1CEFC806E}.Release|Win32.Build.0 = Build All|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Build All|Win32.ActiveCfg = Build|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Build All|Win32.Build.0 = Build|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Build libtonc|Win32.ActiveCfg = Build|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Build libtonc|Win32.Build.0 = Build|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Build Single|Win32.ActiveCfg = Build|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Build Single|Win32.Build.0 = Build|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Build|Win32.ActiveCfg = Build|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Build|Win32.Build.0 = Build|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Clean All|Win32.ActiveCfg = Clean|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Clean All|Win32.Build.0 = Clean|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Clean Single|Win32.ActiveCfg = Clean|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Clean Single|Win32.Build.0 = Clean|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Clean|Win32.ActiveCfg = Clean|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Clean|Win32.Build.0 = Clean|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Debug|Win32.ActiveCfg = Build|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Debug|Win32.Build.0 = Build|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Release|Win32.ActiveCfg = Build|Win32
+		{1F11FFF7-7BCD-42D3-A581-9C4C0A4885C7}.Release|Win32.Build.0 = Build|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Build All|Win32.ActiveCfg = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Build All|Win32.Build.0 = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Build libtonc|Win32.ActiveCfg = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Build libtonc|Win32.Build.0 = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Build Single|Win32.ActiveCfg = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Build Single|Win32.Build.0 = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Build|Win32.ActiveCfg = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Build|Win32.Build.0 = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Clean All|Win32.ActiveCfg = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Clean All|Win32.Build.0 = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Clean Single|Win32.ActiveCfg = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Clean Single|Win32.Build.0 = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Clean|Win32.ActiveCfg = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Clean|Win32.Build.0 = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Debug|Win32.ActiveCfg = Debug|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Debug|Win32.Build.0 = Debug|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Release|Win32.ActiveCfg = Release|Win32
+		{838CD683-F696-4952-8872-CC6A51F88588}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

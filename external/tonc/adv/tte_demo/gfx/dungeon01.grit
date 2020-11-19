@@ -1,0 +1,4 @@
+#
+# LoZ:LttP, dungeon 1 map : 64x64t, 4bpp, SBB-layout, LZ77 compressed.
+#
+-gt -gB4 -mR4 -mLs -Zl
