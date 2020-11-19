@@ -129,11 +129,11 @@ set(GAME_HPP_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/util/LightBitset.hpp
 	${CMAKE_CURRENT_SOURCE_DIR}/util/ObjectStack.hpp)
 
-add_library(GAME_OBJECTS OBJECT
-	${GAME_C_FILES}
-	${GAME_CPP_FILES}
-	${GAME_S_FILES}
-	${GAME_HPP_FILES})
+#add_library(GAME_OBJECTS OBJECT
+#	${GAME_C_FILES}
+#	${GAME_CPP_FILES}
+#	${GAME_S_FILES}
+#	${GAME_HPP_FILES})
 
-target_include_directories(GAME_OBJECTS PRIVATE
-	${CMAKE_SOURCE_DIR}/external/tonc/tonclib/include)
+#target_include_directories(GAME_OBJECTS PRIVATE
+#	${CMAKE_SOURCE_DIR}/external/tonc/tonclib/include)
