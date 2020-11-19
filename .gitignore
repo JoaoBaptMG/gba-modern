@@ -9,9 +9,7 @@ tools/obj
 tools/tools
 tools/pch.hpp.gch
 gba-modern.code-workspace
-bin
 gba.map
-gcc*
 libsamplerate*
 .vs/*
 out/isenseconfig/WSL-Debug/iconfig.json
