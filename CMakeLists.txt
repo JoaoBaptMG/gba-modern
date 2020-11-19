@@ -69,14 +69,27 @@ foreach(SPRITE ${SPR_FILES})
 		COMMAND ${CMAKE_BINARY_DIR}/tools/tools sprite-export ${CMAKE_SOURCE_DIR}/data/sprites/${SPRITE}.png ${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.s ${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.hpp
 		BYPRODUCTS ${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.s ${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.hpp
 		COMMENT "Exporting Sprite ${SPRITE}")
-	add_custom_target(${SPRITE} ALL
+	execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools sprite-export ${CMAKE_SOURCE_DIR}/data/sprites/${SPRITE}.png ${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.s ${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.hpp)
+	add_custom_target(${SPRITE}-target ALL
 		DEPENDS tools ${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.s ${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.hpp
+		SOURCES ${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.s ${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.hpp
 		COMMENT "Building ${SPRITE}")
-	list(APPEND SPRITES_L ${SPRITE})
+	add_library(${SPRITE}-image OBJECT
+		${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.s
+		${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.hpp)
+	add_dependencies(${SPRITE}-image ${SPRITE}-target)
+	list(APPEND SPRITES_L $<TARGET_OBJECT:${SPRITE}-image>)
 endforeach()
 
-add_custom_target(SPRITES ALL
-	DEPENDS ${SPRITES_L})
+add_library(TESTTT OBJECT
+	${CMAKE_BINARY_DIR}/data/sprites/big-lurker.s ${CMAKE_BINARY_DIR}/data/sprites/big-lurker.hpp)
+
+#add_library(SPRITES OBJECT
+#	${SPRITES_L})
+#add_dependencies(SPRITES ${SPR_FILES})
+
+#add_custom_target(SPRITES ALL
+#	DEPENDS ${SPRITES_L})
 
 #build backgrounds
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/backgrounds)
@@ -88,6 +101,7 @@ foreach(BACKGROUND ${BKG_FILES})
 		COMMENT "Exporting Background Sprite ${SPRITE}")
 	add_custom_target(${BACKGROUND} ALL
 		DEPENDS tools ${CMAKE_BINARY_DIR}/data/backgrounds/${BACKGROUND}.s ${CMAKE_BINARY_DIR}/data/backgrounds/${BACKGROUND}.hpp
+		SOURCES ${CMAKE_BINARY_DIR}/data/backgrounds/${BACKGROUND}.s ${CMAKE_BINARY_DIR}/data/backgrounds/${BACKGROUND}.hpp
 		COMMENT "Building ${BACKGROUND}")
 	list(APPEND BACKGROUNDS_L ${BACKGROUND})
 endforeach()
@@ -105,6 +119,7 @@ foreach(FONT ${FNT_FILES})
 		COMMENT "Exporting Font ${FONT}")
 	add_custom_target(${FONT} ALL
 		DEPENDS tools ${CMAKE_BINARY_DIR}/data/fonts/${FONT}.s ${CMAKE_BINARY_DIR}/data/fonts/${FONT}.hpp
+		SOURCES ${CMAKE_BINARY_DIR}/data/fonts/${FONT}.s ${CMAKE_BINARY_DIR}/data/fonts/${FONT}.hpp
 		COMMENT "Building ${FONT}")
 	list(APPEND FONTS_L ${FONT})
 endforeach()
@@ -121,6 +136,7 @@ foreach(SETTING ${AUS_FILES})
 		COMMENT "Exporting Audio Setting ${SETTING}")
 	add_custom_target(${SETTING} ALL
 		DEPENDS tools ${CMAKE_BINARY_DIR}/data/${SETTING}.hpp ${CMAKE_BINARY_DIR}/data/${SETTING}.json
+		SOURCES ${CMAKE_BINARY_DIR}/data/${SETTING}.hpp ${CMAKE_BINARY_DIR}/data/${SETTING}.json
 		COMMENT "Building ${SETTING}")
 	list(APPEND AUS_L ${SETTING})
 endforeach()
@@ -138,6 +154,7 @@ foreach(SOUND ${SND_FILES})
 		COMMENT "Exporting Sound ${SOUND}")
 	add_custom_target(${SOUND} ALL
 		DEPENDS tools ${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.s ${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.hpp
+		SOURCES ${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.s ${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.hpp
 		COMMENT "Building ${SOUND}")
 	list(APPEND SND_L ${SOUND})
 endforeach()
@@ -146,8 +163,8 @@ add_custom_target(SOUNDS ALL
 	DEPENDS ${SND_L})
 
 #add_library(RESOURCES OBJECT
-#	${SPR_S})
-#	${BKG_S}
+#	$<TARGET_OBJECTS:SPRITES>
+#	BACKGROUNDS)
 #	${BKG_HPP}
 #	${FNT_S}
 #	${FNT_HPP}
@@ -172,57 +189,52 @@ add_custom_target(SOUNDS ALL
 
 #find_package(LibSampleRate REQUIRED)
 
+# Source files
+#build/%.iwram.o: %.iwram.cpp
+#add_custom_target(IWRAM_CPP_OBJECT_FILES ALL
+#	DEPENDS tools SPRITES BACKGROUNDS FONTS AUS SOUNDS)
+#	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
+
+#build/%.iwram.o: %.iwram.c
+#add_custom_target(IWRAM_C_OBJECT_FILES ALL
+#	DEPENDS tools SPRITES BACKGROUNDS FONTS AUS SOUNDS)
+#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
+
+#build/%.o: %.cpp
+#add_custom_target(CPP_OBJECTS ALL
+#	DEPENDS tools SPRITES BACKGROUNDS FONTS AUS SOUNDS)
+#	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
+
+#build/%.o: %.c
+#add_custom_target(C_OBJECTS ALL
+#	DEPENDS tools SPRITES BACKGROUNDS FONTS AUS SOUNDS)
+#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+#build/%.o: %.s
+#add_custom_target(ASSEMBLY_OBJECTS ALL
+#	DEPENDS tools SPRITES BACKGROUNDS FONTS AUS SOUNDS)
+#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
+
+#bin/game.elf: build/data/audio-settings.hpp $(OFILES)
 # Get the right linker
 #ifeq ($(strip $(CPPFILES)),)
 #	ARMLD := $(ARMCC)
 #else
 #	ARMLD := $(ARMCPP)
 #endif
-
-#bin/game.elf: build/data/audio-settings.hpp $(OFILES)
 #	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) $(LIBRARIES) -o $@
+
+#add_custom_target(OBJECT_DUMP ALL
+#	DEPENDS IWRAM_CPP_OBJECT_FILES IWRAM_C_OBJECT_FILES CPP_OBJECTS C_OBJECTS ASSEMBLY_OBJECTS)
 #	@${CMAKE_OBJDUMP} -dCS $@ > $@.dump
 
-# Source files
-#build/%.iwram.o: %.iwram.cpp
-#	@mkdir -p $(@D)
-#	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
-add_custom_target(IWRAM_CPP_OBJECT_FILES ALL
-	DEPENDS tools SPRITES BACKGROUNDS FONTS SOUNDS)
-
-#build/%.iwram.o: %.iwram.c
-#	@mkdir -p $(@D)
-#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
-add_custom_target(IWRAM_C_OBJECT_FILES ALL
-	DEPENDS tools SPRITES BACKGROUNDS FONTS SOUNDS)
-
-#build/%.o: %.cpp
-#	@mkdir -p $(@D)
-#	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
-add_custom_target(CPP_OBJECTS ALL
-	DEPENDS tools SPRITES BACKGROUNDS FONTS SOUNDS)
-
-#build/%.o: %.c
-#	@mkdir -p $(@D)
-#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -c $< -o $@
-add_custom_target(C_OBJECTS ALL
-	DEPENDS tools SPRITES BACKGROUNDS FONTS SOUNDS)
-
-#build/%.o: %.s
-#	@mkdir -p $(@D)
-#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
-add_custom_target(ASSEMBLY_OBJECTS ALL
-	DEPENDS tools SPRITES BACKGROUNDS FONTS SOUNDS
-	)#COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF)
-
 #bin/game.gba:
-#	@mkdir -p bin
+#add_custom_target(ROM_BUILD ALL
+#	DEPENDS OBJECT_DUMP
+#	COMMENT "Building ROM")
 #	@${CMAKE_OBJCOPY} -O binary $(@:.gba=.elf) $@
-#	@tools/tools rom-sanitize $@ gba.json $@
-add_custom_target(ROM_BUILD ALL
-	DEPENDS IWRAM_CPP_OBJECT_FILES IWRAM_C_OBJECT_FILES CPP_OBJECTS C_OBJECTS ASSEMBLY_OBJECTS
-	COMMENT "Building ROM")
 
-add_custom_target(ROM ALL
-	DEPENDS ROM_BUILD
-	COMMENT "Sanitising final file")
+#add_custom_target(ROM ALL
+#	DEPENDS ROM_BUILD
+#	COMMENT "Sanitising final file")
+#	@tools/tools rom-sanitize $@ gba.json $@
