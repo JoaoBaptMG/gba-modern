@@ -235,6 +235,17 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 			${FONTS_S} ${FONTS_HPP}
 			${AUS_HPP} ${AUS_JSON}
 			${SOUNDS_S} ${SOUNDS_HPP})
+
+	add_custom_target(RESOURCE_OBJECTS ALL
+		DEPENDS RESOURCES
+		#-MP means we construct a phony target for each dependency other than the main file, causing it to depend on nothing
+		#-MMD and -MF file, specifies a file to write the dependencies to, it overrides the default dependecy output thanks to -MMD
+		#-x assembler-with-cpp indicates that the assembly code contains C directives and armclang must run the C preprocessor
+		#assembler flags
+		#-c output_file writes all comments passed through to the output file
+		#-o file 
+		COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF files? -x assembler-with-cpp -g -mthumb -mthumb-interwork -c output_file -o input-file?
+		COMMENT "Building RESOURCE_OBJECTS")
 	#add_subdirectory(source)
 
 
@@ -255,27 +266,27 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	# Source files
 	#build/%.iwram.o: %.iwram.cpp
 	add_custom_target(IWRAM_CPP_OBJECT_FILES ALL
-		DEPENDS RESOURCES)
+		DEPENDS RESOURCE_OBJECTS)
 	#	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
 
 	#build/%.iwram.o: %.iwram.c
 	add_custom_target(IWRAM_C_OBJECT_FILES ALL
-		DEPENDS RESOURCES)
+		DEPENDS RESOURCE_OBJECTS)
 	#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
 
 	#build/%.o: %.cpp
 	add_custom_target(CPP_OBJECTS ALL
-		DEPENDS RESOURCES)
+		DEPENDS RESOURCE_OBJECTS)
 	#	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
 
 	#build/%.o: %.c
 	add_custom_target(C_OBJECTS ALL
-		DEPENDS RESOURCES)
+		DEPENDS RESOURCE_OBJECTS)
 	#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 	#build/%.o: %.s
 	add_custom_target(ASSEMBLY_OBJECTS ALL
-		DEPENDS RESOURCES)
+		DEPENDS RESOURCE_OBJECTS)
 	#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
 
 	#bin/game.elf: build/data/audio-settings.hpp $(OFILES)
