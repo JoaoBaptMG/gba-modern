@@ -37,8 +37,7 @@ context_t context_switch2(context_t ctx, context_t* oldCtx) IWRAM_CODE;
 
 // "Schedules" the context switch from inside the IRQ, in a way that, when
 // the IRQ returns, it behaves as-if from a context_switch, and sets the
-// other context's return value to emulate an IRQ return.
-// *It must be the last function to be called from the IRQ!!!*
+// other context's return value to emulate an IRQ return
 void context_switch_from_irq(context_t ctx) IWRAM_CODE;
 
 // All stack pointers must be aligned by 8 bytes
