@@ -241,7 +241,10 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		#-MP means we construct a phony target for each dependency other than the main file, causing it to depend on nothing
 		#-MMD and -MF file, specifies a file to write the dependencies to, it overrides the default dependecy output thanks to -MMD
 		#-x assembler-with-cpp indicates that the assembly code contains C directives and armclang must run the C preprocessor
-		#assembler flags
+		#assembler flags (-g -mthumb -mthumb-interwork)
+		#	-g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
+		#	-mthumb Requests that the compiler targets the T32 instruction set.
+		#	-mthumb-interwork Generate code that supports calling between the ARM and Thumb instruction sets
 		#-c output_file writes all comments passed through to the output file
 		#-o file 
 		COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF files? -x assembler-with-cpp -g -mthumb -mthumb-interwork -c output_file -o input-file?
