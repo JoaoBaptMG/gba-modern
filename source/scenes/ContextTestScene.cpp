@@ -9,9 +9,8 @@
 #include "colors.hpp"
 #include <cctype>
 
-context_t testContext(context_t ctx, void* arg);
-
-STACKPTR std::byte ctxStack[512] IWRAM_DATA;
+static context_t testContext(context_t ctx, void* arg);
+static STACKPTR std::byte ctxStack[512] IWRAM_DATA;
 
 ContextTestScene::ContextTestScene() : IScene(), writer(data::fonts::monogram_extended, vid_mem),
     curContext(context_new(ctxStack+sizeof(ctxStack), testContext, this)), x(0), framesToWait(0)
