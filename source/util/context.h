@@ -3,12 +3,6 @@
 //--------------------------------------------------------------------------------
 // Provides an API for context switching (a primitive form of coroutines)
 //--------------------------------------------------------------------------------
-
-// IMPORTANT!!! IF YOU USE TONC'S NESTED ISR, SET THIS VALUE TO 36!!
-// Otherwise, it should remain as 40
-#define STACK_SIZE 40
-
-#ifndef __ASSEMBLER__
 #pragma once
 
 #ifdef __cplusplus
@@ -26,19 +20,6 @@ typedef context_t (*context_entry_point_t)(context_t ctx, void* arg);
 // "wake up" the other context and, when this context is switched to again,
 // the function will return with a new context
 context_t context_switch(context_t ctx) IWRAM_CODE;
-
-// Gives up ownership and switches to another context. This function will
-// "wake up" the other context and, when this context is switched to again,
-// the function will return with a new context.
-// This function does the same as context_switch, but it saves a copy of
-// the current context in oldCtx, it should be used for context scheduling
-// from inside the IRQ
-context_t context_switch2(context_t ctx, context_t* oldCtx) IWRAM_CODE;
-
-// "Schedules" the context switch from inside the IRQ, in a way that, when
-// the IRQ returns, it behaves as-if from a context_switch, and sets the
-// other context's return value to emulate an IRQ return
-void context_switch_from_irq(context_t ctx) IWRAM_CODE;
 
 // All stack pointers must be aligned by 8 bytes
 #define STACKPTR __attribute__((aligned(8)))
@@ -62,5 +43,4 @@ inline static context_t context_new(void* stack_top, context_entry_point_t entry
 
 #ifdef __cplusplus
 }
-#endif
 #endif
