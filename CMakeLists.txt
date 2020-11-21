@@ -12,10 +12,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Compilation flags	
-# Arch flags
+# Architecture? flags
 # -mthumb Requests that the compiler targets the T32 instruction set.
 # -mthumb-interwork Generate code that supports calling between the ARM and Thumb instruction sets	
-set(ARCH "-mthumb -mthumb-interwork")
+set(ARCH "-mthumb-interwork")
 
 # C flags
 # -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
@@ -47,7 +47,7 @@ set(CPPFLAGS "${CFLAGS} -std=c++17 -fno-rtti -fno-exceptions")
 
 # assembler flags
 # -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
-set(ASFLAGS "-g ${ARCH}")
+set(ASFLAGS "${ARCH}") #-g seems to break this?
 
 # LD flags
 # -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
@@ -312,12 +312,12 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 				${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.hpp
 				${CMAKE_BINARY_DIR}/data/audio-settings.json
 			COMMENT "Exporting Sound ${SOUND}")
-		add_custom_target(${SOUND}-font ALL
+		add_custom_target(${SOUND}-sound ALL
 			DEPENDS tools ${SOUND}-command
 			SOURCES ${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.s
 				${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.hpp
 			COMMENT "Building ${SOUND}")
-		list(APPEND SOUNDS_L ${SOUND}-font)
+		list(APPEND SOUNDS_L ${SOUND}-sound)
 		list(APPEND SOUNDS_S ${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.s)
 		list(APPEND SOUNDS_HPP ${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.hpp)
 	endforeach()
@@ -327,20 +327,31 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		SOURCES ${SOUNDS_S} ${SOUNDS_HPP}
 		COMMENT "Building SOUNDS")
 
-	add_custom_target(RESOURCES ALL
+	add_custom_target(RESOURCES_ASSEMBLY ALL
 		DEPENDS SPRITES
 			BACKGROUNDS
 			FONTS
 			AUS
 			SOUNDS
-		SOURCES ${SPRITES_S} ${SPRITES_HPP}
-			${BACKGROUNDS_S} ${BACKGROUNDS_HPP}
-			${FONTS_S} ${FONTS_HPP}
-			${AUS_HPP} ${AUS_JSON}
-			${SOUNDS_S} ${SOUNDS_HPP})
+		SOURCES ${SPRITES_S}
+			${BACKGROUNDS_S}
+			${FONTS_S}
+			${SOUNDS_S})
+
+	add_custom_target(RESOURCES_HPP ALL
+		DEPENDS SPRITES
+			BACKGROUNDS
+			FONTS
+			AUS
+			SOUNDS
+		SOURCES ${SPRITES_HPP}
+			${BACKGROUNDS_HPP}
+			${FONTS_HPP}
+			${AUS_HPP}
+			${SOUNDS_HPP})
 
 	add_custom_target(RESOURCE_OBJECTS ALL
-		DEPENDS RESOURCES
+		DEPENDS RESOURCES_ASSEMBLY RESOURCES_HPP
 		
 		COMMENT "Building RESOURCE_OBJECTS")
 	
@@ -492,7 +503,11 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	#LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 	#INCLUDE	:= $(foreach dir,$(LIBDIRS),-isystem $(dir)/include) $(foreach dir,$(INCDIRS), -isystem $(dir)) -iquote build -iquote source
 
-	
+	set(ARMCC "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-gcc")
+	set(ARMCPP "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-g++")
+	set(ARMOC "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objcopy")
+	set(ARMOD "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objdump")
+
 	set(LibSampleRate_DIR ${CMAKE_SOURCE_DIR}/external/libsamplerate-install)
 	find_package(LibSampleRate REQUIRED)
 
@@ -517,17 +532,65 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		DEPENDS RESOURCE_OBJECTS)
 	#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-	#build/%.o: %.s
+	# Build Resource Assembly File Objects
+	foreach (FILE ${SPR_FILES})
+		add_custom_command(OUTPUT ${FILE}-object-command
+			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.o
+			DEPENDS RESOURCE_OBJECTS
+			COMMENT "Building Assembly File Object ${FILE}")
+		add_custom_target(${FILE}-object ALL
+			DEPENDS ${FILE}-object-command
+			SOURCES ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.d
+			COMMENT "Built ${FILE} Object")
+		list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
+		list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.d)
+	endforeach()
+	foreach (FILE ${BKG_FILES})
+		add_custom_command(OUTPUT ${FILE}-object-command
+			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.o
+			DEPENDS RESOURCE_OBJECTS
+			COMMENT "Building Assembly File Object ${FILE}")
+		add_custom_target(${FILE}-object ALL
+			DEPENDS ${FILE}-object-command
+			SOURCES ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.d
+			COMMENT "Built ${FILE} Object")
+		list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
+		list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.d)
+	endforeach()
+	foreach (FILE ${FNT_FILES})
+		add_custom_command(OUTPUT ${FILE}-object-command
+			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.o
+			DEPENDS RESOURCE_OBJECTS
+			COMMENT "Building Assembly File Object ${FILE}")
+		add_custom_target(${FILE}-object ALL
+			DEPENDS ${FILE}-object-command
+			SOURCES ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.d
+			COMMENT "Built ${FILE} Object")
+		list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
+		list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.d)
+	endforeach()
+	foreach (FILE ${SND_FILES})
+		add_custom_command(OUTPUT ${FILE}-object-command
+			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.o
+			DEPENDS RESOURCE_OBJECTS
+			COMMENT "Building Assembly File Object ${FILE}")
+		add_custom_target(${FILE}-object ALL
+			DEPENDS ${FILE}-object-command
+			SOURCES ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.d
+			COMMENT "Built ${FILE} Object")
+		list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
+		list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.d)
+	endforeach()
 	add_custom_target(ASSEMBLY_OBJECTS ALL
-		DEPENDS RESOURCE_OBJECTS)
+		DEPENDS ${ASSEMBLY_OBJECTS_DEPENDS}
+		SOURCES ${ASSEMBLY_OBJECTS_SOURCES}
 	#-MP means we construct a phony target for each dependency other than the main file, causing it to depend on nothing
 	#-MMD and -MF file, specifies a file to write the dependencies to, it overrides the default dependecy output thanks to -MMD
 	#-x assembler-with-cpp indicates that the assembly code contains C directives and armclang must run the C preprocessor
 	#-c output_file writes all comments passed through to the output file
 	#-o file
 	#	${CMAKE_C_COMPILER} -MMD -MP -MF files? -x assembler-with-cpp -g -mthumb -mthumb-interwork -c output_file -o input-file?
-	#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
-
+		)
 	#bin/game.elf: build/data/audio-settings.hpp $(OFILES)
 	# Get the right linker
 	#ifeq ($(strip $(CPPFILES)),)
@@ -538,18 +601,35 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	#	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) $(LIBRARIES) -o $@
 
 	add_custom_target(OBJECT_DUMP ALL
-		DEPENDS IWRAM_CPP_OBJECT_FILES IWRAM_C_OBJECT_FILES CPP_OBJECTS C_OBJECTS ASSEMBLY_OBJECTS)
-	#	@${CMAKE_OBJDUMP} -dCS $@ > $@.dump
+		DEPENDS IWRAM_CPP_OBJECT_FILES IWRAM_C_OBJECT_FILES CPP_OBJECTS C_OBJECTS ASSEMBLY_OBJECTS
+	#	-d --disassmble Display the assembler mnemonics for the machine instructions from the input file.
+	#		This option only disassembles those sections which are expected to contain instructions.
+	#		If the optional symbol argument is given, then display the assembler mnemonics starting at symbol.
+	#		If symbol is a function name then disassembly will stop at the end of the function,
+	#		otherwise it will stop when the next symbol is encountered. If there are no matches for symbol then nothing will be displayed.
+	#	-C --demangle Decode (demangle) low-level symbol names into user-level names.
+	#		Besides removing any initial underscore prepended by the system, this makes C++ function names readable.
+	#		Different compilers have different mangling styles.
+	#		The optional demangling style argument can be used to choose an appropriate demangling style for your compiler.
+	#	-S --source Display source code intermixed with disassembly, if possible. Implies -d.
+	#	INFILE .elf
+	#	OUTFILE .elf.dump
+	#	COMMAND @${CMAKE_OBJDUMP} -dCS ${CMAKE_BINARY_DIR}/gba-modern.elf > ${CMAKE_BINARY_DIR}/gba-modern.elf.dump
+		)
 
 	#bin/game.gba:
 	add_custom_target(ROM_BUILD ALL
 		DEPENDS OBJECT_DUMP
-		COMMENT "Building ROM")
-	#	@${CMAKE_OBJCOPY} -O binary $(@:.gba=.elf) $@
+		COMMENT "Building ROM"
+	#	-O binary Write the output file using binary.
+	#	INFILE .elf
+	#	OUTFILE .gba
+	#	@${CMAKE_OBJCOPY} -O binary ${CMAKE_BINARY_DIR}/gba-modern.elf ${CMAKE_BINARY_DIR}/gba-modern.gba
+		)
 
 	add_custom_target(ROM ALL
 		DEPENDS ROM_BUILD
-		COMMENT "Sanitising final file")
-	#	@tools/tools rom-sanitize $@ gba.json $@
-
+		COMMENT "Sanitising final file"
+		#COMMAND ${CMAKE_BINARY_DIR}/tools/tools rom-sanitize ${CMAKE_BINARY_DIR}/gba-modern.gba gba.json ${CMAKE_BINARY_DIR}/gba-modern.gba
+		)
 endif()
