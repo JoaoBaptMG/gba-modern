@@ -13,3 +13,4 @@ gba.map
 libsamplerate*
 .vs/*
 out/isenseconfig/WSL-Debug/iconfig.json
+external/*

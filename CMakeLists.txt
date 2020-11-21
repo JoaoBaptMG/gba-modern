@@ -1,10 +1,16 @@
 # Projects Settings
 cmake_minimum_required (VERSION 3.16)
+
 include(ExternalProject)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "$CMAKE_SOURCE_DIR}")
-add_definitions("-fpermissive")
+
+add_definitions("-fpermissive") #not sure if this is needed here or elsewhere
+
 project (gbaModern)
-message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.")
+
+message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.") #this is needed to actually load the toolchain file from the config for some reason lol
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -15,7 +21,24 @@ set(CPPFLAGS "${CFLAGS} -std=c++17 -fno-rtti -fno-exceptions")
 set(ASFLAGS "-g ${ARCH}")
 set(LDFLAGS	"-g ${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map")
 
-
+# Dependencies
+#	gcem is handled as a submodule so it is fine
+#	GBA gcc is needed
+set(GCC_PLATFORM "x86_64-linux")
+set(GCC_PREFIX "10-2020q2")
+set(GCC_NAME "gcc-arm-none-eabi-10-2020-q2-preview")
+set(GCC_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/${GCC_PREFIX}/${GCC_NAME}-${GCC_PLATFORM}.tar.bz2")
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/external/gcc)
+ExternalProject_Add(gbaGCC
+	URL ${GCC_URL}
+	DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
+	UPDATE_COMMAND tar xjf ${CMAKE_SOURCE_DIR}/external/${GCC_NAME}-${GCC_PLATFORM}.tar.bz2 -C ${CMAKE_SOURCE_DIR}/external/gcc --strip-components 1
+	CONFIGURE_COMMAND cmake -E echo "Skipping configure step."
+	BUILD_COMMAND cmake -E echo "Skipping BUILD step."
+	INSTALL_COMMAND cmake -E echo "Skipping install step."
+	)
+#	TONC is needed
+#	LibSampleRate is needed
 # Libraries
 #set(TONC_PATH "${CMAKE_SOURCE_DIR}/external/tonc/tonclib")
 #set(LIBRARIES_ "-nodefaultlibs -ltonc")
@@ -28,7 +51,8 @@ set(LDFLAGS	"-g ${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map")
 ExternalProject_Add(tools
 	SOURCE_DIR ${CMAKE_SOURCE_DIR}/tools
 	BINARY_DIR ${CMAKE_BINARY_DIR}/tools
-	INSTALL_COMMAND cmake -E echo "Skipping install step.")
+	INSTALL_COMMAND cmake -E echo "Skipping install step."
+	DEPENDS gbaGCC)
 
 # Resource File Definitions
 # Sprite Files - Assumed to be .png
@@ -64,7 +88,7 @@ set(SND_FILES
 #build sprites
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/sprites)
 if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
-	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated, probably fails if tools aren't already built?'
+	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated
 	foreach(SPRITE ${SPR_FILES})
 		execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools sprite-export
 		${CMAKE_SOURCE_DIR}/data/sprites/${SPRITE}.png
@@ -72,6 +96,8 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.hpp)
 	endforeach()
 	foreach(SPRITE ${SPR_FILES})
+		# Generate again when we are building, need to clear the files first still, otherwise there may be errors
+		# Adding BYPRODUCTS seems to break finding the generated files
 		add_custom_command(OUTPUT ${SPRITE}-command
 			DEPENDS tools
 			COMMAND ${CMAKE_BINARY_DIR}/tools/tools sprite-export
@@ -97,7 +123,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 
 	#build backgrounds
 	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/backgrounds)
-	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated, probably fails if tools aren't already built?'
+	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated
 	foreach(BACKGROUND ${BKG_FILES})
 		execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools background-export
 		${CMAKE_SOURCE_DIR}/data/backgrounds/${BACKGROUND}.png
@@ -105,6 +131,8 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		${CMAKE_BINARY_DIR}/data/backgrounds/${BACKGROUND}.hpp)
 	endforeach()
 	foreach(BACKGROUND ${BKG_FILES})
+		# Generate again when we are building, need to clear the files first still, otherwise there may be errors
+		# Adding BYPRODUCTS seems to break finding the generated files
 		add_custom_command(OUTPUT ${BACKGROUND}-command
 			DEPENDS tools
 			COMMAND ${CMAKE_BINARY_DIR}/tools/tools background-export
@@ -129,7 +157,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 
 	#build fonts
 	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/fonts)
-	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated, probably fails if tools aren't already built?'
+	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated
 	foreach(FONT ${FNT_FILES})
 		execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools font-export
 		${CMAKE_SOURCE_DIR}/data/fonts/${FONT}.ttf
@@ -137,6 +165,8 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		${CMAKE_BINARY_DIR}/data/fonts/${FONT}.hpp)
 	endforeach()
 	foreach(FONT ${FNT_FILES})
+		# Generate again when we are building, need to clear the files first still, otherwise there may be errors
+		# Adding BYPRODUCTS seems to break finding the generated files
 		add_custom_command(OUTPUT ${FONT}-command
 			DEPENDS tools
 			COMMAND ${CMAKE_BINARY_DIR}/tools/tools font-export
@@ -160,7 +190,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		COMMENT "Building FONTS")
 
 	#build audio settings
-	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated, probably fails if tools aren't already built?'
+	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated
 	foreach(SETTING ${AUS_FILES})
 		execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools audio-export-settings
 		${CMAKE_SOURCE_DIR}/data/${SETTING}.json
@@ -168,6 +198,8 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		${CMAKE_BINARY_DIR}/data/${SETTING}.json)
 	endforeach()
 	foreach(SETTING ${AUS_FILES})
+		# Generate again when we are building, need to clear the files first still, otherwise there may be errors
+		# Adding BYPRODUCTS seems to break finding the generated files
 		add_custom_command(OUTPUT ${SETTING}-command
 			DEPENDS tools
 			COMMAND ${CMAKE_BINARY_DIR}/tools/tools audio-export-settings
@@ -192,7 +224,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 
 	#build sound files
 	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/sounds)
-	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated, probably fails if tools aren't already built?'
+	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated
 	foreach(SOUND ${SND_FILES})
 		execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools sound-export
 		${CMAKE_SOURCE_DIR}/data/sounds/${SOUND}.wav
@@ -201,6 +233,8 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		${CMAKE_BINARY_DIR}/data/audio-settings.json)
 	endforeach()
 	foreach(SOUND ${SND_FILES})
+		# Generate again when we are building, need to clear the files first still, otherwise there may be errors
+		# Adding BYPRODUCTS seems to break finding the generated files
 		add_custom_command(OUTPUT ${SOUND}-command
 			DEPENDS tools AUS
 			COMMAND ${CMAKE_BINARY_DIR}/tools/tools sound-export
@@ -247,7 +281,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		#	-mthumb-interwork Generate code that supports calling between the ARM and Thumb instruction sets
 		#-c output_file writes all comments passed through to the output file
 		#-o file 
-		COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF files? -x assembler-with-cpp -g -mthumb -mthumb-interwork -c output_file -o input-file?
+		#COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF files? -x assembler-with-cpp -g -mthumb -mthumb-interwork -c output_file -o input-file?
 		COMMENT "Building RESOURCE_OBJECTS")
 	#add_subdirectory(source)
 
