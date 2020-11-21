@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(gba-modern-tools)
 find_package(Freetype REQUIRED)
+set(LibSampleRate_DIR ${CMAKE_SOURCE_DIR}/../external/libsamplerate-install)
 find_package(LibSampleRate REQUIRED)
 
 # CPP_FILES

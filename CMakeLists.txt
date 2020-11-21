@@ -95,6 +95,7 @@ ExternalProject_Add(Tonc
 set(LSRC_VERSION "0.1.9")
 set(LSRC_URL "http://www.mega-nerd.com/SRC/libsamplerate-${LSRC_VERSION}.tar.gz")
 set(LSRC_MD5 "2b78ae9fe63b36b9fbb6267fad93f259")
+set(LSRC_INSTALL_FOLDER ${CMAKE_SOURCE_DIR}/external/libsamplerate-install/)
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/external/libsamplerate)
 ExternalProject_Add(LibSampleRateSource
 	URL ${LSRC_URL}
@@ -102,9 +103,9 @@ ExternalProject_Add(LibSampleRateSource
 	DOWNLOAD_NO_EXTRACT TRUE
 	DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
 	UPDATE_COMMAND tar xzf ${CMAKE_SOURCE_DIR}/external/libsamplerate-${LSRC_VERSION}.tar.gz -C ${CMAKE_SOURCE_DIR}/external/libsamplerate --strip-components 1
-	CONFIGURE_COMMAND cmake -E echo "Skipping configure step."
-	BUILD_COMMAND cmake -E echo "Skipping BUILD step."
-	INSTALL_COMMAND cmake -E echo "Skipping install step."
+	CONFIGURE_COMMAND ${CMAKE_SOURCE_DIR}/external/libsamplerate/configure --prefix ${LSRC_INSTALL_FOLDER}
+	BUILD_COMMAND make
+	INSTALL_COMMAND make install
 	DEPENDS Tonc)
 
 # Libraries
@@ -491,7 +492,9 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	#LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 	#INCLUDE	:= $(foreach dir,$(LIBDIRS),-isystem $(dir)/include) $(foreach dir,$(INCDIRS), -isystem $(dir)) -iquote build -iquote source
 
-	#find_package(LibSampleRate REQUIRED)
+	
+	set(LibSampleRate_DIR ${CMAKE_SOURCE_DIR}/external/libsamplerate-install)
+	find_package(LibSampleRate REQUIRED)
 
 	# Source files
 	#build/%.iwram.o: %.iwram.cpp
