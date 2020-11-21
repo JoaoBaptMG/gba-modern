@@ -5,17 +5,13 @@ include(ExternalProject)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "$CMAKE_SOURCE_DIR}")
 
-add_definitions("-fpermissive") #not sure if this is needed here or elsewhere
-
 project (gbaModern)
 
 message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.") #this is needed to actually load the toolchain file from the config for some reason lol
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Compilation flags
-	
+# Compilation flags	
 # Arch flags
 # -mthumb Requests that the compiler targets the T32 instruction set.
 # -mthumb-interwork Generate code that supports calling between the ARM and Thumb instruction sets	
@@ -97,11 +93,12 @@ ExternalProject_Add(LibSampleRateSource
 	BUILD_COMMAND cmake -E echo "Skipping BUILD step."
 	INSTALL_COMMAND cmake -E echo "Skipping install step."
 	DEPENDS Tonc)
+
 # Libraries
-#set(TONC_PATH "${CMAKE_SOURCE_DIR}/external/tonc/tonclib")
-#set(LIBRARIES_ "-nodefaultlibs -ltonc")
-#set(LIBDIRS ${TONC_PATH})
-#set(INCDIRS "${CMAKE_SOURCE_DIR}/external/gcem/include")
+set(TONC_PATH "${CMAKE_SOURCE_DIR}/external/tonc/tonclib")
+set(LIBRARIES_ "-nodefaultlibs -ltonc")
+set(LIBDIRS ${TONC_PATH})
+set(INCDIRS "${CMAKE_SOURCE_DIR}/external/gcem/include")
 
 # External Project is used to generate tools, 
 # so we can use the normal gcc and g++ compilers,
@@ -331,139 +328,142 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	add_custom_target(RESOURCE_OBJECTS ALL
 		DEPENDS RESOURCES
 		
-		#COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF files? -x assembler-with-cpp -g -mthumb -mthumb-interwork -c output_file -o input-file?
 		COMMENT "Building RESOURCE_OBJECTS")
 	
 	# Source files
-# C Files
-set(GAME_C_FILES
-	${CMAKE_SOURCE_DIR}/source/math/gcd.c
-	${CMAKE_SOURCE_DIR}/source/util/libc-replacement.c
-	${CMAKE_SOURCE_DIR}/source/util/memmove.iwram.c
-	${CMAKE_SOURCE_DIR}/source/util/random.iwram.c)
-# CPP Files
-set(GAME_CPP_FILES
-	${CMAKE_SOURCE_DIR}/source/main.cpp
-	${CMAKE_SOURCE_DIR}/source/audio/audio.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Background.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/collisionCircleBitmaskGenerator.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Enemy.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/EnemyProjectiles.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Explosions.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/GameScene.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Hud.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Level.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Player.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/PlayerProjectiles.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Projectile.iwram.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/bigLurker.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/level.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/wavingEnemy.cpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/wobblingEnemies.cpp
-	${CMAKE_SOURCE_DIR}/source/graphics/BuddyObjectAllocator.cpp
-	${CMAKE_SOURCE_DIR}/source/graphics/FrameAnimator.cpp
-	${CMAKE_SOURCE_DIR}/source/graphics/graphics.cpp
-	${CMAKE_SOURCE_DIR}/source/graphics/HblankDma.cpp
-	${CMAKE_SOURCE_DIR}/source/graphics/OamManager.cpp
-	${CMAKE_SOURCE_DIR}/source/graphics/OamManager.iwram.cpp
-	${CMAKE_SOURCE_DIR}/source/graphics/StreamAnimator.cpp
-	${CMAKE_SOURCE_DIR}/source/math/trapdiv0.cpp
-	${CMAKE_SOURCE_DIR}/source/memory/allocator.iwram.cpp
-	${CMAKE_SOURCE_DIR}/source/scenes/BitmaskTestScene.cpp
-	${CMAKE_SOURCE_DIR}/source/scenes/ContextTestScene.cpp
-	${CMAKE_SOURCE_DIR}/source/scenes/Mode3TextTestScene.cpp
-	${CMAKE_SOURCE_DIR}/source/scenes/TileTextTestScene.cpp
-	${CMAKE_SOURCE_DIR}/source/util/dynamic.cpp
-	${CMAKE_SOURCE_DIR}/source/util/profile.cpp
-	${CMAKE_SOURCE_DIR}/source/util/virtual.cpp)
-# S Files
-set(GAME_S_FILES
-	${CMAKE_SOURCE_DIR}/source/crt0.s
-	${CMAKE_SOURCE_DIR}/source/audio/audioMix.s
-	${CMAKE_SOURCE_DIR}/source/gameplay/collision.s
-	${CMAKE_SOURCE_DIR}/source/gameplay/collisionBitmask.s
-	${CMAKE_SOURCE_DIR}/source/gameplay/Projectile.s
-	${CMAKE_SOURCE_DIR}/source/math/clz.s
-	${CMAKE_SOURCE_DIR}/source/math/lmul.s
-	${CMAKE_SOURCE_DIR}/source/math/sdiv32.s
-	${CMAKE_SOURCE_DIR}/source/math/sqrt32.s
-	${CMAKE_SOURCE_DIR}/source/math/sqrt64.s
-	${CMAKE_SOURCE_DIR}/source/math/udiv32.s
-	${CMAKE_SOURCE_DIR}/source/text/mode3PutGlyph.s
-	${CMAKE_SOURCE_DIR}/source/text/tile4bppPutGlyph.s
-	${CMAKE_SOURCE_DIR}/source/util/context.s
-	${CMAKE_SOURCE_DIR}/source/util/memops.s
-	${CMAKE_SOURCE_DIR}/source/util/uintDigits.s)
-set(GAME_HPP_FILES
-	${CMAKE_SOURCE_DIR}/source/colors.hpp
-	${CMAKE_SOURCE_DIR}/source/audio/audio.hpp
-	${CMAKE_SOURCE_DIR}/source/data/AnimatedPng.hpp
-	${CMAKE_SOURCE_DIR}/source/data/BackgroundData.hpp
-	${CMAKE_SOURCE_DIR}/source/data/BitmaskData.hpp
-	${CMAKE_SOURCE_DIR}/source/data/DataPng.hpp
-	${CMAKE_SOURCE_DIR}/source/data/Font.hpp
-	${CMAKE_SOURCE_DIR}/source/data/Sound.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Background.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/collision.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Enemy.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/EnemyProjectiles.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Explosions.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/GameScene.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Hud.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Level.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Player.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/PlayerProjectiles.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/Projectile.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/vecUtils.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/bigLurker.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/wavingEnemy.hpp
-	${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/wobblingEnemies.hpp
-	${CMAKE_SOURCE_DIR}/source/graphics/AnimationPose.hpp
-	${CMAKE_SOURCE_DIR}/source/graphics/BuddyObjectAllocator.hpp
-	${CMAKE_SOURCE_DIR}/source/graphics/FrameAnimator.hpp
-	${CMAKE_SOURCE_DIR}/source/graphics/graphics.hpp
-	${CMAKE_SOURCE_DIR}/source/graphics/HBlankDma.hpp
-	${CMAKE_SOURCE_DIR}/source/graphics/OamManager.hpp
-	${CMAKE_SOURCE_DIR}/source/graphics/ObjectTilePointer.hpp
-	${CMAKE_SOURCE_DIR}/source/graphics/PalettePointer.hpp
-	${CMAKE_SOURCE_DIR}/source/graphics/SpriteSize.hpp
-	${CMAKE_SOURCE_DIR}/source/graphics/StillImagePointer.hpp
-	${CMAKE_SOURCE_DIR}/source/graphics/StreamAnimator.hpp
-	${CMAKE_SOURCE_DIR}/source/math/fixed.hpp
-	${CMAKE_SOURCE_DIR}/source/math/fixedmath.hpp
-	${CMAKE_SOURCE_DIR}/source/math/gcem-degrees.hpp
-	${CMAKE_SOURCE_DIR}/source/math/movetowards.hpp
-	${CMAKE_SOURCE_DIR}/source/math/stdfixed.hpp
-	${CMAKE_SOURCE_DIR}/source/math/vec2.hpp
-	${CMAKE_SOURCE_DIR}/source/memory/allocator.hpp
-	${CMAKE_SOURCE_DIR}/source/scenes/BitmaskTestScene.hpp
-	${CMAKE_SOURCE_DIR}/source/scenes/ContextTestScene.hpp
-	${CMAKE_SOURCE_DIR}/source/scenes/IScene.hpp
-	${CMAKE_SOURCE_DIR}/source/scenes/Mode3TextTestScene.hpp
-	${CMAKE_SOURCE_DIR}/source/scenes/TileTextTestScene.hpp
-	${CMAKE_SOURCE_DIR}/source/text/aslatin1.hpp
-	${CMAKE_SOURCE_DIR}/source/text/mGBADebugging.hpp
-	${CMAKE_SOURCE_DIR}/source/text/Mode3GlyphWriter.hpp
-	${CMAKE_SOURCE_DIR}/source/text/StringBuilder.hpp
-	${CMAKE_SOURCE_DIR}/source/text/TextWriter.hpp
-	${CMAKE_SOURCE_DIR}/source/text/Tile4bppGlyphWriter.hpp
-	${CMAKE_SOURCE_DIR}/source/util/AllocatorPointer.hpp
-	${CMAKE_SOURCE_DIR}/source/util/bit-pointers.hpp
-	${CMAKE_SOURCE_DIR}/source/util/flags-enum.hpp
-	${CMAKE_SOURCE_DIR}/source/util/gba-assert.hpp
-	${CMAKE_SOURCE_DIR}/source/util/generateTable.hpp
-	${CMAKE_SOURCE_DIR}/source/util/integer-sequence-utils.hpp
-	${CMAKE_SOURCE_DIR}/source/util/LightBitset.hpp
-	${CMAKE_SOURCE_DIR}/source/util/ObjectStack.hpp)
+	# C Files
+	set(GAME_C_FILES
+		${CMAKE_SOURCE_DIR}/source/math/gcd.c
+		${CMAKE_SOURCE_DIR}/source/util/libc-replacement.c
+		${CMAKE_SOURCE_DIR}/source/util/memmove.iwram.c
+		${CMAKE_SOURCE_DIR}/source/util/random.iwram.c)
 
-#add_library(GAME_OBJECTS OBJECT
-#	${GAME_C_FILES}
-#	${GAME_CPP_FILES}
-#	${GAME_S_FILES}
-#	${GAME_HPP_FILES})
+	# CPP Files
+	set(GAME_CPP_FILES
+		${CMAKE_SOURCE_DIR}/source/main.cpp
+		${CMAKE_SOURCE_DIR}/source/audio/audio.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Background.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/collisionCircleBitmaskGenerator.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Enemy.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/EnemyProjectiles.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Explosions.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/GameScene.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Hud.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Level.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Player.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/PlayerProjectiles.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Projectile.iwram.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/bigLurker.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/level.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/wavingEnemy.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/wobblingEnemies.cpp
+		${CMAKE_SOURCE_DIR}/source/graphics/BuddyObjectAllocator.cpp
+		${CMAKE_SOURCE_DIR}/source/graphics/FrameAnimator.cpp
+		${CMAKE_SOURCE_DIR}/source/graphics/graphics.cpp
+		${CMAKE_SOURCE_DIR}/source/graphics/HblankDma.cpp
+		${CMAKE_SOURCE_DIR}/source/graphics/OamManager.cpp
+		${CMAKE_SOURCE_DIR}/source/graphics/OamManager.iwram.cpp
+		${CMAKE_SOURCE_DIR}/source/graphics/StreamAnimator.cpp
+		${CMAKE_SOURCE_DIR}/source/math/trapdiv0.cpp
+		${CMAKE_SOURCE_DIR}/source/memory/allocator.iwram.cpp
+		${CMAKE_SOURCE_DIR}/source/scenes/BitmaskTestScene.cpp
+		${CMAKE_SOURCE_DIR}/source/scenes/ContextTestScene.cpp
+		${CMAKE_SOURCE_DIR}/source/scenes/Mode3TextTestScene.cpp
+		${CMAKE_SOURCE_DIR}/source/scenes/TileTextTestScene.cpp
+		${CMAKE_SOURCE_DIR}/source/util/dynamic.cpp
+		${CMAKE_SOURCE_DIR}/source/util/profile.cpp
+		${CMAKE_SOURCE_DIR}/source/util/virtual.cpp)
 
-#target_include_directories(GAME_OBJECTS PRIVATE
-#	${CMAKE_SOURCE_DIR}/external/tonc/tonclib/include)
+	# S Files
+	set(GAME_S_FILES
+		${CMAKE_SOURCE_DIR}/source/crt0.s
+		${CMAKE_SOURCE_DIR}/source/audio/audioMix.s
+		${CMAKE_SOURCE_DIR}/source/gameplay/collision.s
+		${CMAKE_SOURCE_DIR}/source/gameplay/collisionBitmask.s
+		${CMAKE_SOURCE_DIR}/source/gameplay/Projectile.s
+		${CMAKE_SOURCE_DIR}/source/math/clz.s
+		${CMAKE_SOURCE_DIR}/source/math/lmul.s
+		${CMAKE_SOURCE_DIR}/source/math/sdiv32.s
+		${CMAKE_SOURCE_DIR}/source/math/sqrt32.s
+		${CMAKE_SOURCE_DIR}/source/math/sqrt64.s
+		${CMAKE_SOURCE_DIR}/source/math/udiv32.s
+		${CMAKE_SOURCE_DIR}/source/text/mode3PutGlyph.s
+		${CMAKE_SOURCE_DIR}/source/text/tile4bppPutGlyph.s
+		${CMAKE_SOURCE_DIR}/source/util/context.s
+		${CMAKE_SOURCE_DIR}/source/util/memops.s
+		${CMAKE_SOURCE_DIR}/source/util/uintDigits.s)
+
+		# HPP Files - Is this even needed? Don't think so
+	set(GAME_HPP_FILES
+		${CMAKE_SOURCE_DIR}/source/colors.hpp
+		${CMAKE_SOURCE_DIR}/source/audio/audio.hpp
+		${CMAKE_SOURCE_DIR}/source/data/AnimatedPng.hpp
+		${CMAKE_SOURCE_DIR}/source/data/BackgroundData.hpp
+		${CMAKE_SOURCE_DIR}/source/data/BitmaskData.hpp
+		${CMAKE_SOURCE_DIR}/source/data/DataPng.hpp
+		${CMAKE_SOURCE_DIR}/source/data/Font.hpp
+		${CMAKE_SOURCE_DIR}/source/data/Sound.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Background.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/collision.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Enemy.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/EnemyProjectiles.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Explosions.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/GameScene.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Hud.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Level.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Player.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/PlayerProjectiles.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/Projectile.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/vecUtils.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/bigLurker.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/wavingEnemy.hpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/wobblingEnemies.hpp
+		${CMAKE_SOURCE_DIR}/source/graphics/AnimationPose.hpp
+		${CMAKE_SOURCE_DIR}/source/graphics/BuddyObjectAllocator.hpp
+		${CMAKE_SOURCE_DIR}/source/graphics/FrameAnimator.hpp
+		${CMAKE_SOURCE_DIR}/source/graphics/graphics.hpp
+		${CMAKE_SOURCE_DIR}/source/graphics/HBlankDma.hpp
+		${CMAKE_SOURCE_DIR}/source/graphics/OamManager.hpp
+		${CMAKE_SOURCE_DIR}/source/graphics/ObjectTilePointer.hpp
+		${CMAKE_SOURCE_DIR}/source/graphics/PalettePointer.hpp
+		${CMAKE_SOURCE_DIR}/source/graphics/SpriteSize.hpp
+		${CMAKE_SOURCE_DIR}/source/graphics/StillImagePointer.hpp
+		${CMAKE_SOURCE_DIR}/source/graphics/StreamAnimator.hpp
+		${CMAKE_SOURCE_DIR}/source/math/fixed.hpp
+		${CMAKE_SOURCE_DIR}/source/math/fixedmath.hpp
+		${CMAKE_SOURCE_DIR}/source/math/gcem-degrees.hpp
+		${CMAKE_SOURCE_DIR}/source/math/movetowards.hpp
+		${CMAKE_SOURCE_DIR}/source/math/stdfixed.hpp
+		${CMAKE_SOURCE_DIR}/source/math/vec2.hpp
+		${CMAKE_SOURCE_DIR}/source/memory/allocator.hpp
+		${CMAKE_SOURCE_DIR}/source/scenes/BitmaskTestScene.hpp
+		${CMAKE_SOURCE_DIR}/source/scenes/ContextTestScene.hpp
+		${CMAKE_SOURCE_DIR}/source/scenes/IScene.hpp
+		${CMAKE_SOURCE_DIR}/source/scenes/Mode3TextTestScene.hpp
+		${CMAKE_SOURCE_DIR}/source/scenes/TileTextTestScene.hpp
+		${CMAKE_SOURCE_DIR}/source/text/aslatin1.hpp
+		${CMAKE_SOURCE_DIR}/source/text/mGBADebugging.hpp
+		${CMAKE_SOURCE_DIR}/source/text/Mode3GlyphWriter.hpp
+		${CMAKE_SOURCE_DIR}/source/text/StringBuilder.hpp
+		${CMAKE_SOURCE_DIR}/source/text/TextWriter.hpp
+		${CMAKE_SOURCE_DIR}/source/text/Tile4bppGlyphWriter.hpp
+		${CMAKE_SOURCE_DIR}/source/util/AllocatorPointer.hpp
+		${CMAKE_SOURCE_DIR}/source/util/bit-pointers.hpp
+		${CMAKE_SOURCE_DIR}/source/util/flags-enum.hpp
+		${CMAKE_SOURCE_DIR}/source/util/gba-assert.hpp
+		${CMAKE_SOURCE_DIR}/source/util/generateTable.hpp
+		${CMAKE_SOURCE_DIR}/source/util/integer-sequence-utils.hpp
+		${CMAKE_SOURCE_DIR}/source/util/LightBitset.hpp
+		${CMAKE_SOURCE_DIR}/source/util/ObjectStack.hpp)
+
+	#add_library(GAME_OBJECTS OBJECT
+	#	${GAME_C_FILES}
+	#	${GAME_CPP_FILES}
+	#	${GAME_S_FILES}
+	#	${GAME_HPP_FILES})
+
+	#target_include_directories(GAME_OBJECTS PRIVATE
+	#	${CMAKE_SOURCE_DIR}/external/tonc/tonclib/include)
 
 
 	# Helper variables
@@ -508,7 +508,8 @@ set(GAME_HPP_FILES
 	#-MMD and -MF file, specifies a file to write the dependencies to, it overrides the default dependecy output thanks to -MMD
 	#-x assembler-with-cpp indicates that the assembly code contains C directives and armclang must run the C preprocessor
 	#-c output_file writes all comments passed through to the output file
-	#-o file 
+	#-o file
+	#	${CMAKE_C_COMPILER} -MMD -MP -MF files? -x assembler-with-cpp -g -mthumb -mthumb-interwork -c output_file -o input-file?
 	#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
 
 	#bin/game.elf: build/data/audio-settings.hpp $(OFILES)
