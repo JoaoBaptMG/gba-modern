@@ -15,10 +15,37 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Compilation flags
+	
+# Arch flags
+# -mthumb Requests that the compiler targets the T32 instruction set.
+# -mthumb-interwork Generate code that supports calling between the ARM and Thumb instruction sets	
 set(ARCH "-mthumb -mthumb-interwork")
+
+# C flags
+# -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
+# -Wall
+# -O3
+# -ffunction-sections
+# -fdata-sections
+# -mcpu=arm7tdmi
+# -mtune=arm7tdmi
+# -flto
 set(CFLAGS "-g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH}")
+
+# CPP flags
+# -std=c++17 Set the c++ standard to 17
+# -fno-rtti
+# -fnoo-exceptions
 set(CPPFLAGS "${CFLAGS} -std=c++17 -fno-rtti -fno-exceptions")
+
+# assembler flags (-g -mthumb -mthumb-interwork)
+# -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
 set(ASFLAGS "-g ${ARCH}")
+
+# LD flags
+# -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
+# -Wl,--gc-section
+# -Wl,--Map,gba.map
 set(LDFLAGS	"-g ${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map")
 
 # Dependencies
@@ -303,15 +330,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 
 	add_custom_target(RESOURCE_OBJECTS ALL
 		DEPENDS RESOURCES
-		#-MP means we construct a phony target for each dependency other than the main file, causing it to depend on nothing
-		#-MMD and -MF file, specifies a file to write the dependencies to, it overrides the default dependecy output thanks to -MMD
-		#-x assembler-with-cpp indicates that the assembly code contains C directives and armclang must run the C preprocessor
-		#assembler flags (-g -mthumb -mthumb-interwork)
-		#	-g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
-		#	-mthumb Requests that the compiler targets the T32 instruction set.
-		#	-mthumb-interwork Generate code that supports calling between the ARM and Thumb instruction sets
-		#-c output_file writes all comments passed through to the output file
-		#-o file 
+		
 		#COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF files? -x assembler-with-cpp -g -mthumb -mthumb-interwork -c output_file -o input-file?
 		COMMENT "Building RESOURCE_OBJECTS")
 	#add_subdirectory(source)
@@ -355,6 +374,11 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	#build/%.o: %.s
 	add_custom_target(ASSEMBLY_OBJECTS ALL
 		DEPENDS RESOURCE_OBJECTS)
+	#-MP means we construct a phony target for each dependency other than the main file, causing it to depend on nothing
+	#-MMD and -MF file, specifies a file to write the dependencies to, it overrides the default dependecy output thanks to -MMD
+	#-x assembler-with-cpp indicates that the assembly code contains C directives and armclang must run the C preprocessor
+	#-c output_file writes all comments passed through to the output file
+	#-o file 
 	#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
 
 	#bin/game.elf: build/data/audio-settings.hpp $(OFILES)
