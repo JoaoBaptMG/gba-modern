@@ -533,6 +533,12 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 	# Build Resource Assembly File Objects
+	#-MP means we construct a phony target for each dependency other than the main file, causing it to depend on nothing
+	#-MMD and -MF file, specifies a file to write the dependencies to, it overrides the default dependecy output thanks to -MMD
+	#-x assembler-with-cpp indicates that the assembly code contains C directives and armclang must run the C preprocessor
+	#-c output_file writes all comments passed through to the output file
+	#-o output file
+	#${ARMCC} -MMD -MP -MF ${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${FILE}.s -o ${FILE}.o
 	foreach (FILE ${SPR_FILES})
 		add_custom_command(OUTPUT ${FILE}-object-command
 			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.o
@@ -583,14 +589,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	endforeach()
 	add_custom_target(ASSEMBLY_OBJECTS ALL
 		DEPENDS ${ASSEMBLY_OBJECTS_DEPENDS}
-		SOURCES ${ASSEMBLY_OBJECTS_SOURCES}
-	#-MP means we construct a phony target for each dependency other than the main file, causing it to depend on nothing
-	#-MMD and -MF file, specifies a file to write the dependencies to, it overrides the default dependecy output thanks to -MMD
-	#-x assembler-with-cpp indicates that the assembly code contains C directives and armclang must run the C preprocessor
-	#-c output_file writes all comments passed through to the output file
-	#-o file
-	#	${CMAKE_C_COMPILER} -MMD -MP -MF files? -x assembler-with-cpp -g -mthumb -mthumb-interwork -c output_file -o input-file?
-		)
+		SOURCES ${ASSEMBLY_OBJECTS_SOURCES})
 	#bin/game.elf: build/data/audio-settings.hpp $(OFILES)
 	# Get the right linker
 	#ifeq ($(strip $(CPPFILES)),)
