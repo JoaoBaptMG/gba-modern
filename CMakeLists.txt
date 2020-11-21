@@ -28,17 +28,48 @@ set(GCC_PLATFORM "x86_64-linux")
 set(GCC_PREFIX "10-2020q2")
 set(GCC_NAME "gcc-arm-none-eabi-10-2020-q2-preview")
 set(GCC_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/${GCC_PREFIX}/${GCC_NAME}-${GCC_PLATFORM}.tar.bz2")
+set(GCC_MD5 "2d19775c5aa091b7f55a68727c5d7d76")
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/external/gcc)
 ExternalProject_Add(gbaGCC
 	URL ${GCC_URL}
+	URL_HASH MD5=${GCC_MD5}
+	DOWNLOAD_NO_EXTRACT TRUE
 	DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
 	UPDATE_COMMAND tar xjf ${CMAKE_SOURCE_DIR}/external/${GCC_NAME}-${GCC_PLATFORM}.tar.bz2 -C ${CMAKE_SOURCE_DIR}/external/gcc --strip-components 1
 	CONFIGURE_COMMAND cmake -E echo "Skipping configure step."
 	BUILD_COMMAND cmake -E echo "Skipping BUILD step."
-	INSTALL_COMMAND cmake -E echo "Skipping install step."
-	)
+	INSTALL_COMMAND cmake -E echo "Skipping install step.")
+
 #	TONC is needed
+set(TONC_URL "http://www.coranac.com/files/tonc-code.zip")
+set(TONC_MD5 "3f9ebdbbe7989b33c2a788c5b5a1bfed")
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/external/tonc)
+ExternalProject_Add(Tonc
+	URL ${TONC_URL}
+	URL_HASH MD5=${TONC_MD5}
+	DOWNLOAD_NO_EXTRACT TRUE
+	DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
+	UPDATE_COMMAND unzip -qq -n ${CMAKE_SOURCE_DIR}/external/tonc-code.zip -d ${CMAKE_SOURCE_DIR}/external/tonc
+	CONFIGURE_COMMAND cmake -E echo "Skipping configure step."
+	BUILD_COMMAND cmake -E echo "Skipping BUILD step."
+	INSTALL_COMMAND cmake -E echo "Skipping install step."
+	DEPENDS gbaGCC)
+
 #	LibSampleRate is needed
+set(LSRC_VERSION "0.1.9")
+set(LSRC_URL "http://www.mega-nerd.com/SRC/libsamplerate-${LSRC_VERSION}.tar.gz")
+set(LSRC_MD5 "2b78ae9fe63b36b9fbb6267fad93f259")
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/external/libsamplerate)
+ExternalProject_Add(LibSampleRateSource
+	URL ${LSRC_URL}
+	URL_HASH MD5=${LSRC_MD5}
+	DOWNLOAD_NO_EXTRACT TRUE
+	DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
+	UPDATE_COMMAND tar xzf ${CMAKE_SOURCE_DIR}/external/libsamplerate-${LSRC_VERSION}.tar.gz -C ${CMAKE_SOURCE_DIR}/external/libsamplerate --strip-components 1
+	CONFIGURE_COMMAND cmake -E echo "Skipping configure step."
+	BUILD_COMMAND cmake -E echo "Skipping BUILD step."
+	INSTALL_COMMAND cmake -E echo "Skipping install step."
+	DEPENDS Tonc)
 # Libraries
 #set(TONC_PATH "${CMAKE_SOURCE_DIR}/external/tonc/tonclib")
 #set(LIBRARIES_ "-nodefaultlibs -ltonc")
@@ -52,7 +83,7 @@ ExternalProject_Add(tools
 	SOURCE_DIR ${CMAKE_SOURCE_DIR}/tools
 	BINARY_DIR ${CMAKE_BINARY_DIR}/tools
 	INSTALL_COMMAND cmake -E echo "Skipping install step."
-	DEPENDS gbaGCC)
+	DEPENDS LibSampleRateSource)
 
 # Resource File Definitions
 # Sprite Files - Assumed to be .png
