@@ -1,1 +1,0 @@
-<Project name="key_demo"><Folder name="hdr"><File path="input.h"></File><File path="gba_pic.h"></File></Folder><Folder name="src"><File path="key_demo.c"></File><File path="toolbox.c"></File><File path="gba_pic.c"></File></Folder><Folder name="asm"></Folder><File path="Makefile"></File><File path="toolbox.h"></File></Project>

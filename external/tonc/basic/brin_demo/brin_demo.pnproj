@@ -1,1 +1,0 @@
-<Project name="brin_demo"><Folder name="hdr"><File path="brin.h"></File><File path="toolbox.h"></File></Folder><Folder name="src"><File path="brin.c"></File><File path="brin_demo.c"></File><File path="toolbox.c"></File></Folder><Folder name="asm"></Folder><File path="Makefile"></File><File path="brin_demo.map"></File></Project>

@@ -1,1 +1,0 @@
-<Project name="sbb_reg"><Folder name="hdr"><File path="input.h"></File><File path="toolbox.h"></File></Folder><Folder name="src"><File path="sbb_reg.c"></File><File path="toolbox.c"></File></Folder><Folder name="asm"></Folder><File path="Makefile"></File><File path="sbb_reg.map"></File></Project>

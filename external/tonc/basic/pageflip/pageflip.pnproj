@@ -1,1 +1,0 @@
-<Project name="pageflip"><Folder name="hdr"><File path="page_pic.h"></File><File path="toolbox.h"></File></Folder><Folder name="src"><File path="page_pic.c"></File><File path="pageflip.c"></File><File path="toolbox.c"></File></Folder><Folder name="asm"></Folder><File path="Makefile"></File><File path="pageflip.map"></File></Project>
