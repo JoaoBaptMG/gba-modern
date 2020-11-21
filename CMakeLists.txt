@@ -15,7 +15,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Architecture? flags
 # -mthumb Requests that the compiler targets the T32 instruction set.
 # -mthumb-interwork Generate code that supports calling between the ARM and Thumb instruction sets	
-set(ARCH "-mthumb-interwork")
+set(ARCH -mthumb -mthumb-interwork)
 
 # C flags
 # -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
@@ -33,7 +33,7 @@ set(ARCH "-mthumb-interwork")
 #	performance can be obtained by using this option. 
 # -flto Enables or disables link time optimization. -flto outputs bitcode wrapped in an ELF file for link time optimization.
 #	The primary use for files containing bitcode is for link time optimization. 
-set(CFLAGS "-g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH}")
+set(CFLAGS -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH})
 
 # CPP flags
 # -std=c++17 Set the c++ standard to 17
@@ -43,11 +43,11 @@ set(CFLAGS "-g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtu
 # -fno-exceptions Compiling with -fno-exceptions disables exceptions support and uses the variant of C++ libraries without exceptions. Use of try, catch, or throw results in an error message.
 #	Linking objects that have been compiled with -fno-exceptions automatically selects the libraries without exceptions.
 #	You can use the linker option --no_exceptions to diagnose whether the objects being linked contain exceptions.
-set(CPPFLAGS "${CFLAGS} -std=c++17 -fno-rtti -fno-exceptions")
+set(CPPFLAGS ${CFLAGS} -std=c++17 -fno-rtti -fno-exceptions)
 
 # assembler flags
 # -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
-set(ASFLAGS "${ARCH}") #-g seems to break this?
+set(ASFLAGS -g ${ARCH}) #-g seems to break this?
 
 # LD flags
 # -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
@@ -55,7 +55,7 @@ set(ASFLAGS "${ARCH}") #-g seems to break this?
 #	You can do this by setting the -Wl,--gc-sections option to gcc command (Which we do)
 #	This will perform a garbage collection of code and data never referenced.
 # -Wl,--Map,gba.map Generate a Linker Memory Map?
-set(LDFLAGS	"-g ${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map")
+set(LDFLAGS	-g ${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map)
 
 # Dependencies
 #	gcem is handled as a submodule so it is fine
@@ -351,17 +351,27 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 			${SOUNDS_HPP})
 
 	add_custom_target(RESOURCE_OBJECTS ALL
-		DEPENDS RESOURCES_ASSEMBLY RESOURCES_HPP
-		
+		DEPENDS RESOURCES_ASSEMBLY RESOURCES_HPP		
 		COMMENT "Building RESOURCE_OBJECTS")
 	
 	# Source files
+	# IWRAM C Files
+	set(IWRAM_C_FILES
+		/util/memmove.iwram
+		/util/random.iwram)
+
+	# IWRAM CPP Files
+	set(IWRAM_CPP_FILES
+		/gameplay/Projectile.iwram
+		/graphics/OamManager.iwram
+		/memory/allocator.iwram)
+	
 	# C Files
 	set(GAME_C_FILES
-		${CMAKE_SOURCE_DIR}/source/math/gcd.c
-		${CMAKE_SOURCE_DIR}/source/util/libc-replacement.c
-		${CMAKE_SOURCE_DIR}/source/util/memmove.iwram.c
-		${CMAKE_SOURCE_DIR}/source/util/random.iwram.c)
+		/math/gcd
+		/util/libc-replacement
+		/util/memmove.iwram
+		/util/random.iwram)
 
 	# CPP Files
 	set(GAME_CPP_FILES
@@ -376,8 +386,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		${CMAKE_SOURCE_DIR}/source/gameplay/Hud.cpp
 		${CMAKE_SOURCE_DIR}/source/gameplay/Level.cpp
 		${CMAKE_SOURCE_DIR}/source/gameplay/Player.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/PlayerProjectiles.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Projectile.iwram.cpp
+		${CMAKE_SOURCE_DIR}/source/gameplay/PlayerProjectiles.cpp		
 		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/bigLurker.cpp
 		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/level.cpp
 		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/wavingEnemy.cpp
@@ -386,11 +395,9 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		${CMAKE_SOURCE_DIR}/source/graphics/FrameAnimator.cpp
 		${CMAKE_SOURCE_DIR}/source/graphics/graphics.cpp
 		${CMAKE_SOURCE_DIR}/source/graphics/HblankDma.cpp
-		${CMAKE_SOURCE_DIR}/source/graphics/OamManager.cpp
-		${CMAKE_SOURCE_DIR}/source/graphics/OamManager.iwram.cpp
+		${CMAKE_SOURCE_DIR}/source/graphics/OamManager.cpp		
 		${CMAKE_SOURCE_DIR}/source/graphics/StreamAnimator.cpp
-		${CMAKE_SOURCE_DIR}/source/math/trapdiv0.cpp
-		${CMAKE_SOURCE_DIR}/source/memory/allocator.iwram.cpp
+		${CMAKE_SOURCE_DIR}/source/math/trapdiv0.cpp		
 		${CMAKE_SOURCE_DIR}/source/scenes/BitmaskTestScene.cpp
 		${CMAKE_SOURCE_DIR}/source/scenes/ContextTestScene.cpp
 		${CMAKE_SOURCE_DIR}/source/scenes/Mode3TextTestScene.cpp
@@ -512,26 +519,56 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	find_package(LibSampleRate REQUIRED)
 
 	# Source files
-	#build/%.iwram.o: %.iwram.cpp
-	add_custom_target(IWRAM_CPP_OBJECT_FILES ALL
-		DEPENDS RESOURCE_OBJECTS)
-	#	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
+	#build/%.o: %.c
+	#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -c $< -o $@
+	foreach (FILE ${GAME_C_FILES})
+		string(REPLACE "/" "-" FILE_COM ${FILE})
+		message(STATUS ${FILE_COM})
+		add_custom_command(OUTPUT c-${FILE_COM}-object-command
+			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source${FILE}.d ${CFLAGS} ${INCDIR} -c ${CMAKE_SOURCE_DIR}/source${FILE}.c -o ${CMAKE_BINARY_DIR}/source${FILE}.o
+			DEPENDS RESOURCE_OBJECTS
+			COMMENT "Building C File Object ${FILE}")
+		add_custom_target(c-${FILE_COM}-object ALL
+			DEPENDS c-${FILE_COM}-object-command 
+			#SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d
+			COMMENT "Built ${FILE} Object")
+		list(APPEND C_OBJECTS_DEPENDS c-${FILE_COM}-object)
+		list(APPEND C_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d)
+	endforeach()
+	
+	add_custom_target(C_OBJECT_FILES ALL
+		DEPENDS C_OBJECTS_DEPENDS)
 
 	#build/%.iwram.o: %.iwram.c
-	add_custom_target(IWRAM_C_OBJECT_FILES ALL
-		DEPENDS RESOURCE_OBJECTS)
 	#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
-
+	foreach (FILE ${IWRAM_C_FILES})
+		string(REPLACE "/" "-" FILE_COM ${FILE})
+		message(STATUS ${FILE_COM})
+		add_custom_command(OUTPUT iwram-${FILE_COM}-object-command
+			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source${FILE}.d ${CFLAGS} ${INCDIR} -fno-lto -marm -mlong-calls -c ${CMAKE_SOURCE_DIR}/source${FILE}.c -o ${CMAKE_BINARY_DIR}/source${FILE}.o
+			DEPENDS C_OBJECT_FILES
+			COMMENT "Building IWRAM C File Object ${FILE}")
+		add_custom_target(iwram-${FILE_COM}-object ALL
+			DEPENDS iwram-${FILE_COM}-object-command 
+			#SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d
+			COMMENT "Built ${FILE} Object")
+		list(APPEND IWRAM_C_OBJECTS_DEPENDS iwram-${FILE_COM}-object)
+		list(APPEND IWRAM_C_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d)
+	endforeach()
+		
+	add_custom_target(IWRAM_C_OBJECT_FILES ALL
+		DEPENDS IWRAM_C_OBJECTS_DEPENDS)
+	
 	#build/%.o: %.cpp
 	add_custom_target(CPP_OBJECTS ALL
-		DEPENDS RESOURCE_OBJECTS)
+		DEPENDS IWRAM_C_OBJECT_FILES)
 	#	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
-
-	#build/%.o: %.c
-	add_custom_target(C_OBJECTS ALL
-		DEPENDS RESOURCE_OBJECTS)
-	#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -c $< -o $@
-
+	
+	#build/%.iwram.o: %.iwram.cpp
+	add_custom_target(IWRAM_CPP_OBJECT_FILES ALL
+		DEPENDS CPP_OBJECTS)
+	#	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
+	
 	# Build Resource Assembly File Objects
 	#-MP means we construct a phony target for each dependency other than the main file, causing it to depend on nothing
 	#-MMD and -MF file, specifies a file to write the dependencies to, it overrides the default dependecy output thanks to -MMD
@@ -542,7 +579,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	foreach (FILE ${SPR_FILES})
 		add_custom_command(OUTPUT ${FILE}-object-command
 			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.o
-			DEPENDS RESOURCE_OBJECTS
+			DEPENDS IWRAM_CPP_OBJECT_FILES
 			COMMENT "Building Assembly File Object ${FILE}")
 		add_custom_target(${FILE}-object ALL
 			DEPENDS ${FILE}-object-command
@@ -554,7 +591,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	foreach (FILE ${BKG_FILES})
 		add_custom_command(OUTPUT ${FILE}-object-command
 			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.o
-			DEPENDS RESOURCE_OBJECTS
+			DEPENDS IWRAM_CPP_OBJECT_FILES
 			COMMENT "Building Assembly File Object ${FILE}")
 		add_custom_target(${FILE}-object ALL
 			DEPENDS ${FILE}-object-command
@@ -566,7 +603,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	foreach (FILE ${FNT_FILES})
 		add_custom_command(OUTPUT ${FILE}-object-command
 			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.o
-			DEPENDS RESOURCE_OBJECTS
+			DEPENDS IWRAM_CPP_OBJECT_FILES
 			COMMENT "Building Assembly File Object ${FILE}")
 		add_custom_target(${FILE}-object ALL
 			DEPENDS ${FILE}-object-command
@@ -578,7 +615,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	foreach (FILE ${SND_FILES})
 		add_custom_command(OUTPUT ${FILE}-object-command
 			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.o
-			DEPENDS RESOURCE_OBJECTS
+			DEPENDS IWRAM_CPP_OBJECT_FILES
 			COMMENT "Building Assembly File Object ${FILE}")
 		add_custom_target(${FILE}-object ALL
 			DEPENDS ${FILE}-object-command
@@ -590,6 +627,9 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	add_custom_target(ASSEMBLY_OBJECTS ALL
 		DEPENDS ${ASSEMBLY_OBJECTS_DEPENDS}
 		SOURCES ${ASSEMBLY_OBJECTS_SOURCES})
+	
+	# Build Source Assembly File Objects
+
 	#bin/game.elf: build/data/audio-settings.hpp $(OFILES)
 	# Get the right linker
 	#ifeq ($(strip $(CPPFILES)),)
@@ -600,7 +640,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	#	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) $(LIBRARIES) -o $@
 
 	add_custom_target(OBJECT_DUMP ALL
-		DEPENDS IWRAM_CPP_OBJECT_FILES IWRAM_C_OBJECT_FILES CPP_OBJECTS C_OBJECTS ASSEMBLY_OBJECTS
+		DEPENDS IWRAM_CPP_OBJECT_FILES IWRAM_C_OBJECT_FILES CPP_OBJECTS C_OBJECT_FILES ASSEMBLY_OBJECTS
 	#	-d --disassmble Display the assembler mnemonics for the machine instructions from the input file.
 	#		This option only disassembles those sections which are expected to contain instructions.
 	#		If the optional symbol argument is given, then display the assembler mnemonics starting at symbol.
