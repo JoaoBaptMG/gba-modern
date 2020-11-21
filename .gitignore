@@ -12,5 +12,5 @@ gba-modern.code-workspace
 gba.map
 libsamplerate*
 .vs/*
-out/isenseconfig/WSL-Debug/iconfig.json
+out/*
 external/*
