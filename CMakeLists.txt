@@ -5,7 +5,7 @@ include(ExternalProject)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "$CMAKE_SOURCE_DIR}")
 
-project (gbaModern)
+project (gba-modern)
 
 message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.") #this is needed to actually load the toolchain file from the config for some reason lol
 set(CMAKE_CXX_STANDARD 17)
@@ -19,35 +19,48 @@ set(ARCH "-mthumb -mthumb-interwork")
 
 # C flags
 # -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
-# -Wall
-# -O3
-# -ffunction-sections
-# -fdata-sections
-# -mcpu=arm7tdmi
-# -mtune=arm7tdmi
-# -flto
+# -Wall enables all compiler's warning messages.
+# -O3 optimisation level 3,, enables various optimisation flags
+# -ffunction-sections generates a separate ELF section for each function in the source file.
+#	The unused section elimination feature of the linker can then remove unused functions at link time.
+#	The output section for each function has the same name as the function that generates the section, but with a . text.
+# -fdata-sections Place each function or data item into its own section in the output file if the target supports arbitrary sections.
+#	The name of the function or the name of the data item determines the section's name in the output file.
+# -mcpu=arm7tdmi This specifies the name of the target ARM processor. GCC uses this name to derive the name of the target ARM architecture (as if specified by -march)
+#	and the ARM processor type for which to tune for performance (as if specified by -mtune). Where this option is used in conjunction with -march or -mtune, those options
+#	take precedence over the appropriate part of this option.
+# -mtune=arm7tdmi This option specifies the name of the target ARM processor for which GCC should tune the performance of the code. For some ARM implementations better
+#	performance can be obtained by using this option. 
+# -flto Enables or disables link time optimization. -flto outputs bitcode wrapped in an ELF file for link time optimization.
+#	The primary use for files containing bitcode is for link time optimization. 
 set(CFLAGS "-g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH}")
 
 # CPP flags
 # -std=c++17 Set the c++ standard to 17
-# -fno-rtti
-# -fnoo-exceptions
+# -fno-rtti Disable generation of information about every class with virtual functions for use by the C++ runtime type identification features (`dynamic_cast' and `typeid').
+#	If you don't use those parts of the language, you can save some space by using this flag. Note that exception handling uses the same information, but it will generate it as needed.
+#	The `dynamic_cast' operator can still be used for casts that do not require runtime type information, i.e. casts to void * or to unambiguous base classes.
+# -fno-exceptions Compiling with -fno-exceptions disables exceptions support and uses the variant of C++ libraries without exceptions. Use of try, catch, or throw results in an error message.
+#	Linking objects that have been compiled with -fno-exceptions automatically selects the libraries without exceptions.
+#	You can use the linker option --no_exceptions to diagnose whether the objects being linked contain exceptions.
 set(CPPFLAGS "${CFLAGS} -std=c++17 -fno-rtti -fno-exceptions")
 
-# assembler flags (-g -mthumb -mthumb-interwork)
+# assembler flags
 # -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
 set(ASFLAGS "-g ${ARCH}")
 
 # LD flags
 # -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
-# -Wl,--gc-section
-# -Wl,--Map,gba.map
+# -Wl,--gc-section Once the objects and static libraries are created with these options, the linker can perform the dead code elimination.
+#	You can do this by setting the -Wl,--gc-sections option to gcc command (Which we do)
+#	This will perform a garbage collection of code and data never referenced.
+# -Wl,--Map,gba.map Generate a Linker Memory Map?
 set(LDFLAGS	"-g ${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map")
 
 # Dependencies
 #	gcem is handled as a submodule so it is fine
 #	GBA gcc is needed
-set(GCC_PLATFORM "x86_64-linux")
+set(GCC_PLATFORM "x86_64-linux") #just assuming this for now, toolchain stuff messes things up a little
 set(GCC_PREFIX "10-2020q2")
 set(GCC_NAME "gcc-arm-none-eabi-10-2020-q2-preview")
 set(GCC_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/${GCC_PREFIX}/${GCC_NAME}-${GCC_PLATFORM}.tar.bz2")
