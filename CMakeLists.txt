@@ -109,10 +109,15 @@ ExternalProject_Add(LibSampleRateSource
 	DEPENDS Tonc)
 
 # Libraries
-set(TONC_PATH "${CMAKE_SOURCE_DIR}/external/tonc/tonclib")
+set(TONC_PATH "${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib")
 set(LIBRARIES_ "-nodefaultlibs -ltonc")
 set(LIBDIRS ${TONC_PATH})
 set(INCDIRS "${CMAKE_SOURCE_DIR}/external/gcem/include")
+
+set(EXTERNAL_LIBS
+	${TONC_PATH}/lib)
+
+set(EXTERNAL_INCLUDES ${INCDIRS} ${TONC_PATH}/include)
 
 # External Project is used to generate tools, 
 # so we can use the normal gcc and g++ compilers,
@@ -525,7 +530,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		string(REPLACE "/" "-" FILE_COM ${FILE})
 		message(STATUS ${FILE_COM})
 		add_custom_command(OUTPUT c-${FILE_COM}-object-command
-			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source${FILE}.d ${CFLAGS} ${INCDIR} -c ${CMAKE_SOURCE_DIR}/source${FILE}.c -o ${CMAKE_BINARY_DIR}/source${FILE}.o
+			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source${FILE}.d ${CFLAGS} ${EXTERNAL_INCLUDES} -c ${CMAKE_SOURCE_DIR}/source${FILE}.c -o ${CMAKE_BINARY_DIR}/source${FILE}.o
 			DEPENDS RESOURCE_OBJECTS
 			COMMENT "Building C File Object ${FILE}")
 		add_custom_target(c-${FILE_COM}-object ALL
@@ -536,37 +541,37 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 		list(APPEND C_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d)
 	endforeach()
 	
-	add_custom_target(C_OBJECT_FILES ALL
-		DEPENDS C_OBJECTS_DEPENDS)
+	#add_custom_target(C_OBJECT_FILES ALL
+	#	DEPENDS C_OBJECTS_DEPENDS)
 
 	#build/%.iwram.o: %.iwram.c
 	#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
-	foreach (FILE ${IWRAM_C_FILES})
-		string(REPLACE "/" "-" FILE_COM ${FILE})
-		message(STATUS ${FILE_COM})
-		add_custom_command(OUTPUT iwram-${FILE_COM}-object-command
-			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source${FILE}.d ${CFLAGS} ${INCDIR} -fno-lto -marm -mlong-calls -c ${CMAKE_SOURCE_DIR}/source${FILE}.c -o ${CMAKE_BINARY_DIR}/source${FILE}.o
-			DEPENDS C_OBJECT_FILES
-			COMMENT "Building IWRAM C File Object ${FILE}")
-		add_custom_target(iwram-${FILE_COM}-object ALL
-			DEPENDS iwram-${FILE_COM}-object-command 
-			#SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d
-			COMMENT "Built ${FILE} Object")
-		list(APPEND IWRAM_C_OBJECTS_DEPENDS iwram-${FILE_COM}-object)
-		list(APPEND IWRAM_C_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d)
-	endforeach()
-		
-	add_custom_target(IWRAM_C_OBJECT_FILES ALL
-		DEPENDS IWRAM_C_OBJECTS_DEPENDS)
+	#foreach (FILE ${IWRAM_C_FILES})
+	#	string(REPLACE "/" "-" FILE_COM ${FILE})
+	#	message(STATUS ${FILE_COM})
+	#	add_custom_command(OUTPUT iwram-${FILE_COM}-object-command
+	#		COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source${FILE}.d ${CFLAGS} ${INCDIR} -fno-lto -marm -mlong-calls -c ${CMAKE_SOURCE_DIR}/source${FILE}.c -o ${CMAKE_BINARY_DIR}/source${FILE}.o
+	#		DEPENDS C_OBJECT_FILES
+	#		COMMENT "Building IWRAM C File Object ${FILE}")
+	#	add_custom_target(iwram-${FILE_COM}-object ALL
+	#		DEPENDS iwram-${FILE_COM}-object-command 
+	#		#SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d
+	#		COMMENT "Built ${FILE} Object")
+	#	list(APPEND IWRAM_C_OBJECTS_DEPENDS iwram-${FILE_COM}-object)
+	#	list(APPEND IWRAM_C_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d)
+	#endforeach()
+	#	
+	#add_custom_target(IWRAM_C_OBJECT_FILES ALL
+	#	DEPENDS IWRAM_C_OBJECTS_DEPENDS)
 	
 	#build/%.o: %.cpp
-	add_custom_target(CPP_OBJECTS ALL
-		DEPENDS IWRAM_C_OBJECT_FILES)
+	#add_custom_target(CPP_OBJECTS ALL
+	#	DEPENDS IWRAM_C_OBJECT_FILES)
 	#	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
 	
 	#build/%.iwram.o: %.iwram.cpp
-	add_custom_target(IWRAM_CPP_OBJECT_FILES ALL
-		DEPENDS CPP_OBJECTS)
+	#add_custom_target(IWRAM_CPP_OBJECT_FILES ALL
+	#	DEPENDS CPP_OBJECTS)
 	#	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
 	
 	# Build Resource Assembly File Objects
@@ -576,57 +581,57 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	#-c output_file writes all comments passed through to the output file
 	#-o output file
 	#${ARMCC} -MMD -MP -MF ${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${FILE}.s -o ${FILE}.o
-	foreach (FILE ${SPR_FILES})
-		add_custom_command(OUTPUT ${FILE}-object-command
-			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.o
-			DEPENDS IWRAM_CPP_OBJECT_FILES
-			COMMENT "Building Assembly File Object ${FILE}")
-		add_custom_target(${FILE}-object ALL
-			DEPENDS ${FILE}-object-command
-			SOURCES ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.d
-			COMMENT "Built ${FILE} Object")
-		list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
-		list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.d)
-	endforeach()
-	foreach (FILE ${BKG_FILES})
-		add_custom_command(OUTPUT ${FILE}-object-command
-			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.o
-			DEPENDS IWRAM_CPP_OBJECT_FILES
-			COMMENT "Building Assembly File Object ${FILE}")
-		add_custom_target(${FILE}-object ALL
-			DEPENDS ${FILE}-object-command
-			SOURCES ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.d
-			COMMENT "Built ${FILE} Object")
-		list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
-		list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.d)
-	endforeach()
-	foreach (FILE ${FNT_FILES})
-		add_custom_command(OUTPUT ${FILE}-object-command
-			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.o
-			DEPENDS IWRAM_CPP_OBJECT_FILES
-			COMMENT "Building Assembly File Object ${FILE}")
-		add_custom_target(${FILE}-object ALL
-			DEPENDS ${FILE}-object-command
-			SOURCES ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.d
-			COMMENT "Built ${FILE} Object")
-		list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
-		list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.d)
-	endforeach()
-	foreach (FILE ${SND_FILES})
-		add_custom_command(OUTPUT ${FILE}-object-command
-			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.o
-			DEPENDS IWRAM_CPP_OBJECT_FILES
-			COMMENT "Building Assembly File Object ${FILE}")
-		add_custom_target(${FILE}-object ALL
-			DEPENDS ${FILE}-object-command
-			SOURCES ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.d
-			COMMENT "Built ${FILE} Object")
-		list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
-		list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.d)
-	endforeach()
-	add_custom_target(ASSEMBLY_OBJECTS ALL
-		DEPENDS ${ASSEMBLY_OBJECTS_DEPENDS}
-		SOURCES ${ASSEMBLY_OBJECTS_SOURCES})
+	#foreach (FILE ${SPR_FILES})
+	#	add_custom_command(OUTPUT ${FILE}-object-command
+	#		COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.o
+	#		DEPENDS IWRAM_CPP_OBJECT_FILES
+	#		COMMENT "Building Assembly File Object ${FILE}")
+	#	add_custom_target(${FILE}-object ALL
+	#		DEPENDS ${FILE}-object-command
+	#		SOURCES ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.d
+	#		COMMENT "Built ${FILE} Object")
+	#	list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
+	#	list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.d)
+	#endforeach()
+	#foreach (FILE ${BKG_FILES})
+	#	add_custom_command(OUTPUT ${FILE}-object-command
+	#		COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.o
+	#		DEPENDS IWRAM_CPP_OBJECT_FILES
+	#		COMMENT "Building Assembly File Object ${FILE}")
+	#	add_custom_target(${FILE}-object ALL
+	#		DEPENDS ${FILE}-object-command
+	#		SOURCES ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.d
+	#		COMMENT "Built ${FILE} Object")
+	#	list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
+	#	list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.d)
+	#endforeach()
+	#foreach (FILE ${FNT_FILES})
+	#	add_custom_command(OUTPUT ${FILE}-object-command
+	#		COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.o
+	#		DEPENDS IWRAM_CPP_OBJECT_FILES
+	#		COMMENT "Building Assembly File Object ${FILE}")
+	#	add_custom_target(${FILE}-object ALL
+	#		DEPENDS ${FILE}-object-command
+	#		SOURCES ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.d
+	#		COMMENT "Built ${FILE} Object")
+	#	list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
+	#	list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.d)
+	#endforeach()
+	#foreach (FILE ${SND_FILES})
+	#	add_custom_command(OUTPUT ${FILE}-object-command
+	#		COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.o
+	#		DEPENDS IWRAM_CPP_OBJECT_FILES
+	#		COMMENT "Building Assembly File Object ${FILE}")
+	#	add_custom_target(${FILE}-object ALL
+	#		DEPENDS ${FILE}-object-command
+	#		SOURCES ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.d
+	#		COMMENT "Built ${FILE} Object")
+	#	list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
+	#	list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.d)
+	#endforeach()
+	#add_custom_target(ASSEMBLY_OBJECTS ALL
+	#	DEPENDS ${ASSEMBLY_OBJECTS_DEPENDS}
+	#	SOURCES ${ASSEMBLY_OBJECTS_SOURCES})
 	
 	# Build Source Assembly File Objects
 
@@ -639,8 +644,8 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	#endif
 	#	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) $(LIBRARIES) -o $@
 
-	add_custom_target(OBJECT_DUMP ALL
-		DEPENDS IWRAM_CPP_OBJECT_FILES IWRAM_C_OBJECT_FILES CPP_OBJECTS C_OBJECT_FILES ASSEMBLY_OBJECTS
+	#add_custom_target(OBJECT_DUMP ALL
+	#	DEPENDS IWRAM_CPP_OBJECT_FILES IWRAM_C_OBJECT_FILES CPP_OBJECTS C_OBJECT_FILES ASSEMBLY_OBJECTS
 	#	-d --disassmble Display the assembler mnemonics for the machine instructions from the input file.
 	#		This option only disassembles those sections which are expected to contain instructions.
 	#		If the optional symbol argument is given, then display the assembler mnemonics starting at symbol.
@@ -654,21 +659,21 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	#	INFILE .elf
 	#	OUTFILE .elf.dump
 	#	COMMAND @${CMAKE_OBJDUMP} -dCS ${CMAKE_BINARY_DIR}/gba-modern.elf > ${CMAKE_BINARY_DIR}/gba-modern.elf.dump
-		)
+	#	)
 
 	#bin/game.gba:
-	add_custom_target(ROM_BUILD ALL
-		DEPENDS OBJECT_DUMP
-		COMMENT "Building ROM"
+	#add_custom_target(ROM_BUILD ALL
+	#	DEPENDS OBJECT_DUMP
+	#	COMMENT "Building ROM"
 	#	-O binary Write the output file using binary.
 	#	INFILE .elf
 	#	OUTFILE .gba
 	#	@${CMAKE_OBJCOPY} -O binary ${CMAKE_BINARY_DIR}/gba-modern.elf ${CMAKE_BINARY_DIR}/gba-modern.gba
-		)
+	#	)
 
-	add_custom_target(ROM ALL
-		DEPENDS ROM_BUILD
-		COMMENT "Sanitising final file"
-		#COMMAND ${CMAKE_BINARY_DIR}/tools/tools rom-sanitize ${CMAKE_BINARY_DIR}/gba-modern.gba gba.json ${CMAKE_BINARY_DIR}/gba-modern.gba
-		)
+	#add_custom_target(ROM ALL
+	#	DEPENDS ROM_BUILD
+	#	COMMENT "Sanitising final file"
+	#	#COMMAND ${CMAKE_BINARY_DIR}/tools/tools rom-sanitize ${CMAKE_BINARY_DIR}/gba-modern.gba gba.json ${CMAKE_BINARY_DIR}/gba-modern.gba
+	#	)
 endif()
