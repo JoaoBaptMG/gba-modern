@@ -15,7 +15,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Architecture? flags
 # -mthumb Requests that the compiler targets the T32 instruction set.
 # -mthumb-interwork Generate code that supports calling between the ARM and Thumb instruction sets	
-set(ARCH -mthumb -mthumb-interwork)
+set(ARCH "-mthumb -mthumb-interwork")
 
 # C flags
 # -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
@@ -33,7 +33,7 @@ set(ARCH -mthumb -mthumb-interwork)
 #	performance can be obtained by using this option. 
 # -flto Enables or disables link time optimization. -flto outputs bitcode wrapped in an ELF file for link time optimization.
 #	The primary use for files containing bitcode is for link time optimization. 
-set(CFLAGS -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH})
+set(CFLAGS "-g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH}")
 
 # CPP flags
 # -std=c++17 Set the c++ standard to 17
@@ -43,11 +43,11 @@ set(CFLAGS -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtun
 # -fno-exceptions Compiling with -fno-exceptions disables exceptions support and uses the variant of C++ libraries without exceptions. Use of try, catch, or throw results in an error message.
 #	Linking objects that have been compiled with -fno-exceptions automatically selects the libraries without exceptions.
 #	You can use the linker option --no_exceptions to diagnose whether the objects being linked contain exceptions.
-set(CPPFLAGS ${CFLAGS} -std=c++17 -fno-rtti -fno-exceptions)
+set(CPPFLAGS "${CFLAGS} -std=c++17 -fno-rtti -fno-exceptions")
 
 # assembler flags
 # -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
-set(ASFLAGS -g ${ARCH}) #-g seems to break this?
+set(ASFLAGS "-g ${ARCH}")
 
 # LD flags
 # -g requests that the compiler and linker generate and retain source-level dubgging/symbol infomration
@@ -55,7 +55,7 @@ set(ASFLAGS -g ${ARCH}) #-g seems to break this?
 #	You can do this by setting the -Wl,--gc-sections option to gcc command (Which we do)
 #	This will perform a garbage collection of code and data never referenced.
 # -Wl,--Map,gba.map Generate a Linker Memory Map?
-set(LDFLAGS	-g ${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map)
+set(LDFLAGS	"-g ${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map")
 
 # Dependencies
 #	gcem is handled as a submodule so it is fine
@@ -115,9 +115,10 @@ set(LIBDIRS ${TONC_PATH})
 set(INCDIRS "${CMAKE_SOURCE_DIR}/external/gcem/include")
 
 set(EXTERNAL_LIBS
-	${TONC_PATH}/lib)
+	"${TONC_PATH}/lib")
 
-set(EXTERNAL_INCLUDES ${INCDIRS} ${TONC_PATH}/include)
+set(EXTERNAL_INCLUDES "${INCDIRS} ${TONC_PATH}/include")
+
 
 # External Project is used to generate tools, 
 # so we can use the normal gcc and g++ compilers,
@@ -128,17 +129,21 @@ ExternalProject_Add(tools
 	INSTALL_COMMAND cmake -E echo "Skipping install step."
 	DEPENDS LibSampleRateSource)
 
+set(ARMCC "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-gcc")
+set(ARMCPP "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-g++")
+set(ARMOC "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objcopy")
+set(ARMOD "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objdump")
+
+set(LibSampleRate_DIR ${CMAKE_SOURCE_DIR}/external/libsamplerate-install)
+find_package(LibSampleRate REQUIRED)
+
 # Resource File Definitions
 # Sprite Files - Assumed to be .png
 set(SPR_FILES
-	big-lurker
-	bitmask-test
-	enemy-projectiles
-	hud
-	player
-	player-projectiles
-	small-explosion
-	waving-enemy
+	big-lurker bitmask-test
+	enemy-projectiles hud
+	player player-projectiles
+	small-explosion waving-enemy
 	wobbling-enemy)
 
 # Background Files - Assumed to be .png
@@ -155,344 +160,171 @@ set(AUS_FILES
 
 # Sound Files - Assumed to be .wav
 set(SND_FILES
-	player-dmg
-	player-heal
+	player-dmg player-heal
 	player-shot)
 
+# Source files
+	# IWRAM C Files
+	set(IWRAM_C_FILES
+		util/memmove.iwram util/random.iwram)
+
+	# IWRAM CPP Files
+	set(IWRAM_CPP_FILES
+		gameplay/Projectile.iwram graphics/OamManager.iwram
+		memory/allocator.iwram)
+	
+	# C Files
+	set(GAME_C_FILES
+		math/gcd util/libc-replacement)
+
+	# CPP Files
+	set(GAME_CPP_FILES
+		main
+		audio/audio
+		gameplay/Background gameplay/collisionCircleBitmaskGenerator
+		gameplay/Enemy gameplay/EnemyProjectiles
+		gameplay/Explosions gameplay/GameScene
+		gameplay/Hud gameplay/Level
+		gameplay/Player gameplay/PlayerProjectiles		
+		gameplay/levels/level1/bigLurker gameplay/levels/level1/level
+		gameplay/levels/level1/wavingEnemy gameplay/levels/level1/wobblingEnemies
+		graphics/BuddyObjectAllocator graphics/FrameAnimator
+		graphics/graphics graphics/HblankDma
+		graphics/OamManager graphics/StreamAnimator
+		math/trapdiv0 scenes/BitmaskTestScene
+		scenes/ContextTestScene scenes/Mode3TextTestScene
+		scenes/TileTextTestScene util/dynamic
+		util/profile util/virtual)
+
+	# S Files
+	set(GAME_S_FILES
+		crt0 audio/audioMix
+		gameplay/collision gameplay/collisionBitmask
+		gameplay/Projectile math/clz
+		math/lmul math/sdiv32
+		math/sqrt32 math/sqrt64
+		math/udiv32 text/mode3PutGlyph
+		text/tile4bppPutGlyph util/context
+		util/memops util/uintDigits)
+
+		# HPP Files - Is this even needed? Don't think so
+	set(GAME_HPP_FILES
+		colors audio/audio
+		data/AnimatedPng data/BackgroundData
+		data/BitmaskData data/DataPng
+		data/Font data/Sound
+		gameplay/Background gameplay/collision
+		gameplay/Enemy gameplay/EnemyProjectiles
+		gameplay/Explosions gameplay/GameScene
+		gameplay/Hud gameplay/Level
+		gameplay/Player gameplay/PlayerProjectiles
+		gameplay/Projectile gameplay/vecUtils
+		gameplay/levels/level1/bigLurker gameplay/levels/level1/wavingEnemy
+		gameplay/levels/level1/wobblingEnemies graphics/AnimationPose
+		graphics/BuddyObjectAllocator graphics/FrameAnimator
+		graphics/graphics graphics/HBlankDma
+		graphics/OamManager graphics/ObjectTilePointer
+		graphics/PalettePointer graphics/SpriteSize
+		graphics/StillImagePointer graphics/StreamAnimator
+		math/fixed math/fixedmath
+		math/gcem-degrees math/movetowards
+		math/stdfixed math/vec2
+		memory/allocator scenes/BitmaskTestScene
+		scenes/ContextTestScene scenes/IScene
+		scenes/Mode3TextTestScene scenes/TileTextTestScene
+		text/aslatin1 text/mGBADebugging
+		text/Mode3GlyphWriter text/StringBuilder
+		text/TextWriter text/Tile4bppGlyphWriter
+		util/AllocatorPointer util/bit-pointers
+		util/flags-enum util/gba-assert
+		util/generateTable util/integer-sequence-utils
+		util/LightBitset util/ObjectStack)
+
+macro(export_resources)
+	set(RESOURCE_NAME ${ARGV0})
+	set(PLURAL ${RESOURCE_NAME}S)
+	set(TARGET_DEPENDENCIES ${ARGV1})
+	set(TOOL_NAME ${ARGV2})
+	set(FOLDER_NAME ${ARGV3})
+	set(IN1 ${ARGV4})
+	set(OUT1 ${ARGV5})
+	set(OUT2 ${ARGV6})
+	set(RESOURCE_FILES ${ARGV8})
+	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME})
+	set(OBJECT_LIST_NAME ${PLURAL}_OBJECT_LIST)
+	set(OUT1_LIST_NAME ${PLURAL}_OUT1_LIST)
+	set(OUT2_LIST_NAME ${PLURAL}_OUT2_LIST)
+	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated
+	foreach (FILE ${RESOURCE_FILES})
+		execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools ${TOOL_NAME}
+		${CMAKE_SOURCE_DIR}/data/${FOLDER_NAME}${FILE}${IN1}
+		${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${FILE}${OUT1}
+		${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${FILE}${OUT2}
+		${ARGV7})
+	endforeach()
+	foreach(FILE ${RESOURCE_FILES})
+		# Generate again when we are building, need to clear the files first still, otherwise there may be errors
+		# Adding BYPRODUCTS seems to break finding the generated files
+		add_custom_command(OUTPUT ${FILE}-command
+			DEPENDS ${TARGET_DEPENDENCIES}
+			COMMAND ${CMAKE_BINARY_DIR}/tools/tools ${TOOL_NAME}
+				${CMAKE_SOURCE_DIR}/data/${FOLDER_NAME}${FILE}${IN1}
+				${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${FILE}${OUT1}
+				${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${FILE}${OUT2}
+				${ARGV7}
+			COMMENT "Exporting ${RESOURCE_NAME} ${FILE}")
+		add_custom_target(${FILE}-${RESOURCE_NAME} ALL
+			DEPENDS tools ${FILE}-command
+			SOURCES ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${FILE}${OUT1}
+				${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${FILE}${OUT2}
+			COMMENT "Building ${FILE}")
+		list(APPEND ${OBJECT_LIST_NAME} ${FILE}-${RESOURCE_NAME})
+		list(APPEND ${OUT1_LIST_NAME} ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${FILE}${OUT1})
+		list(APPEND ${OUT2_LIST_NAME} ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${FILE}${OUT2})
+	endforeach()
+
+	add_custom_target(${PLURAL} ALL
+		DEPENDS ${${OBJECT_LIST_NAME}} ${${OUT1_LIST_NAME}} ${${OUT2_LIST_NAME}}
+		SOURCES ${${OUT1_LIST_NAME}} ${${OUT2_LIST_NAME}}
+		COMMENT "Building ${PLURAL}")
+endmacro()
 #build sprites
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/sprites)
 if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
-	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated
-	foreach(SPRITE ${SPR_FILES})
-		execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools sprite-export
-		${CMAKE_SOURCE_DIR}/data/sprites/${SPRITE}.png
-		${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.s
-		${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.hpp)
-	endforeach()
-	foreach(SPRITE ${SPR_FILES})
-		# Generate again when we are building, need to clear the files first still, otherwise there may be errors
-		# Adding BYPRODUCTS seems to break finding the generated files
-		add_custom_command(OUTPUT ${SPRITE}-command
-			DEPENDS tools
-			COMMAND ${CMAKE_BINARY_DIR}/tools/tools sprite-export
-				${CMAKE_SOURCE_DIR}/data/sprites/${SPRITE}.png
-				${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.s
-				${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.hpp
-				${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.hpp
-			COMMENT "Exporting Sprite ${SPRITE}")
-		add_custom_target(${SPRITE}-image ALL
-			DEPENDS tools ${SPRITE}-command
-			SOURCES ${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.s
-				${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.hpp
-			COMMENT "Building ${SPRITE}")
-		list(APPEND SPRITES_L ${SPRITE}-image)
-		list(APPEND SPRITES_S ${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.s)
-		list(APPEND SPRITES_HPP ${CMAKE_BINARY_DIR}/data/sprites/${SPRITE}.hpp)
-	endforeach()
-
-	add_custom_target(SPRITES ALL
-		DEPENDS ${SPRITES_L} ${SPRITES_S} ${SPRITES_HPP}
-		SOURCES ${SPRITES_S} ${SPRITES_HPP}
-		COMMENT "Building SPRITES")
-
-	#build backgrounds
-	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/backgrounds)
-	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated
-	foreach(BACKGROUND ${BKG_FILES})
-		execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools background-export
-		${CMAKE_SOURCE_DIR}/data/backgrounds/${BACKGROUND}.png
-		${CMAKE_BINARY_DIR}/data/backgrounds/${BACKGROUND}.s
-		${CMAKE_BINARY_DIR}/data/backgrounds/${BACKGROUND}.hpp)
-	endforeach()
-	foreach(BACKGROUND ${BKG_FILES})
-		# Generate again when we are building, need to clear the files first still, otherwise there may be errors
-		# Adding BYPRODUCTS seems to break finding the generated files
-		add_custom_command(OUTPUT ${BACKGROUND}-command
-			DEPENDS tools
-			COMMAND ${CMAKE_BINARY_DIR}/tools/tools background-export
-				${CMAKE_SOURCE_DIR}/data/backgrounds/${BACKGROUND}.png
-				${CMAKE_BINARY_DIR}/data/backgrounds/${BACKGROUND}.s
-				${CMAKE_BINARY_DIR}/data/backgrounds/${BACKGROUND}.hpp
-			COMMENT "Exporting Sprite ${BACKGROUND}")
-		add_custom_target(${BACKGROUND}-background ALL
-			DEPENDS tools ${BACKGROUND}-command
-			SOURCES ${CMAKE_BINARY_DIR}/data/backgrounds/${BACKGROUND}.s
-				${CMAKE_BINARY_DIR}/data/backgrounds/${BACKGROUND}.hpp
-			COMMENT "Building ${BACKGROUND}")
-		list(APPEND BACKGROUNDS_L ${BACKGROUND}-background)
-		list(APPEND BACKGROUNDS_S ${CMAKE_BINARY_DIR}/data/backgrounds/${BACKGROUND}.s)
-		list(APPEND BACKGROUNDS_HPP ${CMAKE_BINARY_DIR}/data/backgrounds/${BACKGROUND}.hpp)
-	endforeach()
-
-	add_custom_target(BACKGROUNDS ALL
-		DEPENDS ${BACKGROUNDS_L} ${BACKGROUNDS_S} ${BACKGROUNDS_HPP}
-		SOURCES ${BACKGROUNDS_S} ${BACKGROUNDS_HPP}
-		COMMENT "Building BACKGROUNDS")
-
-	#build fonts
-	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/fonts)
-	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated
-	foreach(FONT ${FNT_FILES})
-		execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools font-export
-		${CMAKE_SOURCE_DIR}/data/fonts/${FONT}.ttf
-		${CMAKE_BINARY_DIR}/data/fonts/${FONT}.s
-		${CMAKE_BINARY_DIR}/data/fonts/${FONT}.hpp)
-	endforeach()
-	foreach(FONT ${FNT_FILES})
-		# Generate again when we are building, need to clear the files first still, otherwise there may be errors
-		# Adding BYPRODUCTS seems to break finding the generated files
-		add_custom_command(OUTPUT ${FONT}-command
-			DEPENDS tools
-			COMMAND ${CMAKE_BINARY_DIR}/tools/tools font-export
-				${CMAKE_SOURCE_DIR}/data/fonts/${FONT}.ttf
-				${CMAKE_BINARY_DIR}/data/fonts/${FONT}.s
-				${CMAKE_BINARY_DIR}/data/fonts/${FONT}.hpp
-			COMMENT "Exporting Font ${FONT}")
-		add_custom_target(${FONT}-font ALL
-			DEPENDS tools ${FONT}-command
-			SOURCES ${CMAKE_BINARY_DIR}/data/fonts/${FONT}.s
-				${CMAKE_BINARY_DIR}/data/fonts/${FONT}.hpp
-			COMMENT "Building ${FONT}")
-		list(APPEND FONTS_L ${FONT}-font)
-		list(APPEND FONTS_S ${CMAKE_BINARY_DIR}/data/fonts/${FONT}.s)
-		list(APPEND FONTS_HPP ${CMAKE_BINARY_DIR}/data/fonts/${FONT}.hpp)
-	endforeach()
-
-	add_custom_target(FONTS ALL
-		DEPENDS ${FONTS_L} ${FONTS_S} ${FONTS_HPP}
-		SOURCES ${FONTS_S} ${FONTS_HPP}
-		COMMENT "Building FONTS")
-
-	#build audio settings
-	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated
-	foreach(SETTING ${AUS_FILES})
-		execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools audio-export-settings
-		${CMAKE_SOURCE_DIR}/data/${SETTING}.json
-		${CMAKE_BINARY_DIR}/data/${SETTING}.hpp
-		${CMAKE_BINARY_DIR}/data/${SETTING}.json)
-	endforeach()
-	foreach(SETTING ${AUS_FILES})
-		# Generate again when we are building, need to clear the files first still, otherwise there may be errors
-		# Adding BYPRODUCTS seems to break finding the generated files
-		add_custom_command(OUTPUT ${SETTING}-command
-			DEPENDS tools
-			COMMAND ${CMAKE_BINARY_DIR}/tools/tools audio-export-settings
-				${CMAKE_SOURCE_DIR}/data/${SETTING}.json
-				${CMAKE_BINARY_DIR}/data/${SETTING}.hpp
-				${CMAKE_BINARY_DIR}/data/${SETTING}.json
-			COMMENT "Exporting Audio Settings ${SETTING}")
-		add_custom_target(${SETTING}-aus ALL
-			DEPENDS tools ${SETTING}-command
-			SOURCES ${CMAKE_BINARY_DIR}/data/${SETTING}.hpp
-				${CMAKE_BINARY_DIR}/data/${SETTING}.json
-			COMMENT "Building ${SETTING}")
-		list(APPEND AUS_L ${SETTING}-aus)
-		list(APPEND AUS_HPP ${CMAKE_BINARY_DIR}/data/${SETTING}.hpp)
-		list(APPEND AUS_JSON ${CMAKE_BINARY_DIR}/data/${SETTING}.json)
-	endforeach()
-
-	add_custom_target(AUS ALL
-		DEPENDS ${AUS_L} ${AUS_HPP} ${AUS_JSON}
-		SOURCES ${AUS_HPP} ${AUS_JSON}
-		COMMENT "Building AUS (Audio Settings)")
-
-	#build sound files
-	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/sounds)
-	#Pregenerate so we can see what Resources will be built whenever the CMake is Generated
-	foreach(SOUND ${SND_FILES})
-		execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools sound-export
-		${CMAKE_SOURCE_DIR}/data/sounds/${SOUND}.wav
-		${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.s
-		${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.hpp
-		${CMAKE_BINARY_DIR}/data/audio-settings.json)
-	endforeach()
-	foreach(SOUND ${SND_FILES})
-		# Generate again when we are building, need to clear the files first still, otherwise there may be errors
-		# Adding BYPRODUCTS seems to break finding the generated files
-		add_custom_command(OUTPUT ${SOUND}-command
-			DEPENDS tools AUS
-			COMMAND ${CMAKE_BINARY_DIR}/tools/tools sound-export
-				${CMAKE_SOURCE_DIR}/data/sounds/${SOUND}.wav
-				${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.s
-				${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.hpp
-				${CMAKE_BINARY_DIR}/data/audio-settings.json
-			COMMENT "Exporting Sound ${SOUND}")
-		add_custom_target(${SOUND}-sound ALL
-			DEPENDS tools ${SOUND}-command
-			SOURCES ${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.s
-				${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.hpp
-			COMMENT "Building ${SOUND}")
-		list(APPEND SOUNDS_L ${SOUND}-sound)
-		list(APPEND SOUNDS_S ${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.s)
-		list(APPEND SOUNDS_HPP ${CMAKE_BINARY_DIR}/data/sounds/${SOUND}.hpp)
-	endforeach()
-
-	add_custom_target(SOUNDS ALL
-		DEPENDS AUS ${SOUNDS_L} ${SOUNDS_S} ${SOUNDS_HPP}
-		SOURCES ${SOUNDS_S} ${SOUNDS_HPP}
-		COMMENT "Building SOUNDS")
+	export_resources("SPRITE" "tools" "sprite-export" "sprites/" ".png" ".s" ".hpp" "" "${SPR_FILES}")
+	export_resources("BACKGROUND" "SPRITES" "background-export" "backgrounds/" ".png" ".s" ".hpp" "" "${BKG_FILES}")
+	export_resources("FONT" "BACKGROUNDS" "font-export" "fonts/" ".ttf" ".s" ".hpp" "" "${FNT_FILES}")
+	export_resources("SETTING" "FONTS" "audio-export-settings" "" ".json" ".hpp" ".json" "" "${AUS_FILES}")
+	export_resources("SOUND" "SETTINGS" "sound-export" "sounds/" ".wav" ".s" ".hpp" "${CMAKE_BINARY_DIR}/data/audio-settings.json" "${SND_FILES}")
 
 	add_custom_target(RESOURCES_ASSEMBLY ALL
 		DEPENDS SPRITES
 			BACKGROUNDS
 			FONTS
-			AUS
+			SETTINGS
 			SOUNDS
-		SOURCES ${SPRITES_S}
-			${BACKGROUNDS_S}
-			${FONTS_S}
-			${SOUNDS_S})
+		SOURCES ${SPRITES_OUT1_LIST}
+			${BACKGROUNDS_OUT1_LIST}
+			${FONTS_OUT1_LIST}
+			${SOUNDS_OUT1_LIST})
 
-	add_custom_target(RESOURCES_HPP ALL
-		DEPENDS SPRITES
-			BACKGROUNDS
-			FONTS
-			AUS
-			SOUNDS
-		SOURCES ${SPRITES_HPP}
-			${BACKGROUNDS_HPP}
-			${FONTS_HPP}
-			${AUS_HPP}
-			${SOUNDS_HPP})
+#	add_custom_target(RESOURCES_HPP ALL
+#		DEPENDS SPRITES
+#			BACKGROUNDS
+#			FONTS
+#			AUS
+#			SOUNDS
+#		SOURCES ${SPRITES_HPP}
+#			${BACKGROUNDS_HPP}
+#			${FONTS_HPP}
+#			${AUS_HPP}
+#			${SOUNDS_HPP})
 
-	add_custom_target(RESOURCE_OBJECTS ALL
-		DEPENDS RESOURCES_ASSEMBLY RESOURCES_HPP		
-		COMMENT "Building RESOURCE_OBJECTS")
+#	add_custom_target(RESOURCE_OBJECTS ALL
+#		DEPENDS RESOURCES_ASSEMBLY RESOURCES_HPP		
+#		COMMENT "Building RESOURCE_OBJECTS")
 	
-	# Source files
-	# IWRAM C Files
-	set(IWRAM_C_FILES
-		/util/memmove.iwram
-		/util/random.iwram)
-
-	# IWRAM CPP Files
-	set(IWRAM_CPP_FILES
-		/gameplay/Projectile.iwram
-		/graphics/OamManager.iwram
-		/memory/allocator.iwram)
 	
-	# C Files
-	set(GAME_C_FILES
-		/math/gcd
-		/util/libc-replacement
-		/util/memmove.iwram
-		/util/random.iwram)
-
-	# CPP Files
-	set(GAME_CPP_FILES
-		${CMAKE_SOURCE_DIR}/source/main.cpp
-		${CMAKE_SOURCE_DIR}/source/audio/audio.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Background.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/collisionCircleBitmaskGenerator.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Enemy.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/EnemyProjectiles.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Explosions.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/GameScene.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Hud.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Level.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Player.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/PlayerProjectiles.cpp		
-		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/bigLurker.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/level.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/wavingEnemy.cpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/wobblingEnemies.cpp
-		${CMAKE_SOURCE_DIR}/source/graphics/BuddyObjectAllocator.cpp
-		${CMAKE_SOURCE_DIR}/source/graphics/FrameAnimator.cpp
-		${CMAKE_SOURCE_DIR}/source/graphics/graphics.cpp
-		${CMAKE_SOURCE_DIR}/source/graphics/HblankDma.cpp
-		${CMAKE_SOURCE_DIR}/source/graphics/OamManager.cpp		
-		${CMAKE_SOURCE_DIR}/source/graphics/StreamAnimator.cpp
-		${CMAKE_SOURCE_DIR}/source/math/trapdiv0.cpp		
-		${CMAKE_SOURCE_DIR}/source/scenes/BitmaskTestScene.cpp
-		${CMAKE_SOURCE_DIR}/source/scenes/ContextTestScene.cpp
-		${CMAKE_SOURCE_DIR}/source/scenes/Mode3TextTestScene.cpp
-		${CMAKE_SOURCE_DIR}/source/scenes/TileTextTestScene.cpp
-		${CMAKE_SOURCE_DIR}/source/util/dynamic.cpp
-		${CMAKE_SOURCE_DIR}/source/util/profile.cpp
-		${CMAKE_SOURCE_DIR}/source/util/virtual.cpp)
-
-	# S Files
-	set(GAME_S_FILES
-		${CMAKE_SOURCE_DIR}/source/crt0.s
-		${CMAKE_SOURCE_DIR}/source/audio/audioMix.s
-		${CMAKE_SOURCE_DIR}/source/gameplay/collision.s
-		${CMAKE_SOURCE_DIR}/source/gameplay/collisionBitmask.s
-		${CMAKE_SOURCE_DIR}/source/gameplay/Projectile.s
-		${CMAKE_SOURCE_DIR}/source/math/clz.s
-		${CMAKE_SOURCE_DIR}/source/math/lmul.s
-		${CMAKE_SOURCE_DIR}/source/math/sdiv32.s
-		${CMAKE_SOURCE_DIR}/source/math/sqrt32.s
-		${CMAKE_SOURCE_DIR}/source/math/sqrt64.s
-		${CMAKE_SOURCE_DIR}/source/math/udiv32.s
-		${CMAKE_SOURCE_DIR}/source/text/mode3PutGlyph.s
-		${CMAKE_SOURCE_DIR}/source/text/tile4bppPutGlyph.s
-		${CMAKE_SOURCE_DIR}/source/util/context.s
-		${CMAKE_SOURCE_DIR}/source/util/memops.s
-		${CMAKE_SOURCE_DIR}/source/util/uintDigits.s)
-
-		# HPP Files - Is this even needed? Don't think so
-	set(GAME_HPP_FILES
-		${CMAKE_SOURCE_DIR}/source/colors.hpp
-		${CMAKE_SOURCE_DIR}/source/audio/audio.hpp
-		${CMAKE_SOURCE_DIR}/source/data/AnimatedPng.hpp
-		${CMAKE_SOURCE_DIR}/source/data/BackgroundData.hpp
-		${CMAKE_SOURCE_DIR}/source/data/BitmaskData.hpp
-		${CMAKE_SOURCE_DIR}/source/data/DataPng.hpp
-		${CMAKE_SOURCE_DIR}/source/data/Font.hpp
-		${CMAKE_SOURCE_DIR}/source/data/Sound.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Background.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/collision.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Enemy.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/EnemyProjectiles.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Explosions.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/GameScene.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Hud.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Level.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Player.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/PlayerProjectiles.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/Projectile.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/vecUtils.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/bigLurker.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/wavingEnemy.hpp
-		${CMAKE_SOURCE_DIR}/source/gameplay/levels/level1/wobblingEnemies.hpp
-		${CMAKE_SOURCE_DIR}/source/graphics/AnimationPose.hpp
-		${CMAKE_SOURCE_DIR}/source/graphics/BuddyObjectAllocator.hpp
-		${CMAKE_SOURCE_DIR}/source/graphics/FrameAnimator.hpp
-		${CMAKE_SOURCE_DIR}/source/graphics/graphics.hpp
-		${CMAKE_SOURCE_DIR}/source/graphics/HBlankDma.hpp
-		${CMAKE_SOURCE_DIR}/source/graphics/OamManager.hpp
-		${CMAKE_SOURCE_DIR}/source/graphics/ObjectTilePointer.hpp
-		${CMAKE_SOURCE_DIR}/source/graphics/PalettePointer.hpp
-		${CMAKE_SOURCE_DIR}/source/graphics/SpriteSize.hpp
-		${CMAKE_SOURCE_DIR}/source/graphics/StillImagePointer.hpp
-		${CMAKE_SOURCE_DIR}/source/graphics/StreamAnimator.hpp
-		${CMAKE_SOURCE_DIR}/source/math/fixed.hpp
-		${CMAKE_SOURCE_DIR}/source/math/fixedmath.hpp
-		${CMAKE_SOURCE_DIR}/source/math/gcem-degrees.hpp
-		${CMAKE_SOURCE_DIR}/source/math/movetowards.hpp
-		${CMAKE_SOURCE_DIR}/source/math/stdfixed.hpp
-		${CMAKE_SOURCE_DIR}/source/math/vec2.hpp
-		${CMAKE_SOURCE_DIR}/source/memory/allocator.hpp
-		${CMAKE_SOURCE_DIR}/source/scenes/BitmaskTestScene.hpp
-		${CMAKE_SOURCE_DIR}/source/scenes/ContextTestScene.hpp
-		${CMAKE_SOURCE_DIR}/source/scenes/IScene.hpp
-		${CMAKE_SOURCE_DIR}/source/scenes/Mode3TextTestScene.hpp
-		${CMAKE_SOURCE_DIR}/source/scenes/TileTextTestScene.hpp
-		${CMAKE_SOURCE_DIR}/source/text/aslatin1.hpp
-		${CMAKE_SOURCE_DIR}/source/text/mGBADebugging.hpp
-		${CMAKE_SOURCE_DIR}/source/text/Mode3GlyphWriter.hpp
-		${CMAKE_SOURCE_DIR}/source/text/StringBuilder.hpp
-		${CMAKE_SOURCE_DIR}/source/text/TextWriter.hpp
-		${CMAKE_SOURCE_DIR}/source/text/Tile4bppGlyphWriter.hpp
-		${CMAKE_SOURCE_DIR}/source/util/AllocatorPointer.hpp
-		${CMAKE_SOURCE_DIR}/source/util/bit-pointers.hpp
-		${CMAKE_SOURCE_DIR}/source/util/flags-enum.hpp
-		${CMAKE_SOURCE_DIR}/source/util/gba-assert.hpp
-		${CMAKE_SOURCE_DIR}/source/util/generateTable.hpp
-		${CMAKE_SOURCE_DIR}/source/util/integer-sequence-utils.hpp
-		${CMAKE_SOURCE_DIR}/source/util/LightBitset.hpp
-		${CMAKE_SOURCE_DIR}/source/util/ObjectStack.hpp)
-
 	#add_library(GAME_OBJECTS OBJECT
 	#	${GAME_C_FILES}
 	#	${GAME_CPP_FILES}
@@ -515,14 +347,6 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	#LIBPATHS := $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 	#INCLUDE	:= $(foreach dir,$(LIBDIRS),-isystem $(dir)/include) $(foreach dir,$(INCDIRS), -isystem $(dir)) -iquote build -iquote source
 
-	set(ARMCC "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-gcc")
-	set(ARMCPP "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-g++")
-	set(ARMOC "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objcopy")
-	set(ARMOD "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objdump")
-
-	set(LibSampleRate_DIR ${CMAKE_SOURCE_DIR}/external/libsamplerate-install)
-	find_package(LibSampleRate REQUIRED)
-
 	# Build Resource Assembly File Objects - Needs to be changed to be configurable for more possible filetypes in the future
 	#-MP means we construct a phony target for each dependency other than the main file, causing it to depend on nothing
 	#-MMD and -MF file, specifies a file to write the dependencies to, it overrides the default dependecy output thanks to -MMD
@@ -530,59 +354,62 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	#-c output_file writes all comments passed through to the output file
 	#-o output file
 	#${ARMCC} -MMD -MP -MF ${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${FILE}.s -o ${FILE}.o
-	foreach (FILE ${SPR_FILES})
-		file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/sprites/${FILE})
-		add_custom_command(OUTPUT ${FILE}-object-command
-			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/sprites/${FILE}/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}/${FILE}.o
-			DEPENDS RESOURCE_OBJECTS
-			COMMENT "Building Assembly File Object ${FILE}")
-		add_custom_target(${FILE}-object ALL
-			DEPENDS ${FILE}-object-command
-			#SOURCES ${CMAKE_BINARY_DIR}/data/sprites/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}/${FILE}.d
-			COMMENT "Built ${FILE} Object")
-		list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
-		list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/sprites/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}/${FILE}.d)
-	endforeach()
-	foreach (FILE ${BKG_FILES})
-		file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE})
-		add_custom_command(OUTPUT ${FILE}-object-command
-			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}/${FILE}.o
-			DEPENDS RESOURCE_OBJECTS
-			COMMENT "Building Assembly File Object ${FILE}")
-		add_custom_target(${FILE}-object ALL
-			DEPENDS ${FILE}-object-command
-			#SOURCES ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.d
-			COMMENT "Built ${FILE} Object")
-		list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
-		list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}/${FILE}.d)
-	endforeach()
-	foreach (FILE ${FNT_FILES})
-		file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/fonts/${FILE})
-		add_custom_command(OUTPUT ${FILE}-object-command
-			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/fonts/${FILE}/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}/${FILE}.o
-			DEPENDS RESOURCE_OBJECTS
-			COMMENT "Building Assembly File Object ${FILE}")
-		add_custom_target(${FILE}-object ALL
-			DEPENDS ${FILE}-object-command
-			#SOURCES ${CMAKE_BINARY_DIR}/data/fonts/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}/${FILE}.d
-			COMMENT "Built ${FILE} Object")
-		list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
-		list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/fonts/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}/${FILE}.d)
-	endforeach()
-	foreach (FILE ${SND_FILES})
-		file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/sounds/${FILE})
-		add_custom_command(OUTPUT ${FILE}-object-command
-			COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.o
-			DEPENDS RESOURCE_OBJECTS
-			COMMENT "Building Assembly File Object ${FILE}")
-		add_custom_target(${FILE}-object ALL
-			DEPENDS ${FILE}-object-command
-			#SOURCES ${CMAKE_BINARY_DIR}/data/sounds/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}/${FILE}.d
-			COMMENT "Built ${FILE} Object")
-		list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
-		list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/sounds/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}/${FILE}.d)
-	endforeach()
-	#add_custom_target(ASSEMBLY_OBJECTS ALL
+	#foreach (FILE ${SPR_FILES})
+	#	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/sprites/${FILE})
+	#	set(COMMAND
+	#		" -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/sprites/${FILE}/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/sprites/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}/${FILE}.o")
+	#	message(STATUS ${ARMCC} ${COMMAND})
+	#	add_custom_command(OUTPUT ${FILE}-object-command
+	#		COMMAND ${ARMCC} ${COMMAND}
+	#		DEPENDS RESOURCE_OBJECTS
+	#		COMMENT "Building Assembly File Object ${FILE}")
+	#	add_custom_target(${FILE}-object ALL
+	#		DEPENDS ${FILE}-object-command
+	#		#SOURCES ${CMAKE_BINARY_DIR}/data/sprites/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}/${FILE}.d
+	#		COMMENT "Built ${FILE} Object")
+	#	list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
+	#	list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/sprites/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/sprites/${FILE}/${FILE}.d)
+	#endforeach()
+	#foreach (FILE ${BKG_FILES})
+	#	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE})
+	#	add_custom_command(OUTPUT ${FILE}-object-command
+	#		COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}/${FILE}.o
+	#		DEPENDS RESOURCE_OBJECTS
+	#		COMMENT "Building Assembly File Object ${FILE}")
+	#	add_custom_target(${FILE}-object ALL
+	#		DEPENDS ${FILE}-object-command
+	#		#SOURCES ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}.d
+	#		COMMENT "Built ${FILE} Object")
+	#	list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
+	#	list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/backgrounds/${FILE}/${FILE}.d)
+	#endforeach()
+	#foreach (FILE ${FNT_FILES})
+	#	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/fonts/${FILE})
+	#	add_custom_command(OUTPUT ${FILE}-object-command
+	#		COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/fonts/${FILE}/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/fonts/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}/${FILE}.o
+	#		DEPENDS RESOURCE_OBJECTS
+	#		COMMENT "Building Assembly File Object ${FILE}")
+	#	add_custom_target(${FILE}-object ALL
+	#		DEPENDS ${FILE}-object-command
+	#		#SOURCES ${CMAKE_BINARY_DIR}/data/fonts/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}/${FILE}.d
+	#		COMMENT "Built ${FILE} Object")
+	#	list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
+	#	list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/fonts/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/fonts/${FILE}/${FILE}.d)
+	#endforeach()
+	#foreach (FILE ${SND_FILES})
+	#	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/sounds/${FILE})
+	#	add_custom_command(OUTPUT ${FILE}-object-command
+	#		COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/data/sounds/${FILE}/${FILE}.d -x assembler-with-cpp ${ASFLAGS} -c ${CMAKE_BINARY_DIR}/data/sounds/${FILE}.s -o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}/${FILE}.o
+	#		DEPENDS RESOURCE_OBJECTS
+	#		COMMENT "Building Assembly File Object ${FILE}")
+	#	add_custom_target(${FILE}-object ALL
+	#		DEPENDS ${FILE}-object-command
+	#		#SOURCES ${CMAKE_BINARY_DIR}/data/sounds/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}/${FILE}.d
+	#		COMMENT "Built ${FILE} Object")
+	#	list(APPEND ASSEMBLY_OBJECTS_DEPENDS ${FILE}-object)
+	#	list(APPEND ASSEMBLY_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/data/sounds/${FILE}/${FILE}.o ${CMAKE_BINARY_DIR}/data/sounds/${FILE}/${FILE}.d)
+	#endforeach()
+	#add_custom_target(ASSEMBLY_RESOURCE_OBJECTS ALL
 	#	DEPENDS ${ASSEMBLY_OBJECTS_DEPENDS}
 	#	SOURCES ${ASSEMBLY_OBJECTS_SOURCES})
 
@@ -592,10 +419,12 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	#foreach (FILE ${GAME_C_FILES})
 	#	string(REPLACE "/" "-" FILE_COM ${FILE})
 	#	message(STATUS ${FILE_COM})
+	#	set(COMMAND "${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source${FILE}.d ${CFLAGS} ${EXTERNAL_INCLUDES} -c ${CMAKE_SOURCE_DIR}/source${FILE}.c -o ${CMAKE_BINARY_DIR}/source${FILE}.o")
+	#	message(STATUS ${COMMAND})
 	#	add_custom_command(OUTPUT c-${FILE_COM}-object-command
-	#		COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source${FILE}.d ${CFLAGS} ${EXTERNAL_INCLUDES} -c ${CMAKE_SOURCE_DIR}/source${FILE}.c -o ${CMAKE_BINARY_DIR}/source${FILE}.o
-	#		DEPENDS RESOURCE_OBJECTS
-	#		COMMENT "Building C File Object ${FILE}")
+	#		COMMAND ${COMMAND}
+	#		DEPENDS ASSEMBLY_RESOURCE_OBJECTS
+	#		COMMENT "${COMMAND}")
 	#	add_custom_target(c-${FILE_COM}-object ALL
 	#		DEPENDS c-${FILE_COM}-object-command 
 	#		#SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d
