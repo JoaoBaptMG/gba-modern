@@ -523,7 +523,7 @@ if(EXISTS "${CMAKE_BINARY_DIR}/tools/tools")
 	set(LibSampleRate_DIR ${CMAKE_SOURCE_DIR}/external/libsamplerate-install)
 	find_package(LibSampleRate REQUIRED)
 
-	# Build Resource Assembly File Objects
+	# Build Resource Assembly File Objects - Needs to be changed to be configurable for more possible filetypes in the future
 	#-MP means we construct a phony target for each dependency other than the main file, causing it to depend on nothing
 	#-MMD and -MF file, specifies a file to write the dependencies to, it overrides the default dependecy output thanks to -MMD
 	#-x assembler-with-cpp indicates that the assembly code contains C directives and armclang must run the C preprocessor
