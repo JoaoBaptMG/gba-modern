@@ -127,3 +127,173 @@ std::vector<float> resampleMono(const std::vector<float>& samples, float srcRate
     return out;
 }
 
+#include <unordered_map>
+#include <unordered_set>
+#include <queue>
+#include <stack>
+#include <iostream>
+
+inline static std::size_t nextPot(std::size_t n)
+{
+    if (n == 0) return 0;
+
+    n--;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    n |= n >> 32;
+    n++;
+
+    return n;
+}
+
+float estimateHuffmanSize(const std::vector<int>& val)
+{
+    std::vector<std::pair<int, int>> histogram;
+
+    {
+        // Build the histogram for the vector
+        std::unordered_map<int, int> freqs;
+        for (int v : val) freqs[v]++;
+
+        histogram.resize(freqs.size());
+        std::transform(freqs.begin(), freqs.end(), histogram.begin(),
+            [](const auto& p) { return std::make_pair(p.second, p.first); });
+        std::sort(histogram.begin(), histogram.end());
+    }
+
+    // both >= 0: node, first == -1: leaf, value == second
+    std::vector<std::pair<int, int>> nodes;
+
+    {
+        std::queue<std::pair<int, int>> leafQueue, nodeQueue;
+        for (auto [weight, val] : histogram)
+        {
+            leafQueue.emplace(weight, nodes.size());
+            nodes.emplace_back(-1, val);
+        }
+
+        while (leafQueue.size() + nodeQueue.size() > 1)
+        {
+            int weights[2], indices[2];
+
+            for (std::size_t i = 0; i < 2; i++)
+            {
+                bool chooseLeaf = nodeQueue.empty() ? true :
+                    leafQueue.empty() ? false : (leafQueue.front().first < nodeQueue.front().first);
+
+                auto& queue = chooseLeaf ? leafQueue : nodeQueue;
+                std::tie(weights[i], indices[i]) = queue.front();
+                queue.pop();
+            }
+
+            nodeQueue.emplace(weights[0] + weights[1], nodes.size());
+            nodes.emplace_back(indices[0], indices[1]);
+        }
+    }
+
+    int rootId = nodes.size() - 1;
+
+    // Now, get the bit sizes for everything
+    std::unordered_map<int, std::size_t> encodingBitSizes;
+
+    {
+        // node id | bit count
+        std::queue<std::pair<int, std::size_t>> nodeQueue;
+        nodeQueue.emplace(rootId, 0);
+
+        while (!nodeQueue.empty())
+        {
+            auto [id, count] = nodeQueue.front();
+            nodeQueue.pop();
+
+            const auto& pair = nodes[id];
+            if (pair.first == -1) // leaf node
+                encodingBitSizes[pair.second] = count;
+            else
+            {
+                nodeQueue.emplace(pair.first, count+1);
+                nodeQueue.emplace(pair.second, count+1);
+            }
+        }
+    }
+
+    // Now that we have everything, we can test the sizes
+    std::size_t totalSum = 0;
+    for (int code : val) totalSum += encodingBitSizes[code];
+
+    // Return the possible compression size
+    return totalSum / 8.0f;
+}
+
+float estimateIndexCodingSize(const std::vector<int>& val)
+{
+    std::unordered_set<int> values;
+    for (int v : val) values.insert(v);
+
+    auto numValues = values.size();
+    auto bitSize = 0;
+    while (numValues > (1 << bitSize)) bitSize++;
+
+    return numValues + val.size() * bitSize / 8.0f;
+}
+
+void testCompression(const std::vector<float>& data)
+{
+    constexpr auto PacketSize = 4096;
+    auto numPackets = data.size() / PacketSize;
+
+    float accumMinSize = 0;
+
+    for (std::size_t j = 0; j < numPackets; j++)
+    {
+        // Here, we will test a compression stuff
+        std::vector<std::uint8_t> byteSamples(PacketSize);
+
+        auto ptr = data.data() + j * PacketSize;
+        std::transform(ptr, ptr + PacketSize, byteSamples.begin(), floatToUnsigned8bitPcm);
+
+        std::vector<int> constantResidual(PacketSize - 1);
+        for (std::size_t i = 0; i < constantResidual.size(); i++)
+            constantResidual[i] = (int)byteSamples[i + 1] - byteSamples[i];
+
+        std::vector<int> linearResidual(PacketSize - 2);
+        for (std::size_t i = 0; i < linearResidual.size(); i++)
+            linearResidual[i] = byteSamples[i + 2] - 2 * (int)byteSamples[i + 1] + byteSamples[i];
+
+        std::vector<int> quadraticResidual(PacketSize - 3);
+        for (std::size_t i = 0; i < quadraticResidual.size(); i++)
+            quadraticResidual[i] = byteSamples[i + 3] - 3 * byteSamples[i + 2] + 3 * (int)byteSamples[i + 1] - byteSamples[i];
+
+        std::cout << "Packet #" << j << std::endl;
+
+        auto constantHuffmanSize = 1 + estimateHuffmanSize(constantResidual);
+        auto linearHuffmanSize = 2 + estimateHuffmanSize(linearResidual);
+        auto quadraticHuffmanSize = 3 + estimateHuffmanSize(quadraticResidual);
+
+        std::cout << "Total Huffman size for constant predictor: " << constantHuffmanSize << " bytes ("
+            << (100 * constantHuffmanSize / PacketSize) << "% rate)" << std::endl;
+        std::cout << "Total Huffman size for linear predictor: " << linearHuffmanSize << " bytes ("
+            << (100 * linearHuffmanSize / PacketSize) << "% rate)" << std::endl;
+        std::cout << "Total Huffman size for quadratic predictor: " << quadraticHuffmanSize << " bytes ("
+            << (100 * quadraticHuffmanSize / PacketSize) << "% rate)" << std::endl;
+
+        auto constantIndexCodingSize = 1 + estimateIndexCodingSize(constantResidual);
+        auto linearIndexCodingSize = 2 + estimateIndexCodingSize(linearResidual);
+        auto quadraticIndexCodingSize = 3 + estimateIndexCodingSize(quadraticResidual);
+
+        std::cout << "Total index coding size for constant predictor: " << constantIndexCodingSize << " bytes ("
+            << (100 * constantIndexCodingSize / PacketSize) << "% rate)" << std::endl;
+        std::cout << "Total index coding size for linear predictor: " << linearIndexCodingSize << " bytes ("
+            << (100 * linearIndexCodingSize / PacketSize) << "% rate)" << std::endl;
+        std::cout << "Total index coding size for quadratic predictor: " << quadraticIndexCodingSize << " bytes ("
+            << (100 * quadraticIndexCodingSize / PacketSize) << "% rate)" << std::endl << std::endl;
+
+        accumMinSize += std::min({ constantHuffmanSize, linearHuffmanSize, quadraticHuffmanSize,
+            constantIndexCodingSize, linearIndexCodingSize, quadraticIndexCodingSize, (float)PacketSize });
+    }
+
+    std::cout << "Total expected rate: " << (100 * accumMinSize / (numPackets * PacketSize)) << "%" << std::endl;
+}

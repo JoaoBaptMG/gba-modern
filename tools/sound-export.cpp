@@ -2,6 +2,8 @@
 
 #include "sound-data.hpp"
 
+void testCompression(const std::vector<float>& data);
+
 int soundExport(int argc, char  **argv)
 {
     if (argc < 6) throw std::out_of_range("sound-export expects 4 arguments!");
@@ -22,6 +24,12 @@ int soundExport(int argc, char  **argv)
 
     auto samplingFreq = j.at("sampling-frequency").get<std::size_t>();
     auto [sourceSampleRate, soundData] = loadWavFile(in);
+
+    if (out == "<compression>")
+    {
+        testCompression(soundData);
+        return 0;
+    }
 
     if (sourceSampleRate != samplingFreq)
         soundData = resampleMono(soundData, sourceSampleRate, samplingFreq);
