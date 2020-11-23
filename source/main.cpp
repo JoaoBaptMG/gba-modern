@@ -18,6 +18,9 @@ bool popScene EWRAM_BSS;
 
 int main()
 {
+    // Set the ROM waitstates
+    REG_WAITCNT = WS_SRAM_8 | WS_ROM0_N3 | WS_ROM0_S1 | WS_ROM1_N8 | WS_ROM1_S1 | WS_PREFETCH;
+
     // Enable interrupts
     irq_init(isr_master);
     irq_enable(II_VBLANK);
