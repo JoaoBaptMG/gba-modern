@@ -108,16 +108,12 @@ ExternalProject_Add(LibSampleRateSource
 	INSTALL_COMMAND make install
 	DEPENDS Tonc)
 
-# Libraries
-set(TONC_PATH "${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib")
-set(LIBRARIES_ "-nodefaultlibs -ltonc")
-set(LIBDIRS ${TONC_PATH})
-set(INCDIRS "${CMAKE_SOURCE_DIR}/external/gcem/include")
-
 set(EXTERNAL_LIBS
-	"${TONC_PATH}/lib")
+	${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib)
 
-set(EXTERNAL_INCLUDES "${INCDIRS} ${TONC_PATH}/include")
+set(EXTERNAL_INCLUDES
+	-isystem ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/include
+	-isystem ${CMAKE_SOURCE_DIR}/external/gcem/include)
 
 
 # External Project is used to generate tools, 
@@ -130,10 +126,10 @@ ExternalProject_Add(tools
 	INSTALL_COMMAND cmake -E echo "Skipping install step."
 	DEPENDS LibSampleRateSource)
 
-set(ARMCC "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-gcc")
-set(ARMCPP "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-g++")
-set(ARMOC "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objcopy")
-set(ARMOD "${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objdump")
+set(ARMCC ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-gcc)
+set(ARMCPP ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-g++)
+set(ARMOC ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objcopy)
+set(ARMOD ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objdump)
 
 set(LibSampleRate_DIR ${CMAKE_SOURCE_DIR}/external/libsamplerate-install)
 find_package(LibSampleRate REQUIRED)
@@ -314,13 +310,14 @@ macro(build_resources)
 		list(GET file_new_split 1 file_type)
 		file(MAKE_DIRECTORY ${file_dir}/${file_name})
 		set_property(SOURCE ${file_dir}/${file_name} PROPERTY GENERATED 1)
+		set(build_command ${ARMCC} -MMD -MP -MF ${file_dir}/${file_name}/${file_name}.d -x assembler-with-cpp ${ASFLAGS} -c ${file_dir}/${file_name}${file_type} -o ${file_dir}/${file_name}/${file_name}.o)
 		add_custom_command(OUTPUT ${file_dir}/${file_name}/${file_name}.o ${file_dir}/${file_name}/${file_name}.d
 			#-MP means we construct a phony target for each dependency other than the main file, causing it to depend on nothing
 			#-MMD and -MF file, specifies a file to write the dependencies to, it overrides the default dependecy output thanks to -MMD
 			#-x assembler-with-cpp indicates that the assembly code contains C directives and armclang must run the C preprocessor
 			#-c output_file writes all comments passed through to the output file
 			#-o output file
-			COMMAND ${ARMCC} -MMD -MP -MF ${file_dir}/${file_name}/${file_name}.d -x assembler-with-cpp ${ASFLAGS} -c ${file_dir}/${file_name}${file_type} -o ${file_dir}/${file_name}/${file_name}.o
+			COMMAND ${build_command}
 			DEPENDS RESOURCES_ASSEMBLY RESOURCES_HPP ${file_dir}/${file_name}${file_type}
 			BYPRODUCTS ${file_dir}/${file_name}/${file_name}.o ${file_dir}/${file_name}/${file_name}.d
 			COMMENT "Building Assembly File Object ${file_name}.o and Dependency ${file_name}.d")
@@ -374,7 +371,35 @@ add_custom_target(RESOURCES ALL
 	SOURCES ${RESOURCES_OBJECTS_SOURCES}
 	COMMENT "RESOURCES Built!")
 	
-	
+
+#build/%.iwram.o: %.iwram.c
+#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
+foreach (FILE ${IWRAM_C_FILES})
+	get_filename_component(file_dir "${FILE}" PATH)
+		
+	string(REPLACE "/" ";" splits ${FILE})
+	list(GET splits -1 file_new)
+
+	string(REPLACE "." ";." file_new_split ${file_new})
+	list(GET file_new_split 0 file_name)
+	set(build_command ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d ${CFLAGS} ${EXTERNAL_INCLUDES} -fno-lto -marm -mlong-calls -c ${CMAKE_SOURCE_DIR}/source/${file_dir}/${file_name}.iwram.c -o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o)
+	message(STATUS ${build_command})
+	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name})
+	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d
+		COMMAND ${build_command}
+		DEPENDS RESOURCES
+		BYPRODUCTS ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d
+		COMMENT "Building IWRAM C File Object ${FILE}")
+	set_property(SOURCE ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o PROPERTY GENERATED 1)
+	set_property(SOURCE ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d PROPERTY GENERATED 1)
+	add_custom_target(iwram-${file_name}-object ALL
+		DEPENDS ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d
+		SOURCES ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d
+		COMMENT "Built ${FILE} Object")
+	list(APPEND IWRAM_C_OBJECTS_DEPENDS iwram-${file_name}-object)
+	list(APPEND IWRAM_C_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d)
+endforeach()
+
 #add_library(GAME_OBJECTS OBJECT
 #	${GAME_C_FILES}
 #	${GAME_CPP_FILES}
@@ -407,22 +432,7 @@ add_custom_target(RESOURCES ALL
 #add_custom_target(C_OBJECT_FILES ALL
 #	DEPENDS C_OBJECTS_DEPENDS)
 
-#build/%.iwram.o: %.iwram.c
-#	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
-#foreach (FILE ${IWRAM_C_FILES})
-#	string(REPLACE "/" "-" FILE_COM ${FILE})
-#	message(STATUS ${FILE_COM})
-#	add_custom_command(OUTPUT iwram-${FILE_COM}-object-command
-#		COMMAND ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source${FILE}.d ${CFLAGS} ${INCDIR} -fno-lto -marm -mlong-calls -c ${CMAKE_SOURCE_DIR}/source${FILE}.c -o ${CMAKE_BINARY_DIR}/source${FILE}.o
-#		DEPENDS C_OBJECT_FILES
-#		COMMENT "Building IWRAM C File Object ${FILE}")
-#	add_custom_target(iwram-${FILE_COM}-object ALL
-#		DEPENDS iwram-${FILE_COM}-object-command 
-#		#SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d
-#		COMMENT "Built ${FILE} Object")
-#	list(APPEND IWRAM_C_OBJECTS_DEPENDS iwram-${FILE_COM}-object)
-#	list(APPEND IWRAM_C_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d)
-#endforeach()
+
 #	
 #add_custom_target(IWRAM_C_OBJECT_FILES ALL
 #	DEPENDS IWRAM_C_OBJECTS_DEPENDS)
@@ -446,7 +456,7 @@ add_custom_target(RESOURCES ALL
 #else
 #	ARMLD := $(ARMCPP)
 #endif
-#	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) $(LIBRARIES) -o $@
+#	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) -nodefaultlibs -ltonc -o $@
 
 #add_custom_target(OBJECT_DUMP ALL
 #	DEPENDS IWRAM_CPP_OBJECT_FILES IWRAM_C_OBJECT_FILES CPP_OBJECTS C_OBJECT_FILES ASSEMBLY_OBJECTS
