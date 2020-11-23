@@ -132,8 +132,9 @@ set(ARMOC ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objcopy)
 set(ARMOD ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objdump)
 
 set(LibSampleRate_DIR ${CMAKE_SOURCE_DIR}/external/libsamplerate-install)
-find_package(LibSampleRate REQUIRED)
-
+if(EXISTS ${CMAKE_SOURCE_DIR}/external/libsamplerate-install)
+	find_package(LibSampleRate REQUIRED)
+endif()
 # Resource File Definitions
 # Sprite Files - Assumed to be .png
 set(SPR_FILES
