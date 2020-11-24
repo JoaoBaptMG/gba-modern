@@ -7,7 +7,7 @@
 
 #include <tonc.h>
 #include <algorithm>
-#include "util/gba-assert.hpp"
+#include "../util/gba-assert.hpp"
 
 constexpr auto MaxFreeSlots = 32;
 
