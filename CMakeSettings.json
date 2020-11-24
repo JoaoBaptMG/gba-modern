@@ -4,8 +4,8 @@
       "name": "WSL",
       "generator": "Unix Makefiles",
       "configurationType": "Debug",
-      "buildRoot": "${projectDir}\\out\\build\\${name}",
-      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "buildRoot": "${projectDir}\\build\\${name}",
+      "installRoot": "${projectDir}\\install\\${name}",
       "cmakeExecutable": "/usr/local/bin/cmake",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
@@ -14,7 +14,7 @@
       "wslPath": "${defaultWSLPath}",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
       "variables": [],
-      "cmakeToolchain": "${projectDir}\\toolchain.cmake"
+      "cmakeToolchain": "toolchain.cmake"
     }
   ]
 }
