@@ -138,10 +138,14 @@ endif()
 # Resource File Definitions
 # Sprite Files - Assumed to be .png
 set(SPR_FILES
-	big-lurker bitmask-test
-	enemy-projectiles hud
-	player player-projectiles
-	small-explosion waving-enemy
+	big-lurker
+	bitmask-test
+	enemy-projectiles
+	hud
+	player
+	player-projectiles
+	small-explosion
+	waving-enemy
 	wobbling-enemy)
 
 # Background Files - Assumed to be .png
@@ -325,7 +329,7 @@ macro(build_resources)
 		set_property(SOURCE ${file_dir}/${file_name}/${file_name}.o PROPERTY GENERATED 1)
 		set_property(SOURCE ${file_dir}/${file_name}/${file_name}.d PROPERTY GENERATED 1)
 		add_custom_target(${file_name}-object ALL
-			DEPENDS ${file_dir}/${file_name}${file_type} ${file_dir}/${file_name}/${file_name}.o ${file_dir}/${file_name}/${file_name}.d
+			DEPENDS ${file_dir}/${file_name}/${file_name}.o ${file_dir}/${file_name}/${file_name}.d
 			SOURCES ${file_dir}/${file_name}/${file_name}.o ${file_dir}/${file_name}/${file_name}.d
 			COMMENT "Built Assembly File Object ${file_name}.o and Dependency ${file_name}.d")
 		list(APPEND RESOURCES_OBJECTS_DEPENDS ${file_name}-object)
@@ -384,7 +388,6 @@ foreach (FILE ${IWRAM_C_FILES})
 	string(REPLACE "." ";." file_new_split ${file_new})
 	list(GET file_new_split 0 file_name)
 	set(build_command ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d ${CFLAGS} ${EXTERNAL_INCLUDES} -fno-lto -marm -mlong-calls -c ${CMAKE_SOURCE_DIR}/source/${file_dir}/${file_name}.iwram.c -o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o)
-	message(STATUS ${build_command})
 	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name})
 	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d
 		COMMAND ${build_command}
@@ -401,34 +404,87 @@ foreach (FILE ${IWRAM_C_FILES})
 	list(APPEND IWRAM_C_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d)
 endforeach()
 
-#add_library(GAME_OBJECTS OBJECT
-#	${GAME_C_FILES}
-#	${GAME_CPP_FILES}
-#	${GAME_S_FILES}
-#	${GAME_HPP_FILES})
+#build/%.iwram.o: %.iwram.cpp
+#add_custom_target(IWRAM_CPP_OBJECT_FILES ALL
+#	DEPENDS CPP_OBJECTS)
+#	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
+foreach (FILE ${IWRAM_CPP_FILES})
+	get_filename_component(file_dir "${FILE}" PATH)
+		
+	string(REPLACE "/" ";" splits ${FILE})
+	list(GET splits -1 file_new)
 
-#target_include_directories(GAME_OBJECTS PRIVATE
-#	${CMAKE_SOURCE_DIR}/external/tonc/tonclib/include)
-	
+	string(REPLACE "." ";." file_new_split ${file_new})
+	list(GET file_new_split 0 file_name)
+	set(build_command ${ARMCPP} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d ${CPPFLAGS} ${EXTERNAL_INCLUDES} -fno-lto -marm -mlong-calls -c ${CMAKE_SOURCE_DIR}/source/${file_dir}/${file_name}.iwram.cpp -o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o)
+	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name})
+	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d
+		COMMAND ${build_command}
+		DEPENDS ${IWRAM_C_OBJECTS_DEPENDS}
+		BYPRODUCTS ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d
+		COMMENT "Building IWRAM CPP File Object ${FILE}")
+	set_property(SOURCE ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o PROPERTY GENERATED 1)
+	set_property(SOURCE ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d PROPERTY GENERATED 1)
+	add_custom_target(iwram-${file_name}-object ALL
+		DEPENDS ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d
+		SOURCES ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d
+		COMMENT "Built ${FILE} Object")
+	list(APPEND IWRAM_CPP_OBJECTS_DEPENDS iwram-${file_name}-object)
+	list(APPEND IWRAM_CPP_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.iwram.d)
+endforeach()
+
 # Source files
 #build/%.o: %.c
 #	${CMAKE_C_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -c $< -o $@
-#foreach (FILE ${GAME_C_FILES})
-#	string(REPLACE "/" "-" FILE_COM ${FILE})
-#	message(STATUS ${FILE_COM})
-#	set(COMMAND "${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source${FILE}.d ${CFLAGS} ${EXTERNAL_INCLUDES} -c ${CMAKE_SOURCE_DIR}/source${FILE}.c -o ${CMAKE_BINARY_DIR}/source${FILE}.o")
-#	message(STATUS ${COMMAND})
-#	add_custom_command(OUTPUT c-${FILE_COM}-object-command
-#		COMMAND ${COMMAND}
-#		DEPENDS ASSEMBLY_RESOURCE_OBJECTS
-#		COMMENT "${COMMAND}")
-#	add_custom_target(c-${FILE_COM}-object ALL
-#		DEPENDS c-${FILE_COM}-object-command 
-#		#SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d
-#		COMMENT "Built ${FILE} Object")
-#	list(APPEND C_OBJECTS_DEPENDS c-${FILE_COM}-object)
-#	list(APPEND C_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/source${FILE}.o ${CMAKE_BINARY_DIR}/source${FILE}.d)
-#endforeach()
+foreach (FILE ${GAME_C_FILES})
+	get_filename_component(file_dir "${FILE}" PATH)
+		
+	string(REPLACE "/" ";" splits ${FILE})
+	list(GET splits -1 file_new)
+
+	string(REPLACE "." ";." file_new_split ${file_new})
+	list(GET file_new_split 0 file_name)
+	set(build_command ${ARMCC} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d ${CFLAGS} ${EXTERNAL_INCLUDES} -fno-lto -marm -mlong-calls -c ${CMAKE_SOURCE_DIR}/source/${file_dir}/${file_name}.c -o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o)
+	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name})
+	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d
+		COMMAND ${build_command}
+		DEPENDS ${IWRAM_CPP_OBJECTS_DEPENDS}
+		BYPRODUCTS ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d
+		COMMENT "Building IWRAM C File Object ${FILE}")
+	set_property(SOURCE ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o PROPERTY GENERATED 1)
+	set_property(SOURCE ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d PROPERTY GENERATED 1)
+	add_custom_target(${file_name}-object ALL
+		DEPENDS ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d
+		SOURCES ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d
+		COMMENT "Built ${FILE} Object")
+	list(APPEND GAME_C_OBJECTS_DEPENDS ${file_name}-object)
+	list(APPEND GAME_C_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d)
+endforeach()
+
+foreach (FILE ${GAME_CPP_FILES})
+	get_filename_component(file_dir "${FILE}" PATH)
+		
+	string(REPLACE "/" ";" splits ${FILE})
+	list(GET splits -1 file_new)
+
+	string(REPLACE "." ";." file_new_split ${file_new})
+	list(GET file_new_split 0 file_name)
+	set(build_command ${ARMCPP} -MMD -MP -MF ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d ${CPPFLAGS} ${EXTERNAL_INCLUDES} -fno-lto -marm -mlong-calls -c ${CMAKE_SOURCE_DIR}/source/${file_dir}/${file_name}.c -o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o)
+	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name})
+	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d
+		COMMAND ${build_command}
+		DEPENDS ${GAME_C_OBJECTS_DEPENDS}
+		BYPRODUCTS ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d
+		COMMENT "Building IWRAM C File Object ${FILE}")
+	set_property(SOURCE ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o PROPERTY GENERATED 1)
+	set_property(SOURCE ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d PROPERTY GENERATED 1)
+	add_custom_target(${file_name}-object ALL
+		DEPENDS ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d
+		SOURCES ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d
+		COMMENT "Built ${FILE} Object")
+	list(APPEND GAME_CPP_OBJECTS_DEPENDS ${file_name}-object)
+	list(APPEND GAME_CPP_OBJECTS_SOURCES ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.o ${CMAKE_BINARY_DIR}/source/${file_dir}/${file_name}/${file_name}.d)
+endforeach()
 	
 #add_custom_target(C_OBJECT_FILES ALL
 #	DEPENDS C_OBJECTS_DEPENDS)
@@ -443,12 +499,6 @@ endforeach()
 #	DEPENDS IWRAM_C_OBJECT_FILES)
 #	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
 	
-#build/%.iwram.o: %.iwram.cpp
-#add_custom_target(IWRAM_CPP_OBJECT_FILES ALL
-#	DEPENDS CPP_OBJECTS)
-#	${CMAKE_CXX_COMPILER} -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
-		
-# Build Source Assembly File Objects
 
 #bin/game.elf: build/data/audio-settings.hpp $(OFILES)
 # Get the right linker
