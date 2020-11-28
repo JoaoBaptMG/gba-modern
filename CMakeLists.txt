@@ -65,6 +65,10 @@ ExternalProject_Add(LibSampleRateSource
 	INSTALL_COMMAND make install
 	DEPENDS Tonc)
 
+
+set(LIBSAMPLERATE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/libsamplerate-install)
+set(LIBSAMPLERATE_LIBRARY ${CMAKE_SOURCE_DIR}/external/libsamplerate-install/lib/libsamplerate.so)
+
 set(EXTERNAL_LIBS
 	"${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib")
 
@@ -83,11 +87,6 @@ set(ARMCC ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-gcc)
 set(ARMCPP ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-g++)
 set(ARMOC ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objcopy)
 set(ARMOD ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objdump)
-
-set(LibSampleRate_DIR ${CMAKE_SOURCE_DIR}/external/libsamplerate-install)
-if(EXISTS ${CMAKE_SOURCE_DIR}/external/libsamplerate-install)
-	find_package(LibSampleRate REQUIRED)
-endif()
 
 # Resource File Definitions
 file(GLOB_RECURSE SPR_FILES
@@ -120,21 +119,51 @@ file(GLOB_RECURSE GAME_HPP_FILES
 # Build Functions
 function(export_resources)
 	# Set Variables to make this easier
+	# i.e SPRITE
 	set(RESOURCE_NAME ${ARGV0})
+	# i.e SPRITES
 	set(PLURAL ${RESOURCE_NAME}S)
+	# passed in dependenccies, tool or the previous object
 	set(TARGET_DEPENDENCIES ${ARGV1})
-	set(TOOL_NAME ${ARGV2})
-	set(FOLDER_NAME ${ARGV3})
-	set(OUT1 ${ARGV4})
-	set(OUT2 ${ARGV5})
-	set(RESOURCE_FILES ${ARGV7})
+	if(${RESOURCE_NAME} MATCHES "SPRITE")
+		set(TOOL_NAME sprite-export)
+		set(FOLDER_NAME sprites/)
+		set(OUT1 .s)
+		set(OUT2 .hpp)
+	elseif(${RESOURCE_NAME} MATCHES "BACKGROUND")
+		set(TOOL_NAME background-export)
+		set(FOLDER_NAME backgrounds/)
+		set(OUT1 .s)
+		set(OUT2 .hpp)
+	elseif(${RESOURCE_NAME} MATCHES "FONT")
+		set(TOOL_NAME font-export)
+		set(FOLDER_NAME fonts/)
+		set(OUT1 .s)
+		set(OUT2 .hpp)
+	elseif(${RESOURCE_NAME} MATCHES "SETTING")
+		set(TOOL_NAME audio-export-settings)
+		set(FOLDER_NAME "")
+		set(OUT1 -settings.hpp)
+		set(OUT2 -settings.json)
+	elseif(${RESOURCE_NAME} MATCHES "SOUND")
+		set(TOOL_NAME sound-export)
+		set(FOLDER_NAME sounds/)
+		set(OUT1 .s)
+		set(OUT2 .hpp)
+	endif()
+	set(RESOURCE_FILES ${ARGV2})
+	set(IN2 ${ARGV3})
+
+	#make a directory in build folder for the output files
 	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME})
+	
 	set(OBJECT_LIST_NAME ${PLURAL}_OBJECT_LIST)
 	set(OUT1_LIST_NAME ${PLURAL}_OUT1_LIST)
 	set(OUT2_LIST_NAME ${PLURAL}_OUT2_LIST)
 
 	
 	foreach(FILE ${RESOURCE_FILES})
+		get_filename_component(file_dir "${FILE}" PATH)
 		string(REPLACE "." ";." file ${FILE})#
 		list(GET file 0 file_name)
 		list(GET file 1 file_type)
@@ -144,70 +173,57 @@ function(export_resources)
 		
 		execute_process(COMMAND ${CMAKE_BINARY_DIR}/tools/tools ${TOOL_NAME}
 			./data/${FOLDER_NAME}${file_name}${file_type}
-			${OUTPUT_FILE_1} ${OUTPUT_FILE_2}
-			${ARGV6}
+			${OUTPUT_FILE_1} ${OUTPUT_FILE_2} ${IN2}
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 		add_custom_command(OUTPUT ${OUTPUT_FILE_1} ${OUTPUT_FILE_2}
-			DEPENDS ${TARGET_DEPENDENCIES} ./data/${FOLDER_NAME}${file_name}${file_type}
+			DEPENDS ${TARGET_DEPENDENCIES}
 			COMMAND ${CMAKE_BINARY_DIR}/tools/tools ${TOOL_NAME}
 				./data/${FOLDER_NAME}${file_name}${file_type}
-				${OUTPUT_FILE_1} ${OUTPUT_FILE_2}
-				${ARGV6}
-			BYPRODUCTS ${OUTPUT_FILE_1} ${OUTPUT_FILE_2}
+				${OUTPUT_FILE_1} ${OUTPUT_FILE_2} ${IN2}
+			#BYPRODUCTS ${OUTPUT_FILE_1} ${OUTPUT_FILE_2}
 			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 			COMMENT "Exporting ${RESOURCE_NAME} ${file_name}")
 		
-		set_property(SOURCE ${OUTPUT_FILE_1} PROPERTY GENERATED 0)
-		set_property(SOURCE ${OUTPUT_FILE_2} PROPERTY GENERATED 0)
-		
-		add_custom_target(${RESOURCE_NAME}_${file_name}_SOURCE ALL
-			DEPENDS ${OUTPUT_FILE_1} ${OUTPUT_FILE_2}
-			SOURCES ${OUTPUT_FILE_1} ${OUTPUT_FILE_2}
-			COMMENT "Building ${RESOURCE_NAME} ${file_name} SOURCE")
-
-		list(APPEND ${OBJECT_LIST_NAME} ${RESOURCE_NAME}_${file_name}_SOURCE)
-		list(APPEND ${OUT1_LIST_NAME} ${OUTPUT_FILE_1})
-		list(APPEND ${OUT2_LIST_NAME} ${OUTPUT_FILE_2})
-	endforeach()
-	
-	add_custom_target(${PLURAL}_SOURCE ALL
-		DEPENDS ${${OBJECT_LIST_NAME}} ${${OUT1_LIST_NAME}} ${${OUT2_LIST_NAME}}
-		SOURCES ${${OUT1_LIST_NAME}} ${${OUT2_LIST_NAME}}
-		COMMENT "Building ${PLURAL}")
-endfunction()
-
-function(build_resources)
-	set(RESOURCE_FILES ${ARGV0})
-	set(RESOURCE_NAME ${ARGV1})
-	foreach (FILE ${RESOURCE_FILES})
-		get_filename_component(file_dir "${FILE}" PATH)
-		
-		string(REPLACE "/" ";" splits ${FILE})
-		list(GET splits -1 file_new)
-
-		string(REPLACE "." ";." file_new_split ${file_new})
-		list(GET file_new_split 0 file_name)
-		list(GET file_new_split 1 file_type)
-		
-		add_library(${RESOURCE_NAME}_${file_name}_OBJECT OBJECT ${FILE})
+		add_library(${RESOURCE_NAME}_${file_name}_OBJECT OBJECT ${OUTPUT_FILE_1})
 		target_include_directories(${RESOURCE_NAME}_${file_name}_OBJECT PRIVATE ${EXTERNAL_INCLUDES})
-		add_dependencies(${RESOURCE_NAME}_${file_name}_OBJECT ${RESOURCE_NAME}S_SOURCE)
+		#add_dependencies(${RESOURCE_NAME}_${file_name}_OBJECT ${OUTPUT_FILE_1})
 		set_target_properties(${RESOURCE_NAME}_${file_name}_OBJECT PROPERTIES LINKER_LANGUAGE C)
 		set_target_properties(${RESOURCE_NAME}_${file_name}_OBJECT PROPERTIES COMPILE_FLAGS "-MMD -MP -x assembler-with-cpp ${ASFLAGS}")
-		
-		list(APPEND ${RESOURCE_NAME}_OBJECTS_L $<TARGET_OBJECTS:${RESOURCE_NAME}_${file_name}_OBJECT>)
-		get_target_property(${RESOURCE_NAME}_${file_name}_SOURCE_FILES ${RESOURCE_NAME}_${file_name}_OBJECT SOURCES)
-		list(APPEND ${RESOURCE_NAME}_OBJECTS_SOURCES ${${RESOURCE_NAME}_${file_name}_SOURCE_FILES})
+		if(${RESOURCE_NAME} MATCHES "SPRITE")
+		list(APPEND RESOURCES_HPP ${OUTPUT_FILE_2})
+	elseif(${RESOURCE_NAME} MATCHES "BACKGROUND")
+		list(APPEND RESOURCES_HPP ${OUTPUT_FILE_2})
+	elseif(${RESOURCE_NAME} MATCHES "FONT")
+		list(APPEND RESOURCES_HPP ${OUTPUT_FILE_2})
+	elseif(${RESOURCE_NAME} MATCHES "SETTING")
+		list(APPEND RESOURCES_HPP ${OUTPUT_FILE_1})
+	elseif(${RESOURCE_NAME} MATCHES "SOUND")
+		list(APPEND RESOURCES_HPP ${OUTPUT_FILE_2})
+	endif()
+		list(APPEND ${OBJECT_LIST_NAME} ${RESOURCE_NAME}_${file_name}_OBJECT)
 	endforeach()
-	add_custom_target(${RESOURCE_NAME}_OBJECTS ALL
-		DEPENDS ${${RESOURCE_NAME}_OBJECTS_L}
-		SOURCES ${${RESOURCE_NAME}_OBJECTS_SOURCES})
-	#add_library(${RESOURCE_NAME}_OBJECTS ${${RESOURCE_NAME}_OBJECTS_L})
-	#add_dependencies(${RESOURCE_NAME}_OBJECTS ${${RESOURCE_NAME}_OBJECTS_L})
+	
+	#i.e SPRITES_EXPORT_NAMES
+	set(${PLURAL}_EXPORT_NAMES ${${OBJECT_LIST_NAME}} PARENT_SCOPE)
+	set(RESOURCES_HPP ${RESOURCES_HPP} PARENT_SCOPE)
 endfunction()
 
-function(build_iwram_c)
+function(build_iwram_cpp)
+	
+endfunction()
+
+#if (EXISTS ${CMAKE_BINARY_DIR}/tools/tools)
+	export_resources("SPRITE" "tools" "${SPR_FILES}")
+	export_resources("BACKGROUND" "${SPRITES_EXPORT_NAMES}" "${BKG_FILES}")
+	export_resources("FONT" "${BACKGROUNDS_EXPORT_NAMES}" "${FNT_FILES}")
+	export_resources("SETTING" "${FONTS_EXPORT_NAMES}" "${AUS_FILES}")
+	export_resources("SOUND" "${SETTINGS_EXPORT_NAMES}" "${SND_FILES}" "${CMAKE_BINARY_DIR}/data/audio-settings.json")
+
+	add_custom_target(RESOURCE_OBJECTS_BUILT ALL
+		DEPENDS ${SPRITES_EXPORT_NAMES} ${BACKGROUNDS_EXPORT_NAMES} ${FONTS_EXPORT_NAMES} ${SOUNDS_EXPORT_NAMES})
+	#	SOURCES ${SPRITE_OBJECTS} ${BACKGROUND_OBJECTS} ${FONT_OBJECTS} ${SOUND_OBJECTS})
+
 	foreach (FILE ${IWRAM_C_FILES})
 		get_filename_component(file_dir "${FILE}" PATH)
 		
@@ -219,14 +235,11 @@ function(build_iwram_c)
 
 		add_library(IWRAM_${file_name} OBJECT ${CMAKE_SOURCE_DIR}/source/${file_dir}/${file_name}.iwram.c)
 		target_include_directories(IWRAM_${file_name} PRIVATE ${EXTERNAL_INCLUDES})
-		add_dependencies(IWRAM_${file_name} RESOURCE_SOURCES)
+		add_dependencies(IWRAM_${file_name} RESOURCE_OBJECTS_BUILT)
 		set_target_properties(IWRAM_${file_name} PROPERTIES COMPILE_FLAGS "-MMD -MP ${CFLAGS} -fno-lto -marm -mlong-calls")
-		list(APPEND IWRAM_C_OBJECTS IWRAM_${file_name})
+		list(APPEND IWRAM_C_OBJECTS_L IWRAM_${file_name})
 	endforeach()
-	set(IWRAM_C_OBJECTS ${IWRAM_C_OBJECTS} PARENT_SCOPE)
-endfunction()
-
-function(build_iwram_cpp)
+	set(IWRAM_C_OBJECTS ${IWRAM_C_OBJECTS} ${IWRAM_C_OBJECTS_L})
 	foreach (FILE ${IWRAM_CPP_FILES})
 		get_filename_component(file_dir "${FILE}" PATH)
 		
@@ -238,14 +251,13 @@ function(build_iwram_cpp)
 
 		add_library(IWRAM_${file_name} OBJECT ${CMAKE_SOURCE_DIR}/source/${file_dir}/${file_name}.iwram.cpp)
 		target_include_directories(IWRAM_${file_name} PRIVATE ${EXTERNAL_INCLUDES})
-		add_dependencies(IWRAM_${file_name} RESOURCE_SOURCES)
+		add_dependencies(IWRAM_${file_name} RESOURCE_OBJECTS_BUILT)
+		target_include_directories(IWRAM_${file_name} PRIVATE ${CMAKE_BINARY_DIR})
+		target_include_directories(IWRAM_${file_name} PRIVATE ${CMAKE_SOURCE_DIR}/source)
 		set_target_properties(IWRAM_${file_name} PROPERTIES COMPILE_FLAGS "-MMD -MP ${CFLAGS} ${CPPFLAGS} -fno-lto -marm -mlong-calls")
-		list(APPEND IWRAM_CPP_OBJECTS IWRAM_${file_name})
+		list(APPEND IWRAM_CPP_OBJECTS_L IWRAM_${file_name})
 	endforeach()
-	set(IWRAM_CPP_OBJECTS ${IWRAM_CPP_OBJECTS} PARENT_SCOPE)
-endfunction()
-
-function(build_game_c)
+	set(IWRAM_CPP_OBJECTS ${IWRAM_CPP_OBJECTS} ${IWRAM_CPP_OBJECTS_L})
 	foreach (FILE ${GAME_C_FILES})
 		get_filename_component(file_dir "${FILE}" PATH)
 		
@@ -258,44 +270,38 @@ function(build_game_c)
 
 		add_library(GAME_${file_dir}_${file_name}_OBJECT OBJECT ${FILE})
 		target_include_directories(GAME_${file_dir}_${file_name}_OBJECT PRIVATE ${EXTERNAL_INCLUDES})
-		add_dependencies(GAME_${file_dir}_${file_name}_OBJECT RESOURCE_SOURCES)
+		add_dependencies(GAME_${file_dir}_${file_name}_OBJECT RESOURCE_OBJECTS_BUILT)
 		set_target_properties(GAME_${file_dir}_${file_name}_OBJECT PROPERTIES COMPILE_FLAGS "-MMD -MP ${CFLAGS}")
-		list(APPEND GAME_C_OBJECTS GAME_${file_dir}_${file_name}_OBJECT)
+		list(APPEND GAME_C_OBJECTS_L GAME_${file_dir}_${file_name}_OBJECT)
 	endforeach()
-	set(GAME_C_OBJECTS ${GAME_C_OBJECTS} PARENT_SCOPE)
-endfunction()
-
-function(build_game_cpp)
-	foreach (FILE ${GAME_CPP_FILES})
-		get_filename_component(file_dir "${FILE}" PATH)
-		
-		string(REPLACE "/" ";" splits ${FILE})
-		list(GET splits -1 file_new)
-		list(GET splits -2 file_dir)
-
-		string(REPLACE "." ";." file_new_split ${file_new})
-		list(GET file_new_split 0 file_name)
-
-		add_library(GAME_${file_dir}_${file_name}_OBJECT OBJECT ${FILE})
-		target_include_directories(GAME_${file_dir}_${file_name}_OBJECT PRIVATE ${EXTERNAL_INCLUDES} ${CMAKE_BINARY_DIR}/data)
-		target_include_directories(GAME_${file_dir}_${file_name}_OBJECT PUBLIC
-		# The location of the headers before installation 
-		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
-		# The location of the headers after installation
-		$<INSTALL_INTERFACE:/data>)
-		target_include_directories(GAME_${file_dir}_${file_name}_OBJECT PUBLIC
-		# The location of the headers before installation 
-		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/source>
-		# The location of the headers after installation
-		$<INSTALL_INTERFACE:/source>)
-		add_dependencies(GAME_${file_dir}_${file_name}_OBJECT RESOURCE_SOURCES)
-		set_target_properties(GAME_${file_dir}_${file_name}_OBJECT PROPERTIES COMPILE_FLAGS "-MMD -MP ${CFLAGS} ${CPPFLAGS}")
-		list(APPEND GAME_CPP_OBJECTS GAME_${file_dir}_${file_name}_OBJECT)
-	endforeach()
-	set(GAME_CPP_OBJECTS ${GAME_CPP_OBJECTS} PARENT_SCOPE)
-endfunction()
-
-function(build_game_asm)
+	set(GAME_C_OBJECTS ${GAME_C_OBJECTS} ${GAME_C_OBJECTS_L})
+	#foreach (FILE ${GAME_CPP_FILES})
+		#get_filename_component(file_dir "${FILE}" PATH)
+		#
+		#string(REPLACE "/" ";" splits ${FILE})
+		#list(GET splits -1 file_new)
+		#list(GET splits -2 file_dir)
+		#
+		#string(REPLACE "." ";." file_new_split ${file_new})
+		#list(GET file_new_split 0 file_name)
+		#
+	#	add_library(GAME_${file_dir}_${file_name}_OBJECT OBJECT ${FILE})
+	#	target_include_directories(GAME_${file_dir}_${file_name}_OBJECT PRIVATE ${EXTERNAL_INCLUDES} ${CMAKE_BINARY_DIR}/data)
+	#	target_include_directories(GAME_${file_dir}_${file_name}_OBJECT PUBLIC
+	#	# The location of the headers before installation 
+	#	$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+	#	# The location of the headers after installation
+	#	$<INSTALL_INTERFACE:/data>)
+	#	target_include_directories(GAME_${file_dir}_${file_name}_OBJECT PUBLIC
+	#	# The location of the headers before installation 
+	#	$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/source>
+	#	# The location of the headers after installation
+	#	$<INSTALL_INTERFACE:/source>)
+	#	add_dependencies(GAME_${file_dir}_${file_name}_OBJECT RESOURCE_OBJECTS_BUILT)
+	#	set_target_properties(GAME_${file_dir}_${file_name}_OBJECT PROPERTIES COMPILE_FLAGS "-MMD -MP ${CFLAGS} ${CPPFLAGS}")
+	#	list(APPEND GAME_CPP_OBJECTS_L GAME_${file_dir}_${file_name}_OBJECT)
+	#endforeach()
+	#set(GAME_CPP_OBJECTS ${GAME_CPP_OBJECTS} ${GAME_CPP_OBJECTS_L})
 	foreach (FILE ${GAME_ASM_FILES})
 		get_filename_component(file_dir "${FILE}" PATH)
 		
@@ -307,57 +313,71 @@ function(build_game_asm)
 
 		add_library(GAME_${file_name}_OBJECT OBJECT ${CMAKE_SOURCE_DIR}/source/${file_dir}/${file_name}.s)
 		target_include_directories(GAME_${file_name}_OBJECT PRIVATE ${EXTERNAL_INCLUDES})
-		add_dependencies(GAME_${file_name}_OBJECT RESOURCE_SOURCES)
+		add_dependencies(GAME_${file_name}_OBJECT RESOURCE_OBJECTS_BUILT)
 		set_target_properties(GAME_${file_name}_OBJECT PROPERTIES COMPILE_FLAGS "-MMD -MP -x assembler-with-cpp ${ASFLAGS}")
 		list(APPEND GAME_ASM_OBJECTS GAME_${file_name}_OBJECT)
 	endforeach()
-	set(GAME_ASM_OBJECTS ${GAME_ASM_OBJECTS} PARENT_SCOPE)
-endfunction()
+	set(GAME_ASM_OBJECTS ${GAME_ASM_OBJECTS} ${GAME_ASM_OBJECTS_L})
+		
+	foreach(sprite_object ${SPRITES_EXPORT_NAMES})
+		list(APPEND OBJECT_FILES $<TARGET_OBJECTS:${sprite_object}>)
+	endforeach()
+	foreach(background_object ${BACKGROUNDS_EXPORT_NAMES})
+		list(APPEND OBJECT_FILES $<TARGET_OBJECTS:${background_object}>)
+	endforeach()
+	foreach(font_object ${FONTS_EXPORT_NAMES})
+		list(APPEND OBJECT_FILES $<TARGET_OBJECTS:${font_object}>)
+	endforeach()
+	foreach(sound_object ${SOUNDS_EXPORT_NAMES})
+		list(APPEND OBJECT_FILES $<TARGET_OBJECTS:${sound_object}>)
+	endforeach()
+	foreach(iwram_c_object ${IWRAM_C_OBJECTS})
+		list(APPEND OBJECT_FILES $<TARGET_OBJECTS:${iwram_c_object}>)
+	endforeach()
+	foreach(iwram_cpp_object ${IWRAM_CPP_OBJECTS})
+		list(APPEND OBJECT_FILES $<TARGET_OBJECTS:${iwram_cpp_object}>)
+	endforeach()
+	foreach(game_c_object ${GAME_C_OBJECTS})
+		list(APPEND OBJECT_FILES $<TARGET_OBJECTS:${game_c_object}>)
+	endforeach()
+	#foreach(game_cpp_object ${GAME_CPP_OBJECTS})
+	#	list(APPEND OBJECT_FILES $<TARGET_OBJECTS:${game_cpp_object}>)
+	#endforeach()
+	foreach(game_asm_object ${GAME_ASM_OBJECTS})
+		list(APPEND OBJECT_FILES $<TARGET_OBJECTS:${game_asm_object}>)
+	endforeach()
+	set_source_files_properties(OBJECT_FILES 
+		PROPERTIES 
+		EXTERNAL_OBJECT true
+		GENERATED true)
+	list(FILTER OBJECT_FILES EXCLUDE REGEX "GAME_crt0_OBJECT")
+	message("${OBJECT_FILES}")
 
-if (EXISTS ${CMAKE_BINARY_DIR}/tools/tools)
-	export_resources("SPRITE" "tools" "sprite-export" "sprites/" ".s" ".hpp" "" "${SPR_FILES}")
-	export_resources("BACKGROUND" "SPRITES_SOURCE" "background-export" "backgrounds/" ".s" ".hpp" "" "${BKG_FILES}")
-	export_resources("FONT" "BACKGROUNDS_SOURCE" "font-export" "fonts/" ".s" ".hpp" "" "${FNT_FILES}")
-	export_resources("SETTING" "FONTS_SOURCE" "audio-export-settings" "" "-settings.hpp" "-settings.json" "" "${AUS_FILES}")
-	export_resources("SOUND" "SETTINGS_SOURCE" "sound-export" "sounds/" ".s" ".hpp" "${CMAKE_BINARY_DIR}/data/audio-settings.json" "${SND_FILES}")
+	add_executable(gba-modern ${GAME_CPP_FILES} ${OBJECT_FILES})
 
-	get_target_property(SPRITE_SOURCE_FILES SPRITES_SOURCE SOURCES)
-	list(FILTER SPRITE_SOURCE_FILES EXCLUDE REGEX ".*hpp$")
-	build_resources("${SPRITE_SOURCE_FILES}" "SPRITE")
-	
-	get_target_property(BACKGROUND_SOURCE_FILES BACKGROUNDS_SOURCE SOURCES)
-	list(FILTER BACKGROUND_SOURCE_FILES EXCLUDE REGEX ".*hpp$")
-	build_resources("${BACKGROUND_SOURCE_FILES}" "BACKGROUND")
-	
-	get_target_property(FONT_SOURCE_FILES FONTS_SOURCE SOURCES)
-	list(FILTER FONT_SOURCE_FILES EXCLUDE REGEX ".*hpp$")
-	build_resources("${FONT_SOURCE_FILES}" "FONT")
-
-	get_target_property(SOUND_SOURCE_FILES SOUNDS_SOURCE SOURCES)
-	list(FILTER SOUND_SOURCE_FILES EXCLUDE REGEX ".*hpp$")
-	build_resources("${SOUND_SOURCE_FILES}" "SOUND")
-	
-	#message(${SPRITE_OBJECTS})
-	#add_library(RESOURCE_OBJECTS OBJECT ${SPRITE_OBJECTS} ${BACKGROUNDS_OBJECTS})
-	#add_dependencies(RESOURCE_OBJECTS ${SPRITE_OBJECT_NAMES})
-	#add_custom_target(RESOURCE_OBJECTS ALL
-		#DEPENDS ${SPRITE_OBJECTS})# BACKGROUNDS_SOURCE FONTS_SOURCE SETTINGS_SOURCE SOUNDS_SOURCE
-		#SOURCES ${SPRITE_OBJECTS})
-
-	#build_iwram_c()
-	#build_iwram_cpp()
-	#build_game_c()
-	#build_game_cpp()
-	#build_game_asm()
-
-	#set(OBJECT_FILES "${SPRITE_OBJECTS} ${BACKGROUND_OBJECTS} ${FONT_OBJECTS} ${SOUND_OBJECTS} ${IWRAM_C_OBJECTS} ${IWRAM_CPP_OBJECTS} ${GAME_C_OBJECTS} ${GAME_CPP_OBJECTS} ${GAME_ASM_OBJECTS}")
-	#set_source_files_properties(${OBJECT_FILES} 
-	#	PROPERTIES 
-	#	EXTERNAL_OBJECT true
-	#	GENERATED true)
-	#list(FILTER OBJECT_FILES EXCLUDE REGEX "GAME_crt0_OBJECT")
-	#message("${OBJECT_FILES}")
-endif()
+	#target_link_libraries(gba-modern ${OBJECT_FILES})
+	set_target_properties(gba-modern PROPERTIES LINKER_LANGUAGE CXX)
+	#set_target_properties(gba-modern PROPERTIES DEPENDS "${OBJECT_FILES} ${RESOURCES_HPP}")
+	target_compile_options(gba-modern PRIVATE -mthumb -mthumb-interwork "-Wl,--gc-sections -Wl,-Map,gba.map" "-specs=${CMAKE_SOURCE_DIR}/gba.specs" "-L ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib" -nodefaultlibs -ltonc )
+	target_include_directories(gba-modern PRIVATE ${EXTERNAL_INCLUDES})
+	target_include_directories(gba-modern PRIVATE ${CMAKE_BINARY_DIR})
+	target_include_directories(gba-modern PRIVATE ${CMAKE_BINARY_DIR}/data)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_BINARY_DIR}/data/sprites)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_BINARY_DIR}/data/backgrounds)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_BINARY_DIR}/data/fonts)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_BINARY_DIR}/data/sounds)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_SOURCE_DIR}/source)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_SOURCE_DIR}/source/audio)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_SOURCE_DIR}/source/data)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_SOURCE_DIR}/source/gameplay)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_SOURCE_DIR}/source/graphics)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_SOURCE_DIR}/source/math)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_SOURCE_DIR}/source/memory)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_SOURCE_DIR}/source/scenes)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_SOURCE_DIR}/source/text)
+	target_include_directories(gba-modern PRIVATE ${CMAKE_SOURCE_DIR}/source/util)
+	target_link_directories(gba-modern PRIVATE ${EXTERNAL_LIBS})
+#endif()
 
 #bin/game.elf: build/data/audio-settings.hpp $(OFILES)
 # Get the right linker
@@ -368,12 +388,7 @@ endif()
 #endif
 #	@$(ARMCPP) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) -nodefaultlibs -ltonc -o $@
 
-#add_executable(gba-modern ${SPRITE_OBJECTS} ${BACKGROUND_OBJECTS} ${FONT_OBJECTS} ${SOUND_OBJECTS} ${IWRAM_C_OBJECTS} ${IWRAM_CPP_OBJECTS} ${GAME_C_OBJECTS} ${GAME_CPP_OBJECTS} ${GAME_ASM_OBJECTS})
-#set_target_properties(gba-modern PROPERTIES LINKER_LANGUAGE CXX)
-#set_target_properties(gba-modern PROPERTIES DEPENDS "${SPRITE_OBJECTS} ${BACKGROUND_OBJECTS} ${FONT_OBJECTS} ${SOUND_OBJECTS} ${IWRAM_C_OBJECTS} ${IWRAM_CPP_OBJECTS} ${GAME_C_OBJECTS} ${GAME_CPP_OBJECTS} ${GAME_ASM_OBJECTS}")
-#target_compile_options(gba-modern PRIVATE -mthumb -mthumb-interwork "-Wl,--gc-sections -Wl,-Map,gba.map" "-specs=gba.specs" -nodefaultlibs -ltonc "-L ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib")
-#target_include_directories(gba-modern PRIVATE ${EXTERNAL_INCLUDES})
-#target_link_directories(gba-modern PRIVATE ${EXTERNAL_LIBS})
+
 
 #add_custom_target(gba-modern ALL
 #	DEPENDS ${SPRITE_OBJECT_NAMES} ${BACKGROUND_OBJECT_NAMES} ${FONT_OBJECT_NAMES} ${SOUND_OBJECT_NAMES}
