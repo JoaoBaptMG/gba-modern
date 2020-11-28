@@ -3,10 +3,14 @@ cmake_minimum_required (VERSION 3.16)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 project(gba-modern-tools)
+
 find_package(Freetype REQUIRED)
-set(LibSampleRate_DIR ${CMAKE_SOURCE_DIR}/../external/libsamplerate-install)
-find_package(LibSampleRate REQUIRED)
+
+get_filename_component(PARENT_DIRECTORY ../ ABSOLUTE)
+set(LIBSAMPLERATE_INCLUDE_DIR ${PARENT_DIRECTORY}/external/libsamplerate-install)
+set(LIBSAMPLERATE_LIBRARY ${PARENT_DIRECTORY}/external/libsamplerate-install/lib/libsamplerate.so)
 
 # CPP_FILES
 set(TOOLS_CPP_FILES
@@ -32,7 +36,6 @@ set(TOOLS_PCH_HEADERS
 	nlohmann/json.hpp
 	graphics.hpp
 	resample.hpp
-	${LIBSAMPLERATE_INCLUDE_DIRS}
 	UnionFind.hpp
 	split.hpp
 	util.hpp)
@@ -41,5 +44,4 @@ add_executable(tools ${TOOLS_CPP_FILES})
 target_link_libraries(tools ${FREETYPE_LIBRARIES})
 target_link_libraries(tools ${LIBSAMPLERATE_LIBRARY})
 target_include_directories(tools PRIVATE ${FREETYPE_INCLUDE_DIRS})
-target_include_directories(tools PRIVATE ${LIBSAMPLERATE_INCLUDE_DIRS})
 target_precompile_headers(tools PUBLIC pch.hpp PRIVATE ${TOOLS_PCH_HEADERS})
