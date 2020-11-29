@@ -5,7 +5,7 @@
 @--------------------------------------------------------------------------------
 
 @ Pick up some constants
-#include "../../build/data/audio-settings.hpp"
+#include "data/audio-settings.hpp"
 
 @========================================================================================
 @ Here I should explain how the audio engine is composed:

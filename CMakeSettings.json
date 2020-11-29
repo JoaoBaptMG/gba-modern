@@ -4,7 +4,7 @@
       "name": "WSL",
       "generator": "Unix Makefiles",
       "configurationType": "Debug",
-      "buildRoot": "${projectDir}\\build\\${name}",
+      "buildRoot": "${projectDir}\\build",
       "installRoot": "${projectDir}\\install\\${name}",
       "cmakeExecutable": "/usr/local/bin/cmake",
       "cmakeCommandArgs": "",
@@ -14,7 +14,7 @@
       "wslPath": "${defaultWSLPath}",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
       "variables": [],
-      "cmakeToolchain": "toolchain.cmake"
+      "cmakeToolchain": "M:/Projects/gba-modern/toolchain.cmake"
     }
   ]
 }
