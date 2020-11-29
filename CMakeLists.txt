@@ -16,10 +16,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "$CMAKE_SOURCE_DIR}")
 project (gba-modern)
 
 message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.") #this is needed to actually load the toolchain file from the config for some reason lol
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_USE_RELATIVE_PATHS TRUE)
-
 
 set(ARCH -mthumb -mthumb-interwork)
 set(CFLAGS -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH})
@@ -74,17 +70,12 @@ ExternalProject_Add(LibSampleRateSource
 	INSTALL_COMMAND make install
 	DEPENDS Tonc)
 
-
-set(LIBSAMPLERATE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/libsamplerate-install)
-set(LIBSAMPLERATE_LIBRARY ${CMAKE_SOURCE_DIR}/external/libsamplerate-install/lib/libsamplerate.so)
-
 set(EXTERNAL_LIBS
 	-L ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib
 	 -nodefaultlibs -ltonc)
 
 set(EXTERNAL_INCLUDES
 	-I${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/include -I${CMAKE_SOURCE_DIR}/external/gcem/include)
-
 
 ExternalProject_Add(tools
 	SOURCE_DIR ${CMAKE_SOURCE_DIR}/tools
@@ -122,7 +113,7 @@ file(GLOB_RECURSE GAME_HPP_FILES
 	CONFIGURE_DEPENDS RELATIVE ${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/source/*.h*)	
 
 # Build Functions
-function(export_resources)
+function(build_resource)
 	# Set Variables to make this easier
 	# i.e SPRITE
 	set(RESOURCE_NAME ${ARGV0})
@@ -166,8 +157,7 @@ function(export_resources)
 	set(OBJECT_LIST_NAME ${PLURAL}_OBJECT_LIST)
 	set(OUT1_LIST_NAME ${PLURAL}_OUT1_LIST)
 	set(OUT2_LIST_NAME ${PLURAL}_OUT2_LIST)
-
-	
+		
 	foreach(FILE ${RESOURCE_FILES})
 		get_filename_component(file_dir "${FILE}" PATH)
 		string(REPLACE "." ";." file ${FILE})
@@ -367,11 +357,11 @@ function(build_game_asm)
 	set(GAME_ASM_OBJECT_D_FILES ${GAME_ASM_OBJECT_D_FILES} PARENT_SCOPE)
 endfunction()
 
-export_resources("SPRITE" "tools" "${SPR_FILES}")
-export_resources("BACKGROUND" "${RESOURCES_HPP}" "${BKG_FILES}")
-export_resources("FONT" "${RESOURCES_HPP}" "${FNT_FILES}")
-export_resources("SETTING" "${RESOURCES_HPP}" "${AUS_FILES}")
-export_resources("SOUND" "${RESOURCES_HPP}" "${SND_FILES}" "${CMAKE_BINARY_DIR}/data/audio-settings.json")
+build_resource("SPRITE" "tools" "${SPR_FILES}")
+build_resource("BACKGROUND" "${RESOURCES_HPP}" "${BKG_FILES}")
+build_resource("FONT" "${RESOURCES_HPP}" "${FNT_FILES}")
+build_resource("SETTING" "${RESOURCES_HPP}" "${AUS_FILES}")
+build_resource("SOUND" "${RESOURCES_HPP}" "${SND_FILES}" "${CMAKE_BINARY_DIR}/data/audio-settings.json")
 
 add_custom_target(RESOURCE_OBJECTS_BUILT ALL
 	DEPENDS ${RESOURCE_OBJECT_FILES}
