@@ -130,6 +130,7 @@ function(export_resources)
 	set(PLURAL ${RESOURCE_NAME}S)
 	# passed in dependencies, tool or the previous object
 	set(TARGET_DEPENDENCIES ${ARGV1})
+	# Set helped variables based on what resource we are exporting and building
 	if(${RESOURCE_NAME} MATCHES "SPRITE")
 		set(TOOL_NAME sprite-export)
 		set(FOLDER_NAME sprites/)
@@ -176,6 +177,13 @@ function(export_resources)
 		set(OUTPUT_FILE_1 ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}${OUT1})
 		set(OUTPUT_FILE_2 ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}${OUT2})
 		
+		# This command generates the files from the source/data files
+		# OUTPUT means the files are set as Generated in cmake,
+		# so when they are used as a source, a dependency is set on their generation
+		# We pass in the dependencies to DEPENDS, the first call of this function passes in the Tools project as a dependency,
+		# so that all subsequent commands and targets are implicitely dependent on Tools having finished
+		# WORKING_DIRECTORY is set to the project root (${CMAKE_SOURCE_DIR}) so a relative path to the file that is to be exported
+		# is sent to the tool, for proper generation of namespaces
 		add_custom_command(OUTPUT ${OUTPUT_FILE_1} ${OUTPUT_FILE_2}
 			DEPENDS ${TARGET_DEPENDENCIES}
 			COMMAND ${CMAKE_BINARY_DIR}/tools/tools ${TOOL_NAME}
@@ -184,21 +192,33 @@ function(export_resources)
 			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 			COMMENT "Exporting ${RESOURCE_NAME} ${file_name}")
 
+		# We don't want to generate and object and dependency? file for audio.json, since it only outputs a header and another json file
 		if(NOT ${RESOURCE_NAME} MATCHES "SETTING")
 			file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}/${file_name})
 		
 			set(OUTPUT_OBJECT ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}/${file_name}.o)
 			set(OUTPUT_OBJECT_D ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}/${file_name}.d)
 					
+			# This command generates the object file and dependency? of the exported ASM and header
+			# OUTPUT again means these files are set as GENERATED
+			# MAIN_DEPENDENCY sets the input ASM file as the main dependency
+			# DEPENDS sets the header file as a dependency
+			# We need too set dependencies to the input files used in the command, as it is not automatically done even though they are source files.
+			# This ensures this command is ran after generating the ASM and header files
 			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 				MAIN_DEPENDENCY ${OUTPUT_FILE_1}
 				DEPENDS ${OUTPUT_FILE_2}
 				COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp -g -mthumb -mthumb-interwork -c ${OUTPUT_FILE_1} -o ${OUTPUT_OBJECT}
 				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+
+			# Since we pass in dependencies, we can handle all resource objects as a group
+			# We append to a lists that we later set to the parent scope to use when building
 			list(APPEND RESOURCE_OBJECT_FILES ${OUTPUT_OBJECT})
 			list(APPEND RESOURCE_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
 		endif()
 		
+		# The second output file is usually the header file,
+		# unless the settings are being made, then it is the first.
 		if(NOT ${RESOURCE_NAME} MATCHES "SETTING")
 			list(APPEND RESOURCES_HPP ${OUTPUT_FILE_2})
 		else()
@@ -206,6 +226,7 @@ function(export_resources)
 		endif()
 	endforeach()
 	
+	# Set our object, dependency? and header lists to the parent scope
 	set(RESOURCE_OBJECT_FILES ${RESOURCE_OBJECT_FILES} PARENT_SCOPE)
 	set(RESOURCE_OBJECT_D_FILES ${RESOURCE_OBJECT_D_FILES} PARENT_SCOPE)
 	set(RESOURCES_HPP ${RESOURCES_HPP} PARENT_SCOPE)
@@ -371,11 +392,13 @@ list(FILTER BUILD_GAME_FILES EXCLUDE REGEX "crt0")
 add_custom_target(elf ALL
 	DEPENDS GAME_OBJECTS_BUILT
 	COMMAND ${CMAKE_CXX_COMPILER} -g -mthumb -mthumb-interwork -Wl,--gc-sections -Wl,-Map,gba.map -specs=${CMAKE_SOURCE_DIR}/gba.specs ${BUILD_GAME_FILES} -L ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib -nodefaultlibs -ltonc -o ${CMAKE_BINARY_DIR}/gba-modern.elf
+	BYPRODUCTS ${CMAKE_BINARY_DIR}/gba-modern.elf
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_custom_target(elf_dump ALL
 	DEPENDS elf
-	COMMAND ${CMAKE_OBJDUMP} -dCS ${CMAKE_BINARY_DIR}/gba-modern.elf > ${CMAKE_BINARY_DIR}/gba-modern.elf.dump)
+	COMMAND ${CMAKE_OBJDUMP} -dCS ${CMAKE_BINARY_DIR}/gba-modern.elf > ${CMAKE_BINARY_DIR}/gba-modern.elf.dump
+	BYPRODUCTS ${CMAKE_BINARY_DIR}/gba-modern.elf.dump)
 
 add_custom_target(create_rom ALL
 	DEPENDS elf_dump
@@ -383,4 +406,5 @@ add_custom_target(create_rom ALL
 
 add_custom_target(sanitize_rom ALL
 	DEPENDS create_rom
-	COMMAND ${CMAKE_BINARY_DIR}/tools/tools rom-sanitize ${CMAKE_BINARY_DIR}/gba-modern.gba ${CMAKE_SOURCE_DIR}/gba.json ${CMAKE_BINARY_DIR}/gba-modern.gba)
+	COMMAND ${CMAKE_BINARY_DIR}/tools/tools rom-sanitize ${CMAKE_BINARY_DIR}/gba-modern.gba ${CMAKE_SOURCE_DIR}/gba.json ${CMAKE_BINARY_DIR}/gba-modern.gba
+	BYPRODUCTS ${CMAKE_BINARY_DIR}/gba-modern.gba)
