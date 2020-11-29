@@ -21,11 +21,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_USE_RELATIVE_PATHS TRUE)
 
 
-set(ARCH "-mthumb -mthumb-interwork")
-set(CFLAGS "-Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH}")
-set(CPPFLAGS "-std=c++17 -fno-rtti -fno-exceptions")
-set(ASFLAGS "${ARCH}")
-set(LDFLAGS	"${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map")
+set(ARCH -mthumb -mthumb-interwork)
+set(CFLAGS -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH})
+set(CPPFLAGS ${CFLAGS} -std=c++17 -fno-rtti -fno-exceptions)
+set(ASFLAGS -g ${ARCH})
+set(LDFLAGS	${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map)
 
 # Dependencies
 set(GCC_PLATFORM "x86_64-linux") #just assuming this for now, toolchain stuff messes things up a little
@@ -79,7 +79,8 @@ set(LIBSAMPLERATE_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/external/libsamplerate-install
 set(LIBSAMPLERATE_LIBRARY ${CMAKE_SOURCE_DIR}/external/libsamplerate-install/lib/libsamplerate.so)
 
 set(EXTERNAL_LIBS
-	"${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib")
+	-L ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib
+	 -nodefaultlibs -ltonc)
 
 set(EXTERNAL_INCLUDES
 	-I${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/include -I${CMAKE_SOURCE_DIR}/external/gcem/include)
@@ -207,7 +208,7 @@ function(export_resources)
 			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 				MAIN_DEPENDENCY ${OUTPUT_FILE_1}
 				DEPENDS ${OUTPUT_FILE_2}
-				COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp -g -mthumb -mthumb-interwork -c ${OUTPUT_FILE_1} -o ${OUTPUT_OBJECT}
+				COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp ${ASFLAGS} -c ${OUTPUT_FILE_1} -o ${OUTPUT_OBJECT}
 				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 
 			# Since we pass in dependencies, we can handle all resource objects as a group
@@ -248,7 +249,7 @@ function(build_iwram_c)
 
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto -mthumb -mthumb-interwork ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND IWRAM_C_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -275,7 +276,7 @@ function(build_iwram_cpp)
 
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto -mthumb -mthumb-interwork -std=c++17 -fno-rtti -fno-exceptions ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${CMAKE_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND IWRAM_CPP_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -302,7 +303,7 @@ function(build_game_c)
 
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto -mthumb -mthumb-interwork ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND GAME_C_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -329,7 +330,7 @@ function(build_game_cpp)
 
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto -mthumb -mthumb-interwork -std=c++17 -fno-rtti -fno-exceptions ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${CMAKE_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND GAME_CPP_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -356,7 +357,7 @@ function(build_game_asm)
 		
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp -g -mthumb -mthumb-interwork -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp ${ASFLAGS} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND GAME_ASM_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -390,7 +391,7 @@ list(FILTER BUILD_GAME_FILES EXCLUDE REGEX "crt0")
 
 add_custom_target(elf ALL
 	DEPENDS GAME_OBJECTS_BUILT
-	COMMAND ${CMAKE_CXX_COMPILER} -g -mthumb -mthumb-interwork -Wl,--gc-sections -Wl,-Map,gba.map -specs=${CMAKE_SOURCE_DIR}/gba.specs ${BUILD_GAME_FILES} -L ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib -nodefaultlibs -ltonc -o ${CMAKE_BINARY_DIR}/gba-modern.elf
+	COMMAND ${CMAKE_CXX_COMPILER} ${LDFLAGS} -specs=${CMAKE_SOURCE_DIR}/gba.specs ${BUILD_GAME_FILES} ${EXTERNAL_LIBS} -o ${CMAKE_BINARY_DIR}/gba-modern.elf
 	BYPRODUCTS ${CMAKE_BINARY_DIR}/gba-modern.elf ${CMAKE_SOURCE_DIR}/gba.map
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
