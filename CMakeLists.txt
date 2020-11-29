@@ -228,7 +228,7 @@ function(build_iwram_c)
 
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto -mthumb -mthumb-interwork ${EXTERNAL_INCLUDES} -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto -mthumb -mthumb-interwork ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND IWRAM_C_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -255,7 +255,7 @@ function(build_iwram_cpp)
 
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto -mthumb -mthumb-interwork -std=c++17 -fno-rtti -fno-exceptions ${EXTERNAL_INCLUDES} -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${CMAKE_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto -mthumb -mthumb-interwork -std=c++17 -fno-rtti -fno-exceptions ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND IWRAM_CPP_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -282,7 +282,7 @@ function(build_game_c)
 
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto -mthumb -mthumb-interwork ${EXTERNAL_INCLUDES} -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto -mthumb -mthumb-interwork ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND GAME_C_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -336,7 +336,7 @@ function(build_game_asm)
 		
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp -g -mthumb -mthumb-interwork -I${CMAKE_BINARY_DIR} -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp -g -mthumb -mthumb-interwork -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND GAME_ASM_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -370,7 +370,8 @@ list(FILTER BUILD_GAME_FILES EXCLUDE REGEX "crt0")
 
 add_custom_target(elf ALL
 	DEPENDS GAME_OBJECTS_BUILT
-	COMMAND ${CMAKE_CXX_COMPILER} -g -mthumb -mthumb-interwork -Wl,--gc-sections -Wl,-Map,gba.map -specs=${CMAKE_SOURCE_DIR}/gba.specs ${BUILD_GAME_FILES} -L ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib -nodefaultlibs -ltonc -o ${CMAKE_BINARY_DIR}/gba-modern.elf)
+	COMMAND ${CMAKE_CXX_COMPILER} -g -mthumb -mthumb-interwork -Wl,--gc-sections -Wl,-Map,gba.map -specs=${CMAKE_SOURCE_DIR}/gba.specs ${BUILD_GAME_FILES} -L ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib -nodefaultlibs -ltonc -o ${CMAKE_BINARY_DIR}/gba-modern.elf
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_custom_target(elf_dump ALL
 	DEPENDS elf
