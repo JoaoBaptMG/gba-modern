@@ -392,7 +392,7 @@ list(FILTER BUILD_GAME_FILES EXCLUDE REGEX "crt0")
 add_custom_target(elf ALL
 	DEPENDS GAME_OBJECTS_BUILT
 	COMMAND ${CMAKE_CXX_COMPILER} -g -mthumb -mthumb-interwork -Wl,--gc-sections -Wl,-Map,gba.map -specs=${CMAKE_SOURCE_DIR}/gba.specs ${BUILD_GAME_FILES} -L ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib -nodefaultlibs -ltonc -o ${CMAKE_BINARY_DIR}/gba-modern.elf
-	BYPRODUCTS ${CMAKE_BINARY_DIR}/gba-modern.elf
+	BYPRODUCTS ${CMAKE_BINARY_DIR}/gba-modern.elf ${CMAKE_SOURCE_DIR}/gba.map
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_custom_target(elf_dump ALL
