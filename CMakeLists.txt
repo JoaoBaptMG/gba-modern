@@ -12,7 +12,7 @@ cmake_minimum_required (VERSION 3.16)
 include(ExternalProject)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "$CMAKE_SOURCE_DIR}")
-set(CMAKE_VERBOSE_MAKEFILE ON)
+
 project (gba-modern)
 
 message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.") #this is needed to actually load the toolchain file from the config for some reason lol
@@ -20,7 +20,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_USE_RELATIVE_PATHS TRUE)
 
-message(${CMAKE_CXX_LINK_EXECUTABLE})
 
 set(ARCH "-mthumb -mthumb-interwork")
 set(CFLAGS "-Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH}")
