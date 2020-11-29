@@ -11,11 +11,7 @@ cmake_minimum_required (VERSION 3.16)
 
 include(ExternalProject)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "$CMAKE_SOURCE_DIR}")
-
 project (gba-modern)
-
-message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}.") #this is needed to actually load the toolchain file from the config for some reason lol
 
 set(ARCH -mthumb -mthumb-interwork)
 set(CFLAGS -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH})
@@ -39,6 +35,11 @@ ExternalProject_Add(gbaGCC
 	CONFIGURE_COMMAND cmake -E echo "Skipping configure step."
 	BUILD_COMMAND cmake -E echo "Skipping BUILD step."
 	INSTALL_COMMAND cmake -E echo "Skipping install step.")
+
+set(GBA_C_COMPILER ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-gcc)
+set(GBA_CXX_COMPILER ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-g++)
+set(GBA_OBJCOPY ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objcopy)
+set(GBA_OBJDUMP ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objdump)
 
 set(TONC_URL "http://www.coranac.com/files/tonc-code.zip")
 set(TONC_MD5 "3f9ebdbbe7989b33c2a788c5b5a1bfed")
@@ -198,7 +199,7 @@ function(build_resource)
 			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 				MAIN_DEPENDENCY ${OUTPUT_FILE_1}
 				DEPENDS ${OUTPUT_FILE_2}
-				COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp ${ASFLAGS} -c ${OUTPUT_FILE_1} -o ${OUTPUT_OBJECT}
+				COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp ${ASFLAGS} -c ${OUTPUT_FILE_1} -o ${OUTPUT_OBJECT}
 				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 
 			# Since we pass in dependencies, we can handle all resource objects as a group
@@ -239,7 +240,7 @@ function(build_iwram_c)
 
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND IWRAM_C_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -266,7 +267,7 @@ function(build_iwram_cpp)
 
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${GBA_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND IWRAM_CPP_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -293,7 +294,7 @@ function(build_game_c)
 
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND GAME_C_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -320,7 +321,7 @@ function(build_game_cpp)
 
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${GBA_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND GAME_CPP_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -347,7 +348,7 @@ function(build_game_asm)
 		
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${CMAKE_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp ${ASFLAGS} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+			COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp ${ASFLAGS} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		
 		list(APPEND GAME_ASM_OBJECT_FILES ${OUTPUT_OBJECT})
@@ -381,18 +382,18 @@ list(FILTER BUILD_GAME_FILES EXCLUDE REGEX "crt0")
 
 add_custom_target(elf ALL
 	DEPENDS GAME_OBJECTS_BUILT
-	COMMAND ${CMAKE_CXX_COMPILER} ${LDFLAGS} -specs=${CMAKE_SOURCE_DIR}/gba.specs ${BUILD_GAME_FILES} ${EXTERNAL_LIBS} -o ${CMAKE_BINARY_DIR}/gba-modern.elf
+	COMMAND ${GBA_CXX_COMPILER} ${LDFLAGS} -specs=${CMAKE_SOURCE_DIR}/gba.specs ${BUILD_GAME_FILES} ${EXTERNAL_LIBS} -o ${CMAKE_BINARY_DIR}/gba-modern.elf
 	BYPRODUCTS ${CMAKE_BINARY_DIR}/gba-modern.elf ${CMAKE_SOURCE_DIR}/gba.map
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_custom_target(elf_dump ALL
 	DEPENDS elf
-	COMMAND ${CMAKE_OBJDUMP} -dCS ${CMAKE_BINARY_DIR}/gba-modern.elf > ${CMAKE_BINARY_DIR}/gba-modern.elf.dump
+	COMMAND ${GBA_OBJDUMP} -dCS ${CMAKE_BINARY_DIR}/gba-modern.elf > ${CMAKE_BINARY_DIR}/gba-modern.elf.dump
 	BYPRODUCTS ${CMAKE_BINARY_DIR}/gba-modern.elf.dump)
 
 add_custom_target(create_rom ALL
 	DEPENDS elf_dump
-	COMMAND ${CMAKE_OBJCOPY} -O binary ${CMAKE_BINARY_DIR}/gba-modern.elf ${CMAKE_BINARY_DIR}/gba-modern.gba)
+	COMMAND ${GBA_OBJCOPY} -O binary ${CMAKE_BINARY_DIR}/gba-modern.elf ${CMAKE_BINARY_DIR}/gba-modern.gba)
 
 add_custom_target(sanitize_rom ALL
 	DEPENDS create_rom
