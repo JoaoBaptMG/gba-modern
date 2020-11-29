@@ -21,8 +21,8 @@ set(TOOLS_CPP_FILES
 	graphics.cpp
 	lodepng.cpp
 	main.cpp
-	resample.cpp
 	rom-sanitize.cpp
+	sound-data.cpp
 	sound-export.cpp
 	sprite-export.cpp
 	UnionFind.cpp
@@ -35,8 +35,8 @@ set(TOOLS_PCH_HEADERS
 	lodepng.h
 	nlohmann/json.hpp
 	graphics.hpp
-	resample.hpp
 	UnionFind.hpp
+	sound-data.hpp
 	split.hpp
 	util.hpp)
 
