@@ -7,7 +7,7 @@
 #pragma once
 
 #include <tonc.h>
-#include "../math/vec2.hpp"
+#include "math/vec2.hpp"
 
 // Sprite size enum
 enum class SpriteSize : u8

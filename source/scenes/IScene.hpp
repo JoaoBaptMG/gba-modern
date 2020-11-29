@@ -7,7 +7,7 @@
 
 #include <tonc.h>
 #include <type_traits>
-#include "../util/ObjectStack.hpp"
+#include "util/ObjectStack.hpp"
 
 // The base class for a scene
 class IScene

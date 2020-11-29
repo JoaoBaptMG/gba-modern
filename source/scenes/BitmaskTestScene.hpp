@@ -8,8 +8,8 @@
 #include "IScene.hpp"
 
 #include <tonc.h>
-#include "../math/stdfixed.hpp"
-#include "../math/vec2.hpp"
+#include "math/stdfixed.hpp"
+#include "math/vec2.hpp"
 
 class BitmaskTestScene final : public IScene
 {

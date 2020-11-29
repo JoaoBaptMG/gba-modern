@@ -5,6 +5,6 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "../../Enemy.hpp"
+#include "gameplay/Enemy.hpp"
 
 void wavingEnemy(Enemy& enemy, GameScene& gameScene, u32 frameToShoot);

@@ -6,10 +6,10 @@
 #pragma once
 
 #include <algorithm>
-#include "../math/stdfixed.hpp"
-#include "../math/vec2.hpp"
+#include "math/stdfixed.hpp"
+#include "math/vec2.hpp"
 #include "collision.hpp"
-#include "../graphics/SpriteSize.hpp"
+#include "graphics/SpriteSize.hpp"
 
 struct Projectile
 {

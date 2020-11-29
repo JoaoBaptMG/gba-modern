@@ -6,7 +6,7 @@
 #include "TileTextTestScene.hpp"
 
 #include "data/fonts/monogram_extended.hpp"
-#include "../text/StringBuilder.hpp"
+#include "text/StringBuilder.hpp"
 
 #if 0
 static const char String[] =

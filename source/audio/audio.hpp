@@ -5,8 +5,8 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "../math/stdfixed.hpp"
-#include "../data/Sound.hpp"
+#include "math/stdfixed.hpp"
+#include "data/Sound.hpp"
 
 namespace audio
 {

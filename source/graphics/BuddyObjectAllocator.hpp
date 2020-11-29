@@ -6,7 +6,7 @@
 #pragma once
 
 #include <tonc.h>
-#include "../graphics/SpriteSize.hpp"
+#include "graphics/SpriteSize.hpp"
 
 class BuddyObjectAllocator final
 {

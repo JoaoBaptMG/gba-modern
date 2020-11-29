@@ -8,8 +8,8 @@
 #include <tonc.h>
 
 #include "Projectile.hpp"
-#include "../graphics/ObjectTilePointer.hpp"
-#include "../graphics/PalettePointer.hpp"
+#include "graphics/ObjectTilePointer.hpp"
+#include "graphics/PalettePointer.hpp"
 
 class GameScene;
 

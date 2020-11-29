@@ -7,8 +7,8 @@
 
 #include "IScene.hpp"
 
-#include "../text/TextWriter.hpp"
-#include "../text/Mode3GlyphWriter.hpp"
+#include "text/TextWriter.hpp"
+#include "text/Mode3GlyphWriter.hpp"
 
 class Mode3TextTestScene final : public IScene
 {

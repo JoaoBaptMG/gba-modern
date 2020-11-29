@@ -6,7 +6,7 @@
 #pragma once
 
 #include <tonc.h>
-#include "../data/Font.hpp"
+#include "data/Font.hpp"
 
 extern "C" void tile4bppPutGlyph(int x, int y, const GlyphData* gl, COLOR color, void* buffer, u32 pixelHeight);
 

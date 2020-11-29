@@ -7,10 +7,10 @@
 #pragma once
 
 #include <tonc.h>
-#include "../graphics/SpriteSize.hpp"
-#include "../data/AnimatedPng.hpp"
-#include "../graphics/AnimationPose.hpp"
-#include "../graphics/ObjectTilePointer.hpp"
+#include "graphics/SpriteSize.hpp"
+#include "data/AnimatedPng.hpp"
+#include "graphics/AnimationPose.hpp"
+#include "graphics/ObjectTilePointer.hpp"
 
 // The StreamAnimator starts as invisible
 class StreamAnimator final

@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "../util/type_traits.hpp"
+#include "util/type_traits.hpp"
 
 template <typename T>
 struct vec2 final

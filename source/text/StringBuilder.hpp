@@ -11,7 +11,7 @@
 #include <limits>
 #include <algorithm>
 #include <tonc.h>
-#include "../util/uintDigits.h"
+#include "util/uintDigits.h"
 
 template <typename T>
 constexpr std::size_t numCharsInTempBuffer()

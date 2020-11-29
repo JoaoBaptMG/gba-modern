@@ -10,11 +10,11 @@
 #include <cstdint>
 #include <utility>
 #include "graphics.hpp"
-#include "../graphics/AnimationPose.hpp"
-#include "../graphics/SpriteSize.hpp"
-#include "../data/AnimatedPng.hpp"
-#include "../util/AllocatorPointer.hpp"
-#include "../util/integer-sequence-utils.hpp"
+#include "graphics/AnimationPose.hpp"
+#include "graphics/SpriteSize.hpp"
+#include "data/AnimatedPng.hpp"
+#include "util/AllocatorPointer.hpp"
+#include "util/integer-sequence-utils.hpp"
 
 // Contains the base of the frame animator, used to be able to share code
 class FrameAnimatorBase final

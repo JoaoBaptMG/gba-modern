@@ -7,11 +7,11 @@
 
 #include "IScene.hpp"
 
-#include "../text/TextWriter.hpp"
-#include "../text/Mode3GlyphWriter.hpp"
+#include "text/TextWriter.hpp"
+#include "text/Mode3GlyphWriter.hpp"
 
 #include <tonc.h>
-#include "../util/context.h"
+#include "util/context.h"
 
 class ContextTestScene final : public IScene
 {
