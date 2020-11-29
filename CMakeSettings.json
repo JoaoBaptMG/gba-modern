@@ -5,7 +5,6 @@
       "generator": "Unix Makefiles",
       "configurationType": "Debug",
       "buildRoot": "${projectDir}\\build",
-      "installRoot": "${projectDir}\\install\\${name}",
       "cmakeExecutable": "/usr/local/bin/cmake",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
@@ -14,7 +13,7 @@
       "wslPath": "${defaultWSLPath}",
       "addressSanitizerRuntimeFlags": "detect_leaks=0",
       "variables": [],
-      "cmakeToolchain": "M:/Projects/gba-modern/toolchain.cmake"
+      "cmakeToolchain": "${projectDir}\\toolchain.cmake"
     }
   ]
 }
