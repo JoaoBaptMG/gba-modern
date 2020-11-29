@@ -1,20 +1,8 @@
 #include "pch.hpp"
-#include "resample.hpp"
 
-bool checkMagic(std::ifstream& in, const char* magic)
-{
-    for (auto p = magic; *p; p++)
-        if (in.get() != *p) return false;
-    return true;
-}
+#include "sound-data.hpp"
 
-template <typename T>
-T readFrom(std::ifstream& in)
-{
-    T v;
-    in.read((char*)&v, sizeof(T));
-    return v;
-}
+void testCompression(const std::vector<float>& data);
 
 int soundExport(int argc, char  **argv)
 {
@@ -35,72 +23,15 @@ int soundExport(int argc, char  **argv)
     }
 
     auto samplingFreq = j.at("sampling-frequency").get<std::size_t>();
+    auto [sourceSampleRate, soundData] = loadWavFile(in);
 
-    // Load the WAV file
-    std::ifstream win;
-    win.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    win.open(in);
-
-    if (!checkMagic(win, "RIFF"))
-        throw std::domain_error("File " + in + " is not a valid RIFF file!");
-    auto chunkSize = readFrom<std::uint32_t>(win);
-    if (!checkMagic(win, "WAVE"))
-        throw std::domain_error("File " + in + " is not a valid wave file!");
-
-    // Read the file format
-    if (!checkMagic(win, "fmt "))
-        throw std::domain_error("Expected format chunk in file " + in + "!");
-
-    auto fmtSize = readFrom<std::uint32_t>(win);
-    if (fmtSize != 16)
-        throw std::domain_error("Inconsistent format chunk size in file " + in + "!");
-
-    auto format = readFrom<std::uint16_t>(win);
-    if (format != 1)
-        throw std::domain_error("File " + in + " not in PCM format!");
-
-    auto numChannels = readFrom<std::uint16_t>(win);
-    if (numChannels != 1)
-         throw std::domain_error("File " + in + " must have a single channel!");
-
-    auto sourceSampleRate = readFrom<std::uint32_t>(win);
-    bool changeSampleRate = sourceSampleRate != samplingFreq;
-
-    auto byteRate = readFrom<std::uint32_t>(win);
-    auto blockAlign = readFrom<std::uint16_t>(win);
-    auto bitsPerSample = readFrom<std::uint16_t>(win);
-
-    // Check for data consistency
-    if (byteRate != sourceSampleRate * bitsPerSample / 8)
-        throw std::domain_error("Inconsistent byte rate for file " + in + "!");
-    if (blockAlign != bitsPerSample / 8)
-        throw std::domain_error("Inconsistent block align for file " + in + "!");
-
-    if (bitsPerSample != 8 && bitsPerSample != 16)
-        throw std::domain_error("Invalid bits per sample value for file " + in + "!");
-
-    // Now, for the data format
-    if (!checkMagic(win, "data"))
-        throw std::domain_error("Expected data chunk for file " + in + "!");
-
-    auto dataSize = readFrom<std::uint32_t>(win);
-
-    // Check for data consistency again
-    if (chunkSize != 36 + dataSize)
-        throw std::domain_error("Inconsistent size for file " + in + "!");
-
-    auto numSamples = dataSize / (bitsPerSample / 8);
-    std::vector<float> soundData(numSamples);
-
-    for (float& val : soundData)
+    if (out == "<compression>")
     {
-        if (bitsPerSample == 8)
-            val = (readFrom<std::uint8_t>(win) - 128) / 127.0;
-        else if (bitsPerSample == 16)
-            val = (readFrom<std::int16_t>(win) / 32767.0);
+        testCompression(soundData);
+        return 0;
     }
 
-    if (changeSampleRate)
+    if (sourceSampleRate != samplingFreq)
         soundData = resampleMono(soundData, sourceSampleRate, samplingFreq);
 
     // Pad the sound data to 4 bytes
@@ -127,13 +58,9 @@ int soundExport(int argc, char  **argv)
         std::size_t index = 0;
         for (float& sample : soundData)
         {
-            // The format is 8-bit unsigned PCM
-            int v = sample * 127.0f;
-            v += 128;
-
             if (index % 16 == 0) of << std::endl << "    .byte ";
             else of << ", ";
-            of << toHex(v & 0xFF, 2);
+            of << toHex(floatToUnsigned8bitPcm(sample), 2);
             index++;
         }
 

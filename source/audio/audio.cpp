@@ -107,10 +107,10 @@ extern "C" void audioMix(s16* intBuffer, s8* curMixBuffer, AudioChannel* channel
 
 void audio::mix()
 {
-    profile::begin16();
+    //profile::begin16();
     audioMix(intermediateBuffer, curAudioMixBuffer, audioChannels);
-    auto val = profile::end16();
+    //auto val = profile::end16();
 
-    if (mgba::isEnabled())
-        mgba::log(mgba::Log::Debug, "Audio time: ", val, " cycles.");
+    //if (mgba::isEnabled())
+    //    mgba::log(mgba::Log::Debug, "Audio time: ", val, " cycles.");
 }

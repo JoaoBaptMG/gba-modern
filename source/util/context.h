@@ -5,6 +5,11 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
+// This should be 40 normally, unless if you're using Tonc's nested
+// interrupt switchboard, in which that will be 36
+#define CONTEXT_STACK_SIZE 40
+
+#ifndef __ASSEMBLER__
 #ifdef __cplusplus
 extern "C"
 {
@@ -20,6 +25,16 @@ typedef context_t (*context_entry_point_t)(context_t ctx, void* arg);
 // "wake up" the other context and, when this context is switched to again,
 // the function will return with a new context
 context_t context_switch(context_t ctx) IWRAM_CODE;
+
+// Gives up ownership and switches to another context. This function will
+// "wake up" the other context and, when this context is switched to again,
+// the function will return with a new context, also storing it in outCtx
+context_t context_switch2(context_t ctx, context_t* outCtx) IWRAM_CODE;
+
+// While inside a IRQ, gives up ownership and switches to another context.
+// This function will "wake up" the other context, going back to this context,
+// returning the new context that represents the old function
+context_t context_switch_irq(context_t ctx) IWRAM_CODE;
 
 // All stack pointers must be aligned by 8 bytes
 #define STACKPTR __attribute__((aligned(8)))
@@ -43,4 +58,5 @@ inline static context_t context_new(void* stack_top, context_entry_point_t entry
 
 #ifdef __cplusplus
 }
+#endif
 #endif

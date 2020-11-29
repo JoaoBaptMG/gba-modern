@@ -12,7 +12,7 @@ gba-modern.code-workspace
 gba.map
 libsamplerate*
 .vs/*
-out/*
 external/*
 .cproject
 .project
+test
