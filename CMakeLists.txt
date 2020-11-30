@@ -7,6 +7,7 @@
 #	This is kind of messy, and just uses custom commands and targets to control the build order.
 
 # Projects Settings
+# We require at least version 3.16 if cmake because of external projects
 cmake_minimum_required (VERSION 3.16)
 
 include(ExternalProject)
@@ -20,7 +21,7 @@ set(ASFLAGS -g ${ARCH})
 set(LDFLAGS	${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map)
 
 # Dependencies
-set(GCC_PLATFORM "x86_64-linux") #just assuming this for now, toolchain stuff messes things up a little
+set(GCC_PLATFORM "x86_64-linux")
 set(GCC_PREFIX "10-2020q2")
 set(GCC_NAME "gcc-arm-none-eabi-10-2020-q2-preview")
 set(GCC_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/${GCC_PREFIX}/${GCC_NAME}-${GCC_PLATFORM}.tar.bz2")
@@ -110,8 +111,6 @@ file(GLOB_RECURSE GAME_CPP_FILES
 list(FILTER GAME_CPP_FILES EXCLUDE REGEX ".*iwram.cpp$")
 file(GLOB_RECURSE GAME_ASM_FILES
 	CONFIGURE_DEPENDS RELATIVE ${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/source/*.s)
-file(GLOB_RECURSE GAME_HPP_FILES
-	CONFIGURE_DEPENDS RELATIVE ${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/source/*.h*)	
 
 # Build Functions
 function(build_resource)
@@ -154,20 +153,20 @@ function(build_resource)
 
 	#make a directory in build folder for the output files
 	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME})
-	
+
 	set(OBJECT_LIST_NAME ${PLURAL}_OBJECT_LIST)
 	set(OUT1_LIST_NAME ${PLURAL}_OUT1_LIST)
 	set(OUT2_LIST_NAME ${PLURAL}_OUT2_LIST)
-		
+
 	foreach(FILE ${RESOURCE_FILES})
 		get_filename_component(file_dir "${FILE}" PATH)
 		string(REPLACE "." ";." file ${FILE})
 		list(GET file 0 file_name)
 		list(GET file 1 file_type)
-		
+
 		set(OUTPUT_FILE_1 ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}${OUT1})
 		set(OUTPUT_FILE_2 ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}${OUT2})
-		
+
 		# This command generates the files from the source/data files
 		# OUTPUT means the files are set as Generated in cmake,
 		# so when they are used as a source, a dependency is set on their generation
@@ -186,10 +185,10 @@ function(build_resource)
 		# We don't want to generate and object and dependency? file for audio.json, since it only outputs a header and another json file
 		if(NOT ${RESOURCE_NAME} MATCHES "SETTING")
 			file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}/${file_name})
-		
+
 			set(OUTPUT_OBJECT ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}/${file_name}.o)
 			set(OUTPUT_OBJECT_D ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}/${file_name}.d)
-					
+
 			# This command generates the object file and dependency? of the exported ASM and header
 			# OUTPUT again means these files are set as GENERATED
 			# MAIN_DEPENDENCY sets the input ASM file as the main dependency
@@ -207,7 +206,7 @@ function(build_resource)
 			list(APPEND RESOURCE_OBJECT_FILES ${OUTPUT_OBJECT})
 			list(APPEND RESOURCE_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
 		endif()
-		
+
 		# The second output file is usually the header file,
 		# unless the settings are being made, then it is the first.
 		if(NOT ${RESOURCE_NAME} MATCHES "SETTING")
@@ -216,7 +215,7 @@ function(build_resource)
 			list(APPEND RESOURCES_HPP ${OUTPUT_FILE_1})
 		endif()
 	endforeach()
-	
+
 	# Set our object, dependency? and header lists to the parent scope
 	set(RESOURCE_OBJECT_FILES ${RESOURCE_OBJECT_FILES} PARENT_SCOPE)
 	set(RESOURCE_OBJECT_D_FILES ${RESOURCE_OBJECT_D_FILES} PARENT_SCOPE)
@@ -226,13 +225,13 @@ endfunction()
 function(build_iwram_c)
 	foreach (FILE ${IWRAM_C_FILES})
 		get_filename_component(file_dir "${CMAKE_BINARY_DIR}/source/${FILE}" PATH)
-		
+
 		string(REPLACE "/" ";" splits ${FILE})
 		list(GET splits -1 file_new)
 
 		string(REPLACE "." ";." file_new_split ${file_new})
 		list(GET file_new_split 0 file_name)
-			
+
 		file(MAKE_DIRECTORY ${file_dir}/${file_name})
 
 		set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.iwram.o)
@@ -242,7 +241,7 @@ function(build_iwram_c)
 			DEPENDS RESOURCE_OBJECTS_BUILT
 			COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
-		
+
 		list(APPEND IWRAM_C_OBJECT_FILES ${OUTPUT_OBJECT})
 		list(APPEND IWRAM_C_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
 	endforeach()
@@ -253,13 +252,13 @@ endfunction()
 function(build_iwram_cpp)
 	foreach (FILE ${IWRAM_CPP_FILES})
 		get_filename_component(file_dir "${CMAKE_BINARY_DIR}/source/${FILE}" PATH)
-		
+
 		string(REPLACE "/" ";" splits ${FILE})
 		list(GET splits -1 file_new)
 
 		string(REPLACE "." ";." file_new_split ${file_new})
 		list(GET file_new_split 0 file_name)
-			
+
 		file(MAKE_DIRECTORY ${file_dir}/${file_name})
 
 		set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.iwram.o)
@@ -269,7 +268,7 @@ function(build_iwram_cpp)
 			DEPENDS RESOURCE_OBJECTS_BUILT
 			COMMAND ${GBA_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
-		
+
 		list(APPEND IWRAM_CPP_OBJECT_FILES ${OUTPUT_OBJECT})
 		list(APPEND IWRAM_CPP_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
 	endforeach()
@@ -280,13 +279,13 @@ endfunction()
 function(build_game_c)
 	foreach (FILE ${GAME_C_FILES})
 		get_filename_component(file_dir "${CMAKE_BINARY_DIR}/source/${FILE}" PATH)
-		
+
 		string(REPLACE "/" ";" splits ${FILE})
 		list(GET splits -1 file_new)
 
 		string(REPLACE "." ";." file_new_split ${file_new})
 		list(GET file_new_split 0 file_name)
-			
+
 		file(MAKE_DIRECTORY ${file_dir}/${file_name})
 
 		set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.o)
@@ -296,7 +295,7 @@ function(build_game_c)
 			DEPENDS RESOURCE_OBJECTS_BUILT
 			COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
-		
+
 		list(APPEND GAME_C_OBJECT_FILES ${OUTPUT_OBJECT})
 		list(APPEND GAME_C_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
 	endforeach()
@@ -307,13 +306,13 @@ endfunction()
 function(build_game_cpp)
 	foreach (FILE ${GAME_CPP_FILES})
 		get_filename_component(file_dir "${CMAKE_BINARY_DIR}/source/${FILE}" PATH)
-		
+
 		string(REPLACE "/" ";" splits ${FILE})
 		list(GET splits -1 file_new)
 
 		string(REPLACE "." ";." file_new_split ${file_new})
 		list(GET file_new_split 0 file_name)
-			
+
 		file(MAKE_DIRECTORY ${file_dir}/${file_name})
 
 		set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.o)
@@ -323,7 +322,7 @@ function(build_game_cpp)
 			DEPENDS RESOURCE_OBJECTS_BUILT
 			COMMAND ${GBA_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
-		
+
 		list(APPEND GAME_CPP_OBJECT_FILES ${OUTPUT_OBJECT})
 		list(APPEND GAME_CPP_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
 	endforeach()
@@ -334,23 +333,23 @@ endfunction()
 function(build_game_asm)
 	foreach (FILE ${GAME_ASM_FILES})
 		get_filename_component(file_dir "${CMAKE_BINARY_DIR}/source/${FILE}" PATH)
-		
+
 		string(REPLACE "/" ";" splits ${FILE})
 		list(GET splits -1 file_new)
 
 		string(REPLACE "." ";." file_new_split ${file_new})
 		list(GET file_new_split 0 file_name)
-			
+
 		file(MAKE_DIRECTORY ${file_dir}/${file_name})
 
 		set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.o)
 		set(OUTPUT_OBJECT_D ${file_dir}/${file_name}/${file_name}.d)
-		
+
 		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 			DEPENDS RESOURCE_OBJECTS_BUILT
 			COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp ${ASFLAGS} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
-		
+
 		list(APPEND GAME_ASM_OBJECT_FILES ${OUTPUT_OBJECT})
 		list(APPEND GAME_ASM_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
 	endforeach()
@@ -377,7 +376,7 @@ build_game_asm()
 add_custom_target(GAME_OBJECTS_BUILT ALL
 	DEPENDS ${IWRAM_C_OBJECT_FILES} ${IWRAM_CPP_OBJECT_FILES} ${GAME_C_OBJECT_FILES} ${GAME_CPP_OBJECT_FILES} ${GAME_ASM_OBJECT_FILES})
 
-set(BUILD_GAME_FILES ${RESOURCE_OBJECT_FILES} ${IWRAM_C_OBJECT_FILES} ${IWRAM_CPP_OBJECT_FILES} ${GAME_C_OBJECT_FILES} ${GAME_CPP_OBJECT_FILES} ${GAME_ASM_OBJECT_FILES})	
+set(BUILD_GAME_FILES ${RESOURCE_OBJECT_FILES} ${IWRAM_C_OBJECT_FILES} ${IWRAM_CPP_OBJECT_FILES} ${GAME_C_OBJECT_FILES} ${GAME_CPP_OBJECT_FILES} ${GAME_ASM_OBJECT_FILES})
 list(FILTER BUILD_GAME_FILES EXCLUDE REGEX "crt0")
 
 add_custom_target(elf ALL
