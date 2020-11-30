@@ -9,7 +9,7 @@ project(gba-modern-tools)
 find_package(Freetype REQUIRED)
 
 get_filename_component(PARENT_DIRECTORY ../ ABSOLUTE)
-set(LIBSAMPLERATE_INCLUDE_DIR ${PARENT_DIRECTORY}/external/libsamplerate-install)
+set(LIBSAMPLERATE_INCLUDE_DIR ${PARENT_DIRECTORY}/external/libsamplerate-install/include)
 set(LIBSAMPLERATE_LIBRARY ${PARENT_DIRECTORY}/external/libsamplerate-install/lib/libsamplerate.so)
 
 # CPP_FILES
@@ -36,7 +36,6 @@ set(TOOLS_PCH_HEADERS
 	nlohmann/json.hpp
 	graphics.hpp
 	UnionFind.hpp
-	sound-data.hpp
 	split.hpp
 	util.hpp)
 
@@ -44,4 +43,5 @@ add_executable(tools ${TOOLS_CPP_FILES})
 target_link_libraries(tools ${FREETYPE_LIBRARIES})
 target_link_libraries(tools ${LIBSAMPLERATE_LIBRARY})
 target_include_directories(tools PRIVATE ${FREETYPE_INCLUDE_DIRS})
+target_include_directories(tools PRIVATE ${LIBSAMPLERATE_INCLUDE_DIR})
 target_precompile_headers(tools PUBLIC pch.hpp PRIVATE ${TOOLS_PCH_HEADERS})
