@@ -14,18 +14,18 @@ include(ExternalProject)
 
 project (gba-modern)
 
-set(ARCH -mthumb -mthumb-interwork)
-set(CFLAGS -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH})
-set(CPPFLAGS ${CFLAGS} -std=c++17 -fno-rtti -fno-exceptions)
-set(ASFLAGS -g ${ARCH})
-set(LDFLAGS	${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map)
+set(ARCH -mthumb -mthumb-interwork CACHE)
+set(CFLAGS -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto ${ARCH} CACHE)
+set(CPPFLAGS ${CFLAGS} -std=c++17 -fno-rtti -fno-exceptions CACHE)
+set(ASFLAGS -g ${ARCH} CACHE)
+set(LDFLAGS	${ARCH} -Wl,--gc-sections -Wl,-Map,gba.map CACHE)
 
 # Dependencies
-set(GCC_PLATFORM "x86_64-linux")
-set(GCC_PREFIX "10-2020q2")
-set(GCC_NAME "gcc-arm-none-eabi-10-2020-q2-preview")
+set(GCC_PLATFORM "x86_64-linux" CACHE)
+set(GCC_PREFIX "10-2020q2" CACHE)
+set(GCC_NAME "gcc-arm-none-eabi-10-2020-q2-preview" CACHE)
 set(GCC_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/${GCC_PREFIX}/${GCC_NAME}-${GCC_PLATFORM}.tar.bz2")
-set(GCC_MD5 "2d19775c5aa091b7f55a68727c5d7d76")
+set(GCC_MD5 "2d19775c5aa091b7f55a68727c5d7d76" CACHE)
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/external/gcc)
 ExternalProject_Add(gbaGCC
 	URL ${GCC_URL}
@@ -37,13 +37,13 @@ ExternalProject_Add(gbaGCC
 	BUILD_COMMAND cmake -E echo "Skipping BUILD step."
 	INSTALL_COMMAND cmake -E echo "Skipping install step.")
 
-set(GBA_C_COMPILER ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-gcc)
-set(GBA_CXX_COMPILER ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-g++)
-set(GBA_OBJCOPY ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objcopy)
-set(GBA_OBJDUMP ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objdump)
+set(GBA_C_COMPILER ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-gcc CACHE)
+set(GBA_CXX_COMPILER ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-g++ CACHE)
+set(GBA_OBJCOPY ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objcopy CACHE)
+set(GBA_OBJDUMP ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objdump CACHE)
 
 set(TONC_URL "http://www.coranac.com/files/tonc-code.zip")
-set(TONC_MD5 "3f9ebdbbe7989b33c2a788c5b5a1bfed")
+set(TONC_MD5 "3f9ebdbbe7989b33c2a788c5b5a1bfed" CACHE)
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/external/tonc)
 ExternalProject_Add(Tonc
 	URL ${TONC_URL}
@@ -56,10 +56,10 @@ ExternalProject_Add(Tonc
 	INSTALL_COMMAND cmake -E echo "Skipping install step."
 	DEPENDS gbaGCC)
 
-set(LSRC_VERSION "0.1.9")
+set(LSRC_VERSION "0.1.9" CACHE)
 set(LSRC_URL "http://www.mega-nerd.com/SRC/libsamplerate-${LSRC_VERSION}.tar.gz")
-set(LSRC_MD5 "2b78ae9fe63b36b9fbb6267fad93f259")
-set(LSRC_INSTALL_FOLDER ${CMAKE_SOURCE_DIR}/external/libsamplerate-install/)
+set(LSRC_MD5 "2b78ae9fe63b36b9fbb6267fad93f259" CACHE)
+set(LSRC_INSTALL_FOLDER ${CMAKE_SOURCE_DIR}/external/libsamplerate-install/ CACHE)
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/external/libsamplerate)
 ExternalProject_Add(LibSampleRateSource
 	URL ${LSRC_URL}
