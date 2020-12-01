@@ -1,4 +1,4 @@
-gba-modern-template
+gba-modern
 ==========
 The objective of this project is to aim to create a Game Boy Advance game using C++17, while employing generators to the assets of the game.
 
