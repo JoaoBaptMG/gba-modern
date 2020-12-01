@@ -1,5 +1,3 @@
-#include "pch.hpp"
-
 #include "sound-data.hpp"
 #include <samplerate.h>
 

@@ -1,4 +1,3 @@
-#include "pch.hpp"
 #include "graphics.hpp"
 #include "background-export-state.hpp"
 #include "UnionFind.hpp"

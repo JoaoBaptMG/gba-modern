@@ -1,5 +1,3 @@
-#include "pch.hpp"
-
 using Tool = int(*)(int argc, char **argv);
 
 int spriteExport(int argc, char **argv);

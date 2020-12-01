@@ -1,4 +1,3 @@
-#include "pch.hpp"
 #include "background-export-state.hpp"
 
 struct Offset { int x, y; };

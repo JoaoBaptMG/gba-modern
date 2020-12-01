@@ -1,6 +1,5 @@
 #pragma once
 
-#include "pch.hpp"
 #include "graphics.hpp"
 
 template <typename Character>
