@@ -7,11 +7,11 @@
 #	This is kind of messy, and just uses custom commands and targets to control the build order.
 
 # Projects Settings
-# We require at least version 3.16 if cmake because of external projects
+# We require at least version 3.16 if cmake because we are using ExternalProject_Add
 cmake_minimum_required (VERSION 3.16)
 
 include(ExternalProject)
-
+set(CMAKE_VERBOSE_MAKEFILE ON)
 project (gba-modern)
 
 set(ARCH "-mthumb;-mthumb-interwork" CACHE STRING "ARCH Flags")
@@ -19,6 +19,11 @@ set(CFLAGS "-g;-Wall;-O3;-ffunction-sections;-fdata-sections;-mcpu=arm7tdmi;-mtu
 set(CPPFLAGS "${CFLAGS};-std=c++17;-fno-rtti;-fno-exceptions" CACHE STRING "CPP Flags")
 set(ASFLAGS "-g;${ARCH}" CACHE STRING "Assembly Flags")
 set(LDFLAGS	"${ARCH};-Wl,--gc-sections;-Wl,-Map,gba.map" CACHE STRING "Linker Flags")
+
+set(GBA_C_COMPILER ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-gcc CACHE PATH "GCC C Compiler Path")
+set(GBA_CXX_COMPILER ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-g++ CACHE PATH "GCC CPP Compiler Path")
+set(GBA_OBJCOPY ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objcopy CACHE PATH "GCC Object Copy Path")
+set(GBA_OBJDUMP ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objdump CACHE PATH "GCC Object Dump Path")
 
 # Dependencies
 set(GCC_PLATFORM "x86_64-linux" CACHE STRING "GCC Platform Name")
@@ -28,35 +33,11 @@ set(GCC_URL "https://developer.arm.com/-/media/Files/downloads/gnu-rm/${GCC_PREF
 set(GCC_MD5 "2d19775c5aa091b7f55a68727c5d7d76" CACHE STRING "GCC MD5 Hash")
 set(GCC_FOLDER ${CMAKE_SOURCE_DIR}/external/gcc CACHE PATH "GCC Path")
 file(MAKE_DIRECTORY ${GCC_FOLDER})
-ExternalProject_Add(gbaGCC
-	URL ${GCC_URL}
-	URL_HASH MD5=${GCC_MD5}
-	DOWNLOAD_NO_EXTRACT TRUE
-	DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
-	UPDATE_COMMAND tar xjf ${CMAKE_SOURCE_DIR}/external/${GCC_NAME}-${GCC_PLATFORM}.tar.bz2 -C ${GCC_FOLDER} --strip-components 1
-	CONFIGURE_COMMAND cmake -E echo "Skipping configure step."
-	BUILD_COMMAND cmake -E echo "Skipping BUILD step."
-	INSTALL_COMMAND cmake -E echo "Skipping install step.")
-
-set(GBA_C_COMPILER ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-gcc CACHE PATH "GCC C Compiler Path")
-set(GBA_CXX_COMPILER ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-g++ CACHE PATH "GCC CPP Compiler Path")
-set(GBA_OBJCOPY ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objcopy CACHE PATH "GCC Object Copy Path")
-set(GBA_OBJDUMP ${CMAKE_SOURCE_DIR}/external/gcc/bin/arm-none-eabi-objdump CACHE PATH "GCC Object Dump Path")
 
 set(TONC_URL "http://www.coranac.com/files/tonc-code.zip")
 set(TONC_MD5 "3f9ebdbbe7989b33c2a788c5b5a1bfed" CACHE STRING "TONC MD5 Hash")
 set(TONC_FOLDER ${CMAKE_SOURCE_DIR}/external/tonc CACHE PATH "TONC Path")
 file(MAKE_DIRECTORY ${TONC_FOLDER})
-ExternalProject_Add(Tonc
-	URL ${TONC_URL}
-	URL_HASH MD5=${TONC_MD5}
-	DOWNLOAD_NO_EXTRACT TRUE
-	DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
-	UPDATE_COMMAND unzip -qq -n ${TONC_FOLDER}-code.zip -d ${TONC_FOLDER}
-	CONFIGURE_COMMAND cmake -E echo "Skipping configure step."
-	BUILD_COMMAND cmake -E echo "Skipping BUILD step."
-	INSTALL_COMMAND cmake -E echo "Skipping install step."
-	DEPENDS gbaGCC)
 
 set(LSRC_VERSION "0.1.9" CACHE STRING "LibSampleRate Version")
 set(LSRC_URL "http://www.mega-nerd.com/SRC/libsamplerate-${LSRC_VERSION}.tar.gz")
@@ -64,30 +45,6 @@ set(LSRC_MD5 "2b78ae9fe63b36b9fbb6267fad93f259" CACHE STRING "LibSampleRate MD5 
 set(LSRC_INSTALL_FOLDER ${CMAKE_SOURCE_DIR}/external/libsamplerate-install CACHE PATH "LibSampleRate Install Path")
 set(LSRC_SOURCE_FOLDER ${CMAKE_SOURCE_DIR}/external/libsamplerate CACHE PATH "LibSampleRate Source Path")
 file(MAKE_DIRECTORY ${LSRC_SOURCE_FOLDER})
-ExternalProject_Add(LibSampleRateSource
-	URL ${LSRC_URL}
-	URL_HASH MD5=${LSRC_MD5}
-	DOWNLOAD_NO_EXTRACT TRUE
-	DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
-	UPDATE_COMMAND tar xzf ${LSRC_SOURCE_FOLDER}-${LSRC_VERSION}.tar.gz -C ${LSRC_SOURCE_FOLDER} --strip-components 1
-	CONFIGURE_COMMAND ${LSRC_SOURCE_FOLDER}/configure --prefix ${LSRC_INSTALL_FOLDER}
-	BUILD_COMMAND make
-	INSTALL_COMMAND make install
-	DEPENDS Tonc)
-
-set(EXTERNAL_LIBS
-	-L ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib
-	 -nodefaultlibs -ltonc)
-
-set(EXTERNAL_INCLUDES
-	-I${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/include -I${CMAKE_SOURCE_DIR}/external/gcem/include)
-
-ExternalProject_Add(tools
-	SOURCE_DIR ${CMAKE_SOURCE_DIR}/tools
-	BINARY_DIR ${CMAKE_BINARY_DIR}/tools
-	BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/tools
-	INSTALL_COMMAND cmake -E echo "Skipping install step."
-	DEPENDS LibSampleRateSource)
 
 # Resource File Definitions
 file(GLOB_RECURSE SPR_FILES
@@ -279,33 +236,6 @@ function(build_iwram_cpp)
 	set(IWRAM_CPP_OBJECT_D_FILES ${IWRAM_CPP_OBJECT_D_FILES} PARENT_SCOPE)
 endfunction()
 
-function(build_game_c)
-	foreach (FILE ${GAME_C_FILES})
-		get_filename_component(file_dir "${CMAKE_BINARY_DIR}/source/${FILE}" PATH)
-
-		string(REPLACE "/" ";" splits ${FILE})
-		list(GET splits -1 file_new)
-
-		string(REPLACE "." ";." file_new_split ${file_new})
-		list(GET file_new_split 0 file_name)
-
-		file(MAKE_DIRECTORY ${file_dir}/${file_name})
-
-		set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.o)
-		set(OUTPUT_OBJECT_D ${file_dir}/${file_name}/${file_name}.d)
-
-		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
-			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
-			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
-
-		list(APPEND GAME_C_OBJECT_FILES ${OUTPUT_OBJECT})
-		list(APPEND GAME_C_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
-	endforeach()
-	set(GAME_C_OBJECT_FILES ${GAME_C_OBJECT_FILES} PARENT_SCOPE)
-	set(GAME_C_OBJECT_D_FILES ${GAME_C_OBJECT_D_FILES} PARENT_SCOPE)
-endfunction()
-
 function(build_game_cpp)
 	foreach (FILE ${GAME_CPP_FILES})
 		get_filename_component(file_dir "${CMAKE_BINARY_DIR}/source/${FILE}" PATH)
@@ -333,8 +263,10 @@ function(build_game_cpp)
 	set(GAME_CPP_OBJECT_D_FILES ${GAME_CPP_OBJECT_D_FILES} PARENT_SCOPE)
 endfunction()
 
-function(build_game_asm)
-	foreach (FILE ${GAME_ASM_FILES})
+function(build_game_objects)
+	set(GAME_SOURCE_FILES ${ARGV0})
+	set(SOURCE_TYPE ${ARGV1})
+	foreach (FILE ${GAME_SOURCE_FILES})
 		get_filename_component(file_dir "${CMAKE_BINARY_DIR}/source/${FILE}" PATH)
 
 		string(REPLACE "/" ";" splits ${FILE})
@@ -342,23 +274,87 @@ function(build_game_asm)
 
 		string(REPLACE "." ";." file_new_split ${file_new})
 		list(GET file_new_split 0 file_name)
+		list(GET file_new_split 1 file_type)
+		if(file_type MATCHES ".iwram")
+			list(GET file_new_split 2 file_type2)
+		endif()
 
 		file(MAKE_DIRECTORY ${file_dir}/${file_name})
 
 		set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.o)
 		set(OUTPUT_OBJECT_D ${file_dir}/${file_name}/${file_name}.d)
 
-		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
-			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp ${ASFLAGS} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
-			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+		if(file_type MATCHES ".s")
+			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
+				DEPENDS RESOURCE_OBJECTS_BUILT
+				COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp ${ASFLAGS} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+		elseif(file_type MATCHES ".c")
+			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
+				DEPENDS RESOURCE_OBJECTS_BUILT
+				COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+		elseif(file_type MATCHES ".cpp")
+			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
+				DEPENDS RESOURCE_OBJECTS_BUILT
+				COMMAND ${GBA_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+		endif()
 
-		list(APPEND GAME_ASM_OBJECT_FILES ${OUTPUT_OBJECT})
-		list(APPEND GAME_ASM_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
+		list(APPEND GAME_${SOURCE_TYPE}_OBJECT_FILES ${OUTPUT_OBJECT})
+		list(APPEND GAME_${SOURCE_TYPE}_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
 	endforeach()
-	set(GAME_ASM_OBJECT_FILES ${GAME_ASM_OBJECT_FILES} PARENT_SCOPE)
-	set(GAME_ASM_OBJECT_D_FILES ${GAME_ASM_OBJECT_D_FILES} PARENT_SCOPE)
+	set(GAME_${SOURCE_TYPE}_OBJECT_FILES ${GAME_${SOURCE_TYPE}_OBJECT_FILES} PARENT_SCOPE)
+	set(GAME_${SOURCE_TYPE}_OBJECT_D_FILES ${GAME_${SOURCE_TYPE}_OBJECT_D_FILES} PARENT_SCOPE)
 endfunction()
+
+# Targets
+ExternalProject_Add(gbaGCC
+	URL ${GCC_URL}
+	URL_HASH MD5=${GCC_MD5}
+	DOWNLOAD_NO_EXTRACT TRUE
+	DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
+	UPDATE_COMMAND tar xjf ${CMAKE_SOURCE_DIR}/external/${GCC_NAME}-${GCC_PLATFORM}.tar.bz2 -C ${GCC_FOLDER} --strip-components 1
+	CONFIGURE_COMMAND cmake -E echo "Skipping configure step."
+	BUILD_COMMAND cmake -E echo "Skipping BUILD step."
+	INSTALL_COMMAND cmake -E echo "Skipping install step.")
+
+ExternalProject_Add(Tonc
+	URL ${TONC_URL}
+	URL_HASH MD5=${TONC_MD5}
+	DOWNLOAD_NO_EXTRACT TRUE
+	DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
+	UPDATE_COMMAND unzip -qq -n ${TONC_FOLDER}-code.zip -d ${TONC_FOLDER}
+	CONFIGURE_COMMAND cmake -E echo "Skipping configure step."
+	BUILD_COMMAND cmake -E echo "Skipping BUILD step."
+	INSTALL_COMMAND cmake -E echo "Skipping install step."
+	DEPENDS gbaGCC)
+
+
+ExternalProject_Add(LibSampleRateSource
+	URL ${LSRC_URL}
+	URL_HASH MD5=${LSRC_MD5}
+	DOWNLOAD_NO_EXTRACT TRUE
+	DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/external
+	UPDATE_COMMAND tar xzf ${LSRC_SOURCE_FOLDER}-${LSRC_VERSION}.tar.gz -C ${LSRC_SOURCE_FOLDER} --strip-components 1
+	CONFIGURE_COMMAND ${LSRC_SOURCE_FOLDER}/configure --prefix ${LSRC_INSTALL_FOLDER}
+	BUILD_COMMAND make
+	INSTALL_COMMAND make install
+	DEPENDS Tonc)
+
+set(EXTERNAL_LIBS
+	-L ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib
+	 -nodefaultlibs -ltonc)
+
+set(EXTERNAL_INCLUDES
+	-I${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/include -I${CMAKE_SOURCE_DIR}/external/gcem/include)
+
+ExternalProject_Add(tools
+	SOURCE_DIR ${CMAKE_SOURCE_DIR}/tools
+	BINARY_DIR ${CMAKE_BINARY_DIR}/tools
+	BUILD_BYPRODUCTS ${CMAKE_BINARY_DIR}/tools
+	INSTALL_COMMAND cmake -E echo "Skipping install step."
+	DEPENDS LibSampleRateSource)
 
 build_resource("SPRITE" "tools" "${SPR_FILES}")
 build_resource("BACKGROUND" "${RESOURCES_HPP}" "${BKG_FILES}")
@@ -372,9 +368,9 @@ add_custom_target(RESOURCE_OBJECTS_BUILT ALL
 
 build_iwram_c()
 build_iwram_cpp()
-build_game_c()
-build_game_cpp()
-build_game_asm()
+build_game_cpp()#("${GAME_CPP_FILES}" "CPP")
+build_game_objects("${GAME_C_FILES}" "C")
+build_game_objects("${GAME_ASM_FILES}" "ASM")
 
 add_custom_target(GAME_OBJECTS_BUILT ALL
 	DEPENDS ${IWRAM_C_OBJECT_FILES} ${IWRAM_CPP_OBJECT_FILES} ${GAME_C_OBJECT_FILES} ${GAME_CPP_OBJECT_FILES} ${GAME_ASM_OBJECT_FILES})
