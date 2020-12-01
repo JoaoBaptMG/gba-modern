@@ -73,6 +73,13 @@ list(FILTER GAME_CPP_FILES EXCLUDE REGEX ".*iwram.cpp$")
 file(GLOB_RECURSE GAME_ASM_FILES
 	CONFIGURE_DEPENDS RELATIVE ${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/source/*.s)
 
+set(EXTERNAL_LIBS
+	-L ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib
+	 -nodefaultlibs -ltonc)
+
+set(EXTERNAL_INCLUDES
+	-I${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/include -I${CMAKE_SOURCE_DIR}/external/gcem/include)
+
 # Build Functions
 function(build_resource RESOURCE_NAME TARGET_DEPENDENCIES RESOURCE_FILES)
 	# Set helper variables based on what resource we are exporting and building
@@ -252,13 +259,6 @@ ExternalProject_Add(LibSampleRateSource
 	BUILD_COMMAND make
 	INSTALL_COMMAND make install
 	DEPENDS Tonc)
-
-set(EXTERNAL_LIBS
-	-L ${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/lib
-	 -nodefaultlibs -ltonc)
-
-set(EXTERNAL_INCLUDES
-	-I${CMAKE_SOURCE_DIR}/external/tonc/code/tonclib/include -I${CMAKE_SOURCE_DIR}/external/gcem/include)
 
 ExternalProject_Add(tools
 	SOURCE_DIR ${CMAKE_SOURCE_DIR}/tools
