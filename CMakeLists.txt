@@ -79,45 +79,42 @@ function(build_resource RESOURCE_NAME TARGET_DEPENDENCIES RESOURCE_FILES)
 	if(${RESOURCE_NAME} MATCHES "SPRITE")
 		set(TOOL_NAME sprite-export)
 		set(FOLDER_NAME sprites/)
-		set(OUT1 .s)
-		set(OUT2 .hpp)
+		set(OUT .s .hpp)
 	elseif(${RESOURCE_NAME} MATCHES "BACKGROUND")
 		set(TOOL_NAME background-export)
 		set(FOLDER_NAME backgrounds/)
-		set(OUT1 .s)
-		set(OUT2 .hpp)
+		set(OUT .s .hpp)
 	elseif(${RESOURCE_NAME} MATCHES "FONT")
 		set(TOOL_NAME font-export)
 		set(FOLDER_NAME fonts/)
-		set(OUT1 .s)
-		set(OUT2 .hpp)
+		set(OUT .s .hpp)
 	elseif(${RESOURCE_NAME} MATCHES "SETTING")
 		set(TOOL_NAME audio-export-settings)
 		set(FOLDER_NAME "")
-		set(OUT1 -settings.hpp)
-		set(OUT2 -settings.json)
+		set(OUT -settings.hpp -settings.json)
 	elseif(${RESOURCE_NAME} MATCHES "SOUND")
 		set(TOOL_NAME sound-export)
 		set(FOLDER_NAME sounds/)
-		set(OUT1 .s)
-		set(OUT2 .hpp)
+		set(OUT .s .hpp)
 	endif()
 
 	#make a directory in build folder for the output files
-	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME})
-
-	set(OBJECT_LIST_NAME ${PLURAL}_OBJECT_LIST)
-	set(OUT1_LIST_NAME ${PLURAL}_OUT1_LIST)
-	set(OUT2_LIST_NAME ${PLURAL}_OUT2_LIST)
+	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME})	
 
 	foreach(FILE ${RESOURCE_FILES})
 		get_filename_component(file_dir "${FILE}" PATH)
 		string(REPLACE "." ";." file ${FILE})
 		list(GET file 0 file_name)
 		list(GET file 1 file_type)
-
-		set(OUTPUT_FILE_1 ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}${OUT1})
-		set(OUTPUT_FILE_2 ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}${OUT2})
+		set(OUTPUT_FILES "")
+		foreach(OUTPUT ${OUT})
+			if(${OUTPUT} MATCHES ".hpp")
+				list(APPEND RESOURCES_HPP ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}${OUTPUT})
+			elseif(${OUTPUT} MATCHES ".s")
+				set(RESOURCE_INPUT_FILE ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}${OUTPUT})
+			endif()
+			list(APPEND OUTPUT_FILES ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}${OUTPUT})
+		endforeach()
 
 		# This command generates the files from the source/data files
 		# OUTPUT means the files are set as Generated in cmake,
@@ -126,30 +123,29 @@ function(build_resource RESOURCE_NAME TARGET_DEPENDENCIES RESOURCE_FILES)
 		# so that all subsequent commands and targets are implicitely dependent on Tools having finished
 		# WORKING_DIRECTORY is set to the project root (${CMAKE_SOURCE_DIR}) so a relative path to the file that is to be exported
 		# is sent to the tool, for proper generation of namespaces
-		add_custom_command(OUTPUT ${OUTPUT_FILE_1} ${OUTPUT_FILE_2}
+		add_custom_command(OUTPUT ${OUTPUT_FILES}
 			DEPENDS ${TARGET_DEPENDENCIES}
 			COMMAND ${CMAKE_BINARY_DIR}/tools/tools ${TOOL_NAME}
 				./data/${FOLDER_NAME}${file_name}${file_type}
-				${OUTPUT_FILE_1} ${OUTPUT_FILE_2} ${ARGN}
+				${OUTPUT_FILES} ${ARGN}
 			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 			COMMENT "Exporting ${RESOURCE_NAME} ${file_name}")
 
-		# We don't want to generate and object and dependency? file for audio.json, since it only outputs a header and another json file
+		# We don't want to generate and object file for audio.json, since it only outputs a header and another json file
 		if(NOT ${RESOURCE_NAME} MATCHES "SETTING")
 			file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}/${file_name})
 
 			set(OUTPUT_OBJECT ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}/${file_name}.o)
 
-			# This command generates the object file and dependency? of the exported ASM and header
+			# This command generates the object file of the exported ASM and header
 			# OUTPUT again means these files are set as GENERATED
 			# MAIN_DEPENDENCY sets the input ASM file as the main dependency
 			# DEPENDS sets the header file as a dependency
 			# We need too set dependencies to the input files used in the command, as it is not automatically done even though they are source files.
 			# This ensures this command is ran after generating the ASM and header files
 			add_custom_command(OUTPUT ${OUTPUT_OBJECT}
-				MAIN_DEPENDENCY ${OUTPUT_FILE_1}
-				DEPENDS ${OUTPUT_FILE_2}
-				COMMAND ${GBA_C_COMPILER} -x assembler-with-cpp ${ASFLAGS} -c ${OUTPUT_FILE_1} -o ${OUTPUT_OBJECT}
+				DEPENDS ${OUTPUT_FILES}
+				COMMAND ${GBA_C_COMPILER} -x assembler-with-cpp ${ASFLAGS} -c ${RESOURCE_INPUT_FILE} -o ${OUTPUT_OBJECT}
 				COMMENT "BUILDING ${OUTPUT_OBJECT}")
 
 			# Since we pass in dependencies, we can handle all resource objects as a group
@@ -166,7 +162,7 @@ function(build_resource RESOURCE_NAME TARGET_DEPENDENCIES RESOURCE_FILES)
 		endif()
 	endforeach()
 
-	# Set our object, dependency? and header lists to the parent scope
+	# Set our object and header lists to the parent scope
 	set(RESOURCE_OBJECT_FILES ${RESOURCE_OBJECT_FILES} PARENT_SCOPE)
 	set(RESOURCES_HPP ${RESOURCES_HPP} PARENT_SCOPE)
 endfunction()
