@@ -74,15 +74,8 @@ file(GLOB_RECURSE GAME_ASM_FILES
 	CONFIGURE_DEPENDS RELATIVE ${PROJECT_SOURCE_DIR}/source ${PROJECT_SOURCE_DIR}/source/*.s)
 
 # Build Functions
-function(build_resource)
-	# Set Variables to make this easier
-	# i.e SPRITE
-	set(RESOURCE_NAME ${ARGV0})
-	# i.e SPRITES
-	set(PLURAL ${RESOURCE_NAME}S)
-	# passed in dependencies, tool or the previous object
-	set(TARGET_DEPENDENCIES ${ARGV1})
-	# Set helped variables based on what resource we are exporting and building
+function(build_resource RESOURCE_NAME TARGET_DEPENDENCIES RESOURCE_FILES)
+	# Set helper variables based on what resource we are exporting and building
 	if(${RESOURCE_NAME} MATCHES "SPRITE")
 		set(TOOL_NAME sprite-export)
 		set(FOLDER_NAME sprites/)
@@ -109,8 +102,6 @@ function(build_resource)
 		set(OUT1 .s)
 		set(OUT2 .hpp)
 	endif()
-	set(RESOURCE_FILES ${ARGV2})
-	set(IN2 ${ARGV3})
 
 	#make a directory in build folder for the output files
 	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME})
@@ -139,7 +130,7 @@ function(build_resource)
 			DEPENDS ${TARGET_DEPENDENCIES}
 			COMMAND ${CMAKE_BINARY_DIR}/tools/tools ${TOOL_NAME}
 				./data/${FOLDER_NAME}${file_name}${file_type}
-				${OUTPUT_FILE_1} ${OUTPUT_FILE_2} ${IN2}
+				${OUTPUT_FILE_1} ${OUTPUT_FILE_2} ${ARGN}
 			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 			COMMENT "Exporting ${RESOURCE_NAME} ${file_name}")
 
@@ -148,7 +139,6 @@ function(build_resource)
 			file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}/${file_name})
 
 			set(OUTPUT_OBJECT ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}/${file_name}.o)
-			set(OUTPUT_OBJECT_D ${CMAKE_BINARY_DIR}/data/${FOLDER_NAME}${file_name}/${file_name}.d)
 
 			# This command generates the object file and dependency? of the exported ASM and header
 			# OUTPUT again means these files are set as GENERATED
@@ -156,16 +146,15 @@ function(build_resource)
 			# DEPENDS sets the header file as a dependency
 			# We need too set dependencies to the input files used in the command, as it is not automatically done even though they are source files.
 			# This ensures this command is ran after generating the ASM and header files
-			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
+			add_custom_command(OUTPUT ${OUTPUT_OBJECT}
 				MAIN_DEPENDENCY ${OUTPUT_FILE_1}
 				DEPENDS ${OUTPUT_FILE_2}
-				COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp ${ASFLAGS} -c ${OUTPUT_FILE_1} -o ${OUTPUT_OBJECT}
-				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+				COMMAND ${GBA_C_COMPILER} -x assembler-with-cpp ${ASFLAGS} -c ${OUTPUT_FILE_1} -o ${OUTPUT_OBJECT}
+				COMMENT "BUILDING ${OUTPUT_OBJECT}")
 
 			# Since we pass in dependencies, we can handle all resource objects as a group
 			# We append to a lists that we later set to the parent scope to use when building
 			list(APPEND RESOURCE_OBJECT_FILES ${OUTPUT_OBJECT})
-			list(APPEND RESOURCE_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
 		endif()
 
 		# The second output file is usually the header file,
@@ -179,16 +168,10 @@ function(build_resource)
 
 	# Set our object, dependency? and header lists to the parent scope
 	set(RESOURCE_OBJECT_FILES ${RESOURCE_OBJECT_FILES} PARENT_SCOPE)
-	set(RESOURCE_OBJECT_D_FILES ${RESOURCE_OBJECT_D_FILES} PARENT_SCOPE)
 	set(RESOURCES_HPP ${RESOURCES_HPP} PARENT_SCOPE)
 endfunction()
 
-function(build_game_objects)
-	# The files we want to build
-	set(GAME_SOURCE_FILES ${ARGV0})
-
-	# The name we use to create the lists of output object files, it should be unique and descriptive
-	set(SOURCE_TYPE ${ARGV1})
+function(build_game_objects GAME_SOURCE_FILES SOURCE_TYPE)
 	foreach (FILE ${GAME_SOURCE_FILES})
 		get_filename_component(file_dir "${CMAKE_BINARY_DIR}/source/${FILE}" PATH)
 		string(REPLACE "/" ";" splits ${FILE})
@@ -200,49 +183,44 @@ function(build_game_objects)
 		if(file_type MATCHES ".iwram")
 			list(GET file_new_split 2 file_type2)
 			set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.iwram.o)
-			set(OUTPUT_OBJECT_D ${file_dir}/${file_name}/${file_name}.iwram.d)
 		else()
 			set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.o)
-			set(OUTPUT_OBJECT_D ${file_dir}/${file_name}/${file_name}.d)
 		endif()
 		
 		# Can't have the Flags be cached and used in  the command,  or even setting the command beforehand, so we have to do seperate targets instead of just swapping out the command. 
 		if(file_type MATCHES ".s")
-			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
+			add_custom_command(OUTPUT ${OUTPUT_OBJECT}
 				DEPENDS RESOURCE_OBJECTS_BUILT
-				COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp ${ASFLAGS} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
-				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+				COMMAND ${GBA_C_COMPILER} -x assembler-with-cpp ${ASFLAGS} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+				COMMENT "BUILDING ${OUTPUT_OBJECT}")
 		elseif(file_type MATCHES ".cpp")
-			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
+			add_custom_command(OUTPUT ${OUTPUT_OBJECT}
 				DEPENDS RESOURCE_OBJECTS_BUILT
-				COMMAND ${GBA_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
-				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+				COMMAND ${GBA_CXX_COMPILER} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+				COMMENT "BUILDING ${OUTPUT_OBJECT}")
 		elseif(file_type MATCHES ".c")
-			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
+			add_custom_command(OUTPUT ${OUTPUT_OBJECT}
 				DEPENDS RESOURCE_OBJECTS_BUILT
-				COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
-				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+				COMMAND ${GBA_C_COMPILER} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+				COMMENT "BUILDING ${OUTPUT_OBJECT}")
 		elseif(file_type MATCHES ".iwram")
 			if(file_type2 MATCHES ".cpp")
-				add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
+				add_custom_command(OUTPUT ${OUTPUT_OBJECT}
 					DEPENDS RESOURCE_OBJECTS_BUILT
-					COMMAND ${GBA_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
-					COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+					COMMAND ${GBA_CXX_COMPILER} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+					COMMENT "BUILDING ${OUTPUT_OBJECT}")
 			elseif(file_type2 MATCHES ".c")
-				add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
+				add_custom_command(OUTPUT ${OUTPUT_OBJECT}
 					DEPENDS RESOURCE_OBJECTS_BUILT
-					COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
-					COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+					COMMAND ${GBA_C_COMPILER} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+					COMMENT "BUILDING ${OUTPUT_OBJECT}")
 			endif()
 		endif()
-
 		# Add the output files to their own list
 		list(APPEND GAME_${SOURCE_TYPE}_OBJECT_FILES ${OUTPUT_OBJECT})
-		list(APPEND GAME_${SOURCE_TYPE}_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
 	endforeach()
 	# Set the lists to the parent scope
 	set(GAME_${SOURCE_TYPE}_OBJECT_FILES ${GAME_${SOURCE_TYPE}_OBJECT_FILES} PARENT_SCOPE)
-	set(GAME_${SOURCE_TYPE}_OBJECT_D_FILES ${GAME_${SOURCE_TYPE}_OBJECT_D_FILES} PARENT_SCOPE)
 endfunction()
 
 # Targets
