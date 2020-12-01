@@ -1,18 +1,19 @@
-# TODO: - Cache Cmake variables for configuration
-#		- Comment for clarity
-#		- Use variables where needed
-#		- Optimise build functions
+# TODO: - Optimise build functions
 #		- Skip unpacking externals if they are already unpacked
 
 #	This is kind of messy, and just uses custom commands and targets to control the build order.
+#	I think this could be better implemented through Object Libraries, and using the toolchain functionality of cmake
+#	and building an executable (as an elf) then using a custom target and POST BUILD command to do the final object dump and rom sanitize.
 
 # Projects Settings
 # We require at least version 3.16 if cmake because we are using ExternalProject_Add
 cmake_minimum_required (VERSION 3.16)
 
 include(ExternalProject)
-set(CMAKE_VERBOSE_MAKEFILE ON)
-project (gba-modern)
+
+set(ROM_NAME "gba-modern" CACHE STRING "Project/ROM Name")
+
+project (${ROM_NAME})
 
 set(ARCH "-mthumb;-mthumb-interwork" CACHE STRING "ARCH Flags")
 set(CFLAGS "-g;-Wall;-O3;-ffunction-sections;-fdata-sections;-mcpu=arm7tdmi;-mtune=arm7tdmi;-flto;${ARCH}" CACHE STRING "C Flags")
@@ -182,128 +183,64 @@ function(build_resource)
 	set(RESOURCES_HPP ${RESOURCES_HPP} PARENT_SCOPE)
 endfunction()
 
-function(build_iwram_c)
-	foreach (FILE ${IWRAM_C_FILES})
-		get_filename_component(file_dir "${CMAKE_BINARY_DIR}/source/${FILE}" PATH)
-
-		string(REPLACE "/" ";" splits ${FILE})
-		list(GET splits -1 file_new)
-
-		string(REPLACE "." ";." file_new_split ${file_new})
-		list(GET file_new_split 0 file_name)
-
-		file(MAKE_DIRECTORY ${file_dir}/${file_name})
-
-		set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.iwram.o)
-		set(OUTPUT_OBJECT_D ${file_dir}/${file_name}/${file_name}.iwram.d)
-
-		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
-			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
-			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
-
-		list(APPEND IWRAM_C_OBJECT_FILES ${OUTPUT_OBJECT})
-		list(APPEND IWRAM_C_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
-	endforeach()
-	set(IWRAM_C_OBJECT_FILES ${IWRAM_C_OBJECT_FILES} PARENT_SCOPE)
-	set(IWRAM_C_OBJECT_D_FILES ${IWRAM_C_OBJECT_D_FILES} PARENT_SCOPE)
-endfunction()
-
-function(build_iwram_cpp)
-	foreach (FILE ${IWRAM_CPP_FILES})
-		get_filename_component(file_dir "${CMAKE_BINARY_DIR}/source/${FILE}" PATH)
-
-		string(REPLACE "/" ";" splits ${FILE})
-		list(GET splits -1 file_new)
-
-		string(REPLACE "." ";." file_new_split ${file_new})
-		list(GET file_new_split 0 file_name)
-
-		file(MAKE_DIRECTORY ${file_dir}/${file_name})
-
-		set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.iwram.o)
-		set(OUTPUT_OBJECT_D ${file_dir}/${file_name}/${file_name}.iwram.d)
-
-		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
-			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${GBA_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
-			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
-
-		list(APPEND IWRAM_CPP_OBJECT_FILES ${OUTPUT_OBJECT})
-		list(APPEND IWRAM_CPP_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
-	endforeach()
-	set(IWRAM_CPP_OBJECT_FILES ${IWRAM_CPP_OBJECT_FILES} PARENT_SCOPE)
-	set(IWRAM_CPP_OBJECT_D_FILES ${IWRAM_CPP_OBJECT_D_FILES} PARENT_SCOPE)
-endfunction()
-
-function(build_game_cpp)
-	foreach (FILE ${GAME_CPP_FILES})
-		get_filename_component(file_dir "${CMAKE_BINARY_DIR}/source/${FILE}" PATH)
-
-		string(REPLACE "/" ";" splits ${FILE})
-		list(GET splits -1 file_new)
-
-		string(REPLACE "." ";." file_new_split ${file_new})
-		list(GET file_new_split 0 file_name)
-
-		file(MAKE_DIRECTORY ${file_dir}/${file_name})
-
-		set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.o)
-		set(OUTPUT_OBJECT_D ${file_dir}/${file_name}/${file_name}.d)
-
-		add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
-			DEPENDS RESOURCE_OBJECTS_BUILT
-			COMMAND ${GBA_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
-			COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
-
-		list(APPEND GAME_CPP_OBJECT_FILES ${OUTPUT_OBJECT})
-		list(APPEND GAME_CPP_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
-	endforeach()
-	set(GAME_CPP_OBJECT_FILES ${GAME_CPP_OBJECT_FILES} PARENT_SCOPE)
-	set(GAME_CPP_OBJECT_D_FILES ${GAME_CPP_OBJECT_D_FILES} PARENT_SCOPE)
-endfunction()
-
 function(build_game_objects)
+	# The files we want to build
 	set(GAME_SOURCE_FILES ${ARGV0})
+
+	# The name we use to create the lists of output object files, it should be unique and descriptive
 	set(SOURCE_TYPE ${ARGV1})
 	foreach (FILE ${GAME_SOURCE_FILES})
 		get_filename_component(file_dir "${CMAKE_BINARY_DIR}/source/${FILE}" PATH)
-
 		string(REPLACE "/" ";" splits ${FILE})
 		list(GET splits -1 file_new)
-
 		string(REPLACE "." ";." file_new_split ${file_new})
 		list(GET file_new_split 0 file_name)
 		list(GET file_new_split 1 file_type)
+		file(MAKE_DIRECTORY ${file_dir}/${file_name})
 		if(file_type MATCHES ".iwram")
 			list(GET file_new_split 2 file_type2)
+			set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.iwram.o)
+			set(OUTPUT_OBJECT_D ${file_dir}/${file_name}/${file_name}.iwram.d)
+		else()
+			set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.o)
+			set(OUTPUT_OBJECT_D ${file_dir}/${file_name}/${file_name}.d)
 		endif()
-
-		file(MAKE_DIRECTORY ${file_dir}/${file_name})
-
-		set(OUTPUT_OBJECT ${file_dir}/${file_name}/${file_name}.o)
-		set(OUTPUT_OBJECT_D ${file_dir}/${file_name}/${file_name}.d)
-
+		
+		# Can't have the Flags be cached and used in  the command,  or even setting the command beforehand, so we have to do seperate targets instead of just swapping out the command. 
 		if(file_type MATCHES ".s")
 			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 				DEPENDS RESOURCE_OBJECTS_BUILT
 				COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} -x assembler-with-cpp ${ASFLAGS} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
-				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
-		elseif(file_type MATCHES ".c")
-			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
-				DEPENDS RESOURCE_OBJECTS_BUILT
-				COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
 		elseif(file_type MATCHES ".cpp")
 			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
 				DEPENDS RESOURCE_OBJECTS_BUILT
 				COMMAND ${GBA_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
 				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+		elseif(file_type MATCHES ".c")
+			add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
+				DEPENDS RESOURCE_OBJECTS_BUILT
+				COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+				COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+		elseif(file_type MATCHES ".iwram")
+			if(file_type2 MATCHES ".cpp")
+				add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
+					DEPENDS RESOURCE_OBJECTS_BUILT
+					COMMAND ${GBA_CXX_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CPPFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+					COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+			elseif(file_type2 MATCHES ".c")
+				add_custom_command(OUTPUT ${OUTPUT_OBJECT} ${OUTPUT_OBJECT_D}
+					DEPENDS RESOURCE_OBJECTS_BUILT
+					COMMAND ${GBA_C_COMPILER} -MMD -MP -MF ${OUTPUT_OBJECT_D} ${CFLAGS} ${EXTERNAL_INCLUDES} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}/source -fno-lto -marm -mlong-calls -c ${PROJECT_SOURCE_DIR}/source/${FILE} -o ${OUTPUT_OBJECT}
+					COMMENT "BUILDING ${OUTPUT_OBJECT} AND ${OUTPUT_OBJECT_D}")
+			endif()
 		endif()
 
+		# Add the output files to their own list
 		list(APPEND GAME_${SOURCE_TYPE}_OBJECT_FILES ${OUTPUT_OBJECT})
 		list(APPEND GAME_${SOURCE_TYPE}_OBJECT_D_FILES ${OUTPUT_OBJECT_D})
 	endforeach()
+	# Set the lists to the parent scope
 	set(GAME_${SOURCE_TYPE}_OBJECT_FILES ${GAME_${SOURCE_TYPE}_OBJECT_FILES} PARENT_SCOPE)
 	set(GAME_${SOURCE_TYPE}_OBJECT_D_FILES ${GAME_${SOURCE_TYPE}_OBJECT_D_FILES} PARENT_SCOPE)
 endfunction()
@@ -356,44 +293,53 @@ ExternalProject_Add(tools
 	INSTALL_COMMAND cmake -E echo "Skipping install step."
 	DEPENDS LibSampleRateSource)
 
+# Export and build the resources
 build_resource("SPRITE" "tools" "${SPR_FILES}")
 build_resource("BACKGROUND" "${RESOURCES_HPP}" "${BKG_FILES}")
 build_resource("FONT" "${RESOURCES_HPP}" "${FNT_FILES}")
 build_resource("SETTING" "${RESOURCES_HPP}" "${AUS_FILES}")
 build_resource("SOUND" "${RESOURCES_HPP}" "${SND_FILES}" "${CMAKE_BINARY_DIR}/data/audio-settings.json")
 
+# Dependency target to ensure resources are exported and built
 add_custom_target(RESOURCE_OBJECTS_BUILT ALL
 	DEPENDS ${RESOURCE_OBJECT_FILES}
 	COMMENT "${RESOURCE_OBJECT_FILES}")
-
-build_iwram_c()
-build_iwram_cpp()
-build_game_cpp()#("${GAME_CPP_FILES}" "CPP")
+	
+# Build the game files
+build_game_objects("${IWRAM_C_FILES}" "IWRAM_C")
+build_game_objects("${IWRAM_CPP_FILES}" "IWRAM_CPP")
+build_game_objects("${GAME_CPP_FILES}" "CPP")
 build_game_objects("${GAME_C_FILES}" "C")
 build_game_objects("${GAME_ASM_FILES}" "ASM")
 
+# Dependency target to ensure all the game objects are built, it implicitly depends on the resourccces being exported and built first
 add_custom_target(GAME_OBJECTS_BUILT ALL
-	DEPENDS ${IWRAM_C_OBJECT_FILES} ${IWRAM_CPP_OBJECT_FILES} ${GAME_C_OBJECT_FILES} ${GAME_CPP_OBJECT_FILES} ${GAME_ASM_OBJECT_FILES})
+	DEPENDS ${GAME_IWRAM_C_OBJECT_FILES} ${GAME_IWRAM_CPP_OBJECT_FILES} ${GAME_C_OBJECT_FILES} ${GAME_CPP_OBJECT_FILES} ${GAME_ASM_OBJECT_FILES})
 
-set(BUILD_GAME_FILES ${RESOURCE_OBJECT_FILES} ${IWRAM_C_OBJECT_FILES} ${IWRAM_CPP_OBJECT_FILES} ${GAME_C_OBJECT_FILES} ${GAME_CPP_OBJECT_FILES} ${GAME_ASM_OBJECT_FILES})
+# We need to build crt0, but not use it when building the elf, so we filter it out of all the files
+set(BUILD_GAME_FILES ${RESOURCE_OBJECT_FILES} ${GAME_IWRAM_C_OBJECT_FILES} ${GAME_IWRAM_CPP_OBJECT_FILES} ${GAME_C_OBJECT_FILES} ${GAME_CPP_OBJECT_FILES} ${GAME_ASM_OBJECT_FILES})
 list(FILTER BUILD_GAME_FILES EXCLUDE REGEX "crt0")
 
+# Build the elf
 add_custom_target(elf ALL
 	DEPENDS GAME_OBJECTS_BUILT
-	COMMAND ${GBA_CXX_COMPILER} ${LDFLAGS} -specs=${CMAKE_SOURCE_DIR}/gba.specs ${BUILD_GAME_FILES} ${EXTERNAL_LIBS} -o ${CMAKE_BINARY_DIR}/gba-modern.elf
-	BYPRODUCTS ${CMAKE_BINARY_DIR}/gba-modern.elf ${CMAKE_SOURCE_DIR}/gba.map
+	COMMAND ${GBA_CXX_COMPILER} ${LDFLAGS} -specs=${CMAKE_SOURCE_DIR}/gba.specs ${BUILD_GAME_FILES} ${EXTERNAL_LIBS} -o ${CMAKE_BINARY_DIR}/${ROM_NAME}.elf
+	BYPRODUCTS ${CMAKE_BINARY_DIR}/${ROM_NAME}.elf ${CMAKE_SOURCE_DIR}/gba.map
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+# Dump the elf
 add_custom_target(elf_dump ALL
 	DEPENDS elf
-	COMMAND ${GBA_OBJDUMP} -dCS ${CMAKE_BINARY_DIR}/gba-modern.elf > ${CMAKE_BINARY_DIR}/gba-modern.elf.dump
-	BYPRODUCTS ${CMAKE_BINARY_DIR}/gba-modern.elf.dump)
+	COMMAND ${GBA_OBJDUMP} -dCS ${CMAKE_BINARY_DIR}/${ROM_NAME}.elf > ${CMAKE_BINARY_DIR}/${ROM_NAME}.elf.dump
+	BYPRODUCTS ${CMAKE_BINARY_DIR}/${ROM_NAME}.elf.dump)
 
+# Create the ROM file
 add_custom_target(create_rom ALL
 	DEPENDS elf_dump
-	COMMAND ${GBA_OBJCOPY} -O binary ${CMAKE_BINARY_DIR}/gba-modern.elf ${CMAKE_BINARY_DIR}/gba-modern.gba)
+	COMMAND ${GBA_OBJCOPY} -O binary ${CMAKE_BINARY_DIR}/${ROM_NAME}.elf ${CMAKE_BINARY_DIR}/${ROM_NAME}.gba)
 
+# Sanitize the ROM file
 add_custom_target(sanitize_rom ALL
 	DEPENDS create_rom
-	COMMAND ${CMAKE_BINARY_DIR}/tools/tools rom-sanitize ${CMAKE_BINARY_DIR}/gba-modern.gba ${CMAKE_SOURCE_DIR}/gba.json ${CMAKE_BINARY_DIR}/gba-modern.gba
-	BYPRODUCTS ${CMAKE_BINARY_DIR}/gba-modern.gba)
+	COMMAND ${CMAKE_BINARY_DIR}/tools/tools rom-sanitize ${CMAKE_BINARY_DIR}/${ROM_NAME}.gba ${CMAKE_SOURCE_DIR}/gba.json ${CMAKE_BINARY_DIR}/${ROM_NAME}.gba
+	BYPRODUCTS ${CMAKE_BINARY_DIR}/${ROM_NAME}.gba)
