@@ -301,7 +301,7 @@ add_custom_target(elf ALL
 	BYPRODUCTS ${CMAKE_BINARY_DIR}/${ROM_NAME}.elf ${CMAKE_SOURCE_DIR}/gba.map
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-# Dump the elf
+# Dump the elf, this is just used for debugging, so not needed for release
 add_custom_target(elf_dump ALL
 	DEPENDS elf
 	COMMAND ${GBA_OBJDUMP} -dCS ${CMAKE_BINARY_DIR}/${ROM_NAME}.elf > ${CMAKE_BINARY_DIR}/${ROM_NAME}.elf.dump
