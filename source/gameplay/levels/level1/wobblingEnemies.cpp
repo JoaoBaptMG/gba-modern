@@ -68,9 +68,9 @@ void shootTowardsPlayer(Enemy& enemy, GameScene& gameScene)
 {
     // get the difference and normalize it
     auto diff = vec_utils::normalizeLowp(gameScene.player.pos - enemy.pos);
-    auto diffp = vec_utils::rotate_d<15>(diff);
-    auto diffm = vec_utils::rotate_d<-15>(diff);
-
+    auto diffp = ROTATE_VEC2(diff, 15);
+    auto diffm = ROTATE_VEC2(diff, -15);
+    
     for (auto vec : { diff, diffp, diffm })
     {
         auto vel = vec * WobblingProjectileSpeed;

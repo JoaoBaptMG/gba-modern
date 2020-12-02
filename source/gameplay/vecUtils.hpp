@@ -14,12 +14,9 @@ namespace vec_utils
         return vec2<s32f16>(vec * reclen);
     }
 
-    template <auto Degrees, typename T>
-    inline static constexpr vec2<T> rotate_d(vec2<T> v)
+    inline static constexpr vec2<fixed<s32, 10>> getRotator_d(double d)
     {
-        using NT = decltype(std::declval<T>().template with_exp<10>());
-        constexpr NT cos = gcem_d::cos(Degrees);
-        constexpr NT sin = gcem_d::sin(Degrees);
-        return vec2<T>(v.x * cos - v.y * sin, v.x * sin + v.y * cos);
+        return vec2<fixed<s32, 10>>(gcem_d::cos(d), gcem_d::sin(d));
     }
+#define ROTATE_VEC2(v, d) (vec2<decltype((v).x)>(vec_utils::getRotator_d(d).rotate(v)))
 }

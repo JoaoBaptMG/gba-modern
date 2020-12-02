@@ -6,11 +6,12 @@
 #pragma once
 
 #include "util/type_traits.hpp"
+#include "fixed.hpp"
 
 template <typename T>
 struct vec2 final
 {
-    static_assert(std::is_arithmetic_v<T>, "vec2 only works properly with arithmetic types (including fixed)!");
+    static_assert(std::is_arithmetic_v<T> || is_fixed_v<T>, "vec2 only works properly with arithmetic types or fixed!");
 
     T x, y;
 
@@ -57,13 +58,25 @@ struct vec2 final
     constexpr explicit operator vec2<U>() const { return vec2<U>(U(x), U(y)); }
 
     // Utilities
-    constexpr auto dot(vec2 o) const { return x*o.x + y*o.y; }
-    constexpr auto cross(vec2 o) const { return x*o.y - y*o.x; }
+    template <typename U>
+    constexpr auto dot(vec2<U> o) const { return x*o.x + y*o.y; }
+
+    template <typename U>
+    constexpr auto cross(vec2<U> o) const { return x*o.y - y*o.x; }
 
     constexpr auto perp() const { return vec2(y, -x); }
 
     constexpr auto lensq() const { return x*x + y*y; }
     constexpr auto distsq(vec2 o) const { return (*this - o).lensq(); }
+
+    template <typename U>
+    constexpr auto rotate(vec2<U> o) const 
+    { 
+        auto u = x*o.x - y*o.y;
+        auto v = x*o.y + y*o.x;
+        using NT = std::common_type_t<decltype(u), decltype(v)>;
+        return vec2<NT>(x*o.x - y*o.y, x*o.y + y*o.x); 
+    }
 };
 
 // Template deduction guide

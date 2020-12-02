@@ -590,9 +590,11 @@ operator>=(U b, fixed<Ty, N> a)
 template <typename Ty, std::size_t N>
 constexpr fixed<Ty,N> abs(fixed<Ty,N> v) { return v < 0 ? -v : v; }
 
-// Template specializations
-namespace std
-{
-    template <typename Ty, std::size_t N>
-    struct is_arithmetic<fixed<Ty, N>> : std::true_type {};
-}
+template <typename T>
+struct is_fixed : std::false_type {};
+
+template <typename Ty, std::size_t N>
+struct is_fixed<fixed<Ty, N>> : std::true_type {};
+
+template <typename T>
+constexpr bool is_fixed_v = is_fixed<T>::value;
