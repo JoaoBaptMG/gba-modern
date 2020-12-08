@@ -37,6 +37,9 @@ int soundExport(int argc, char  **argv)
     // Pad the sound data to 4 bytes
     soundData.resize((soundData.size() + 3) & ~3, 0.0f);
 
+    if (soundData.size() >= (1 << 20))
+        throw std::runtime_error("Sounds larger than 1 MB in samples are not supported!");
+
     auto name = deriveSpecialName(in);
 
     {
