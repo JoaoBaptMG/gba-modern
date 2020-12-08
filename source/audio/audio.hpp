@@ -10,11 +10,12 @@
 
 namespace audio
 {
-    constexpr u32 MaxVolume = 16;
+    using Volume = fixed<u32, 4>;
+    using PlaySpeed = fixed<u32, 12>;
 
     void init();
 
-    u32 playSound(const Sound& sound, u32 volume = MaxVolume);
+    u32 playSound(const Sound& sound, Volume volume = 1.0, PlaySpeed playSpeed = 1.0);
     void stopSound(u32 channel);
 
     void mix();

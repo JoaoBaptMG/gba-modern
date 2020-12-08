@@ -22,7 +22,9 @@ static u32 curFrame;
 struct AudioChannel
 {
     const Sound* sound;
-    u32 pos, volume;
+    u32 pos;
+    audio::Volume volume;
+    audio::PlaySpeed playSpeed;
 };
 
 AudioChannel audioChannels[audio::NumChannels];
@@ -75,7 +77,7 @@ void audioVblank()
     }
 }
 
-u32 audio::playSound(const Sound& sound, u32 volume)
+u32 audio::playSound(const Sound& sound, audio::Volume volume, audio::PlaySpeed playSpeed)
 {
     int channel;
     for (channel = 0; channel < NumChannels; channel++)
@@ -93,6 +95,7 @@ u32 audio::playSound(const Sound& sound, u32 volume)
         audioChannels[channel].sound = &sound;
         audioChannels[channel].pos = 0;
         audioChannels[channel].volume = volume;
+        audioChannels[channel].playSpeed = playSpeed;
     }
 
     return channel;
@@ -107,10 +110,10 @@ extern "C" void audioMix(s16* intBuffer, s8* curMixBuffer, AudioChannel* channel
 
 void audio::mix()
 {
-    //profile::begin16();
+    profile::begin16();
     audioMix(intermediateBuffer, curAudioMixBuffer, audioChannels);
-    //auto val = profile::end16();
+    auto val = profile::end16();
 
-    //if (mgba::isEnabled())
-    //    mgba::log(mgba::Log::Debug, "Audio time: ", val, " cycles.");
+    if (mgba::isEnabled())
+        mgba::log(mgba::Log::Debug, "Audio time: ", val, " cycles.");
 }

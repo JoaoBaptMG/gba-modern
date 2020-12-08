@@ -66,7 +66,7 @@ void Player::update()
             gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2 - 4, pos.y - 6),
                 vec2<s16f7>(Cos5 * ProjectileSpeed, -Sin5 * ProjectileSpeed), 0);
 
-            audio::playSound(data::sounds::player_shot.wav, 12);
+            audio::playSound(data::sounds::player_shot.wav, 0.75, 0.75);
         }
     }
 }
@@ -90,7 +90,7 @@ void Player::damage(int amount)
     {
         health -= amount;
         invCounter = 120;
-        audio::playSound(data::sounds::player_dmg.wav, 12);
+        audio::playSound(data::sounds::player_dmg.wav, 0.75);
     }
     else
     {

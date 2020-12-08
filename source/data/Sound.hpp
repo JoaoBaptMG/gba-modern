@@ -9,7 +9,7 @@
 
 struct Sound
 {
-    u32 length, loopLength;
+    fixed<u32,12> length, loopLength;
     // And after that comes the data in u8 chunks
 };
 
