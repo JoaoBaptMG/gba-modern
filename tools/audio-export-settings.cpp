@@ -1,5 +1,3 @@
-#include "pch.hpp"
-
 #include <cmath>
 
 // The allowed frequencies (based on https://deku.gbadev.org/program/sound1.html)

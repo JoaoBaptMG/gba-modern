@@ -1,4 +1,3 @@
-#include "pch.hpp"
 #include "graphics.hpp"
 #include "background-export-state.hpp"
 #include "UnionFind.hpp"
@@ -12,7 +11,7 @@ auto setUnion(const std::vector<Color>& s1, const std::vector<Color>& s2)
     return sresult;
 }
 
-ConversionResult convertBackgroundTo4bpp(const State<Character8bpp>& state8bpp,
+ConversionResult convertBackgroundTo4bpp(const BackgroundState<Character8bpp>& state8bpp,
     const std::array<Color, 256>& originalPalette)
 {
     // To begin with, we are going to build a set of all colors a tile uses
@@ -96,7 +95,7 @@ ConversionResult convertBackgroundTo4bpp(const State<Character8bpp>& state8bpp,
     }
 
     // Finally, we begin to construct the new state
-    State<Character4bpp> state;
+    BackgroundState<Character4bpp> state;
     std::vector<std::size_t> charCorrespondences(numChars);
 
     // Put the new characters first

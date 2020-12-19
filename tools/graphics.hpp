@@ -1,6 +1,5 @@
 #pragma once
 
-#include "pch.hpp"
 
 using Color = std::uint16_t;
 inline static constexpr Color makeColor(std::uint8_t r, std::uint8_t g, std::uint8_t b)

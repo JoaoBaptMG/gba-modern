@@ -1,7 +1,6 @@
-#include "pch.hpp"
 #include "graphics.hpp"
 
-struct State
+struct SpriteState
 {
     SpecialName name;
     std::size_t groupWidth, groupHeight;
@@ -29,15 +28,15 @@ void from_json(const nlohmann::json& j, AnimationPose& af)
 }
 
 template <typename T>
-void writeCharData(std::ostream& of, const State& state, const T& charData);
+void writeCharData(std::ostream& of, const SpriteState& state, const T& charData);
 template <typename T>
-void writeHeaderData(std::ostream& hof, const State& state, const T& charData, bool generateBitmask);
+void writeHeaderData(std::ostream& hof, const SpriteState& state, const T& charData, bool generateBitmask);
 
-void writeCharAnimationData(std::ofstream& of, const State& state, std::size_t totalNumFrames);
+void writeCharAnimationData(std::ofstream& of, const SpriteState& state, std::size_t totalNumFrames);
 
 using AnimationData = std::map<std::string, AnimationPose>;
 template <typename T>
-void writeAnimatedHeaderData(std::ostream &hof, const State &state, const T& charData,
+void writeAnimatedHeaderData(std::ostream &hof, const SpriteState &state, const T& charData,
     const AnimationData &animations, std::size_t frameStep, std::size_t totalNumFrames, bool generateBitmask);
 
 void writeBitmaskData(std::ostream& of, const Bitmask& bitmask);
@@ -52,7 +51,7 @@ int spriteExport(int argc, char **argv)
 
     // Parameters
     bool is8bpp = false;
-    State state = { deriveSpecialName(in), 1, 1, true };
+    SpriteState state = { deriveSpecialName(in), 1, 1, true };
     std::ifstream mdin(in + ".json");
     std::size_t maxColors = 16;
     bool preserveOrder = false;
@@ -136,7 +135,7 @@ int spriteExport(int argc, char **argv)
 }
 
 template <typename T>
-void writeCharData(std::ostream& of, const State& state, const T& charData)
+void writeCharData(std::ostream& of, const SpriteState& state, const T& charData)
 {
     of << "    .section .rodata." << state.name.mangledName << std::endl;
     of << "    .align 2" << std::endl;
@@ -179,7 +178,7 @@ void writeCharData(std::ostream& of, const State& state, const T& charData)
     of << std::endl;
 }
 
-void writeCharAnimationData(std::ofstream& of, const State& state, std::size_t totalNumFrames)
+void writeCharAnimationData(std::ofstream& of, const SpriteState& state, std::size_t totalNumFrames)
 {
     for (std::size_t i = 0; i < totalNumFrames; i++)
         of << "    .hword 0x0000, " << toHex(i, 4) << std::endl;
@@ -187,7 +186,7 @@ void writeCharAnimationData(std::ofstream& of, const State& state, std::size_t t
 }
 
 template <typename T>
-void writeHeaderData(std::ostream& hof, const State& state, const T& charData, bool generateBitmask)
+void writeHeaderData(std::ostream& hof, const SpriteState& state, const T& charData, bool generateBitmask)
 {
     hof << "namespace " << state.name.nmspace << std::endl;
     hof << '{' << std::endl;
@@ -203,7 +202,7 @@ void writeHeaderData(std::ostream& hof, const State& state, const T& charData, b
 }
 
 template <typename T>
-void writeAnimatedHeaderData(std::ostream &hof, const State &state, const T& charData,
+void writeAnimatedHeaderData(std::ostream &hof, const SpriteState &state, const T& charData,
     const AnimationData &animations, std::size_t frameStep, std::size_t totalNumFrames, bool generateBitmask)
 {
     hof << "namespace " << state.name.nmspace << std::endl;

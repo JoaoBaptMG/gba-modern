@@ -1,10 +1,9 @@
 #pragma once
 
-#include "pch.hpp"
 #include "graphics.hpp"
 
 template <typename Character>
-struct State
+struct BackgroundState
 {
     std::vector<Character> chars;
     std::map<Character, std::uint16_t> charIndices;
@@ -33,10 +32,10 @@ using Palette = std::array<Color, 16>;
 
 struct ConversionResult
 { 
-    State<Character4bpp> state;
+    BackgroundState<Character4bpp> state;
     std::vector<Palette> palettes;
 };
 
-ConversionResult convertBackgroundTo4bpp(const State<Character8bpp>& state8bpp,
+ConversionResult convertBackgroundTo4bpp(const BackgroundState<Character8bpp>& state8bpp,
     const std::array<Color, 256>& originalPalette);
 

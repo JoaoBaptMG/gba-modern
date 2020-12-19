@@ -1,4 +1,3 @@
-#include "pch.hpp"
 #include <vector>
 #include <fstream>
 #include <numeric>

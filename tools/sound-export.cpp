@@ -1,5 +1,3 @@
-#include "pch.hpp"
-
 #include "sound-data.hpp"
 
 void testCompression(const std::vector<float>& data);
