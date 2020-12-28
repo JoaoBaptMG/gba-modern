@@ -145,6 +145,10 @@ build/%.iwram.o: %.iwram.c
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
 
+build/%.ewram.o: %.ewram.cpp
+	@mkdir -p $(@D)
+	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -mlong-calls -c $< -o $@
+
 build/%.o: %.cpp
 	@mkdir -p $(@D)
 	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -c $< -o $@

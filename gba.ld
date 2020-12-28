@@ -251,6 +251,8 @@ SECTIONS
 	.ewram __ewram_start : AT (__ewram_lma)
 	{
 		*(.ewram)
+		*(.ewram.*)
+		*ewram.*(.text.*)
 		. = ALIGN(4);  /* REQUIRED. LD is flaky without it. */
 		__ewram_end = ABSOLUTE(.);
 	}>ewram = 0xff
@@ -261,6 +263,7 @@ SECTIONS
  	{
 		__sbss_start__ = ABSOLUTE(.);
  		*(.sbss)
+		*(.sbss.*)
  		. = ALIGN(4);
 		__sbss_end__  = ABSOLUTE(.);
 		__end__ = ABSOLUTE(.);
