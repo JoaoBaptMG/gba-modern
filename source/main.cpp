@@ -12,6 +12,7 @@
 #include "memory/allocator.hpp"
 #include "text/mGBADebugging.hpp"
 #include "audio/audio.hpp"
+#include "gamepak-removed/gamepak-removed.hpp"
 
 SceneStack scene EWRAM_BSS;
 bool popScene EWRAM_BSS;
@@ -24,6 +25,9 @@ int main()
     // Enable interrupts
     irq_init(isr_master);
     irq_enable(II_VBLANK);
+
+    irq_enable(II_GAMEPAK);
+    gamepak::setUpIsr();
 
     // Init the memory allocator
     ewram::init();
