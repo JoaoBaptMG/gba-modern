@@ -65,8 +65,9 @@ endif
 ifeq ($(UNAME_S),Darwin)
 	GCC_PLATFORM := mac
 endif
-GCC_PREFIX := 10-2020q2
-GCC_NAME := gcc-arm-none-eabi-10-2020-q2-preview
+GCC_VERSION := 10.2.1
+GCC_PREFIX := 10-2020q4
+GCC_NAME := gcc-arm-none-eabi-10-2020-q4-major
 GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu-rm/$(GCC_PREFIX)/$(GCC_NAME)-$(GCC_PLATFORM).tar.bz2
 
 # Link to libsamplerate
@@ -93,7 +94,7 @@ endif
 .SECONDEXPANSION:
 
 # Now, the actual rules
-.PHONY: all clean clean-everything clean-downloads download-deps build-tools
+.PHONY: all clean clean-everything clean-downloads download-deps build-tools gcc-check
 
 all: bin/game.gba
 
@@ -137,27 +138,27 @@ build/data/sounds/%.s build/data/sounds/%.hpp: data/sounds/%.wav build/data/audi
 	tools/tools sound-export $(filter %.wav,$^) $(basename $@).s $(basename $@).hpp build/data/audio-settings.json
 
 # Source files
-build/%.iwram.o: %.iwram.cpp
+build/%.iwram.o: %.iwram.cpp | gcc-check
 	@mkdir -p $(@D)
 	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
 
-build/%.iwram.o: %.iwram.c
+build/%.iwram.o: %.iwram.c | gcc-check
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
 
-build/%.ewram.o: %.ewram.cpp
+build/%.ewram.o: %.ewram.cpp | gcc-check
 	@mkdir -p $(@D)
 	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -mlong-calls -c $< -o $@
 
-build/%.o: %.cpp
+build/%.o: %.cpp | gcc-check
 	@mkdir -p $(@D)
 	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
 
-build/%.o: %.c
+build/%.o: %.c | gcc-check
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-build/%.o: %.s
+build/%.o: %.s | gcc-check
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
 
@@ -170,6 +171,11 @@ tonc: tonc.zip
 tonc.zip:
 	wget $(TONC_URL) -O tonc.zip
 
+gcc-check:
+ifneq ($(GCC_VERSION),$(shell $(ARMCC) -dumpversion))
+	$(error "Wrong/out of date version of gcc! Please run `rm -rf gcc*` then `make` ato redownload GCC")
+endif
+
 # Pull gcc
 gcc: gcc.tar.bz2
 ifeq (,$(GCC_PLATFORM))
@@ -178,6 +184,9 @@ endif
 	mkdir gcc && tar xjf gcc.tar.bz2 -C gcc --strip-components 1
 
 gcc.tar.bz2:
+ifeq (,$(GCC_PLATFORM))
+	$(error "This platform does not have a prebuilt arm-none-eabi; try to compile it from source and place it at $(GCC_NAME)")
+endif
 	wget $(GCC_URL) -O gcc.tar.bz2
 
 # Pull libsamplerate
