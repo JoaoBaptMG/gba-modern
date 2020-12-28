@@ -5,18 +5,17 @@
 //--------------------------------------------------------------------------------
 #include "audio.hpp"
 
-#include "data/audio-settings.hpp"
-#include <tonc.h>
-
 #include "util/gba-assert.hpp"
 #include "util/profile.hpp"
 #include "text/mGBADebugging.hpp"
 
-// Declare the mix buffers
+#include "audioBuffers.hpp"
+
+// Materialize the mix buffers
 s16 intermediateBuffer[audio::BufferSize];
 s8 audioMixBuffers[2][audio::BufferSize];
 s8* curAudioMixBuffer;
-static u32 curFrame;
+u32 curFrame;
 
 // The channel structure
 struct AudioChannel
@@ -28,9 +27,6 @@ struct AudioChannel
 };
 
 AudioChannel audioChannels[audio::NumChannels];
-
-// The audio vblank is internal
-static void audioVblank();
 
 void audio::init()
 {
@@ -52,29 +48,6 @@ void audio::init()
 
     // Install the interrupt
     irq_add(II_VBLANK, audioVblank);
-}
-
-void audioVblank()
-{
-    // Start the timer
-    REG_TM0CNT = TM_ENABLE;
-
-    if (curFrame == 0)
-    {
-        // Restart the DMA
-        REG_DMA1CNT = 0;
-        REG_DMA1SAD = (u32)&audioMixBuffers[0][0];
-        REG_DMA1CNT = DMA_DST_FIXED | DMA_REPEAT | DMA_32 | DMA_AT_FIFO | DMA_ENABLE;
-
-        curAudioMixBuffer = &audioMixBuffers[1][0];
-        curFrame = 1;
-    }
-    else
-    {
-        // Don't need to restart the DMA
-        curAudioMixBuffer = &audioMixBuffers[0][0];
-        curFrame = 0;
-    }
 }
 
 u32 audio::playSound(const Sound& sound, audio::Volume volume, audio::PlaySpeed playSpeed)
