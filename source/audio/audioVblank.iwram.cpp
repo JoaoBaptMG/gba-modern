@@ -15,6 +15,7 @@ void audioVblank()
         // Restart the DMA
         REG_DMA1CNT = 0;
         REG_DMA1SAD = (u32)&audioMixBuffers[0][0];
+        REG_DMA1DAD = (u32)&REG_FIFO_A;
         REG_DMA1CNT = DMA_DST_FIXED | DMA_REPEAT | DMA_32 | DMA_AT_FIFO | DMA_ENABLE;
 
         curAudioMixBuffer = &audioMixBuffers[1][0];
