@@ -27,10 +27,6 @@ void Hud::init()
 
     // Transfer the palette
     memcpy32(&pal_bg_bank[15], data::sprites::hud.png.palette, sizeof(PALBANK)/sizeof(u32));
-
-    // Set the two graphic effects
-    clearAlpha = 0;
-    reloadAlpha = 12;
 }
 
 void Hud::vblank()
@@ -48,6 +44,10 @@ void Hud::vblank()
 
     // Reset the alpha blending
     REG_BLDCNT = BLD_TOP(BLD_BACKDROP | BLD_OBJ | BLD_BG3 | BLD_BG2 | BLD_BG1) | BLD_BLACK;
+
+    // Set the two graphic effects
+    clearAlpha = 0;
+    reloadAlpha = 12;
 }
 
 void Hud::update()
