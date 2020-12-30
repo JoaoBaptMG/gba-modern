@@ -1,7 +1,7 @@
 @--------------------------------------------------------------------------------
-@ collision.cpp
+@ collisionBitmask.s
 @--------------------------------------------------------------------------------
-@ Provide collision detection routines and utilities
+@ Provides the collision detection routine with bitmasks
 @--------------------------------------------------------------------------------
 
     .section .iwram, "ax", %progbits

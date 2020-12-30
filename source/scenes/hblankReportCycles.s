@@ -24,7 +24,7 @@ hblankReportCycles:
     bne     .spinLoop2          @ go back to the spin loop - 3 cycles, total 8
 
     add     r0, r0, #0x100
-    strh    r2, [r0, #0xA]    @ stop timer 2 (r2 = 0 from the last part)
+    strh    r2, [r0, #0xA]      @ stop timer 2 (r2 = 0 from the last part)
 
     .extern cycleCount
     ldr     r0, =cycleCount     @ store it on the address
