@@ -7,8 +7,19 @@
 #include "OamManager.hpp"
 #include <algorithm>
 
-void sortOAM(OBJ_ATTR* shadowOAM, u32 objCount)
+#define STACKALLOC(T, n) (T*)__builtin_alloca(sizeof(T) * (n))
+
+void sortOAM(OBJ_ATTR* dstOAM, const OBJ_ATTR* srcOAM, u32 objCount)
 {
-    std::sort(shadowOAM, shadowOAM + objCount,
-        [](const OBJ_ATTR& o1, const OBJ_ATTR& o2) { return o1.fill < o2.fill; });
+    // Construct a basic array of prios and ids
+    auto prioids = STACKALLOC(u32, objCount);
+    for (u32 i = 0; i < objCount; i++)
+        prioids[i] = (srcOAM[i].fill << 16) | i;
+
+    // Sort the ids - this will ensure stable sort
+    std::sort(prioids, prioids+objCount);
+
+    // Push the ids back
+    for (u32 i = 0; i < objCount; i++)
+        dstOAM[i] = srcOAM[prioids[i] & 0xFF];
 }

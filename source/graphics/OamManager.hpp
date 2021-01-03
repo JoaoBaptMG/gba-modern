@@ -22,10 +22,10 @@ class OamManager final
 {
 public:
     // The required array and size
-    u32 objCount;
+    u32 objCount, prevObjCount;
     alignas(void*) OBJ_ATTR shadowOAM[MaxObjs];
 
-    OamManager() {}
+    OamManager() : objCount(0), prevObjCount(MaxObjs) {}
     void init() { oam_init(shadowOAM, MaxObjs); }
     void copyToOAM();
 

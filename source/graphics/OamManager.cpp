@@ -13,26 +13,26 @@ void OamManager::pushAttrs(u16 attr0, u16 attr1, u16 attr2, u16 prio)
     shadowOAM[objCount].attr0 = attr0;
     shadowOAM[objCount].attr1 = attr1;
     shadowOAM[objCount].attr2 = attr2;
-    shadowOAM[objCount].fill = (prio << 7) | objCount;
+    shadowOAM[objCount].fill = prio;
     objCount++;
 }
 
-void sortOAM(OBJ_ATTR* shadowOAM, u32 objCount) IWRAM_CODE;
+void sortOAM(OBJ_ATTR* dstOAM, const OBJ_ATTR* srcOAM, u32 objCount) IWRAM_CODE;
 
 void OamManager::copyToOAM()
 {
 #ifndef DISABLE_OAM_SORTING
     // Sort the objects
-    sortOAM(shadowOAM, objCount);
+    sortOAM(oam_mem, shadowOAM, objCount);
+#else
+    oam_copy(oam_mem, shadowOAM, objCount);
 #endif
 
     // Copy the shadow OAM
-    oam_copy(oam_mem, shadowOAM, MaxObjs);
+    if (objCount < prevObjCount)
+        obj_hide_multi(oam_mem + objCount, prevObjCount - objCount);
 
     // "Reset" the OAM by hiding all objects
-    while (objCount)
-    {
-        objCount--;
-        shadowOAM[objCount].attr0 = ATTR0_HIDE;
-    }
+    prevObjCount = objCount;
+    objCount = 0;
 }
