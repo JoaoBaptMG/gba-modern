@@ -97,7 +97,7 @@ public:
     }
 
     template <typename... Ts>
-    std::enable_if_t<sizeof...(Ts) != 0>
+    std::enable_if_t<(sizeof...(Ts) > 1)>
     append(Ts&&... vs)
     {
         (append(std::forward<Ts>(vs)), ...);
