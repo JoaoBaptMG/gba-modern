@@ -21,7 +21,11 @@ class Explosions final
         u16 counter, dummy;
     };
 
+    // Unfortunately, this is necessary (workaround not to make an array allocate a lot)
+    struct OamProxy final { UniqueOamHandle obj = UniqueOamHandle::noObj(); };
+
     Explosion explosions[MaxExplosions];
+    OamProxy explosionHandles[MaxExplosions];
     ObjectTilePointer smallExplosion[NumSmallExplosionFrames];
     SinglePalettePointer smallPtr;
     u32 numExplosions;
@@ -34,6 +38,7 @@ public:
     inline void addSmallExplosion(vec2<s16> pos)
     {
         ASSERT(numExplosions < MaxExplosions);
-        explosions[numExplosions++] = { pos, 0, 0 };
+        explosions[numExplosions] = { pos, 0, 0 };
+        explosionHandles[numExplosions].obj = UniqueOamHandle();
     }
 };

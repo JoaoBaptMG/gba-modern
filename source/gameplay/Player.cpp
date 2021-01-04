@@ -66,7 +66,7 @@ void Player::update()
             gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2 - 4, pos.y - 6),
                 vec2<s16f7>(Cos5 * ProjectileSpeed, -Sin5 * ProjectileSpeed), 0);
 
-            audio::playSound(data::sounds::player_shot.wav, 0.75, 0.75);
+            audio::playSound(data::sounds::player_shot.wav, 0.75);
         }
     }
 }
@@ -105,7 +105,8 @@ void Player::pushGraphics()
     auto dp = vec2<int>(pos) - PlayerSize/2;
 
     if (!(invCounter & 1))
-        graphics::oam.pushRegular(dp, SpriteSize::s16x16_4bpp, playerPtr.getTileId(), palPtr.getPalette(), 1, PlayerPriority);
+        oamHandle.setRegular(dp, SpriteSize::s16x16_4bpp, playerPtr.getTileId(), palPtr.getPalette(), 1, PlayerPriority);
+    else oamHandle.setHidden();
 }
 
 GameScene& Player::gameScene()

@@ -76,10 +76,10 @@ void EnemyProjectiles::update()
 void EnemyProjectiles::pushGraphics()
 {
     profile::begin32();
-    u32 attr2add = tilePtr.getTileId() + ATTR2_PALBANK(palPtr.getPalette()) + (graphics::oam.objCount << 16);
-    pushProjectilesToOam(numProjectiles, projectiles, graphics::oam.shadowOAM + graphics::oam.objCount, ProjectileTypes, attr2add);
-    graphics::oam.objCount += numProjectiles;
-    ASSERT(graphics::oam.objCount <= MaxObjs);
+    //u32 attr2add = tilePtr.getTileId() + ATTR2_PALBANK(palPtr.getPalette()) + (graphics::oam.objCount << 16);
+    //pushProjectilesToOam(numProjectiles, projectiles, graphics::oam.shadowOAM + graphics::oam.objCount, ProjectileTypes, attr2add);
+    //graphics::oam.objCount += numProjectiles;
+    //ASSERT(graphics::oam.objCount <= MaxObjs);
 
     auto renderingUpdate = profile::end32();
     if (mgba::isEnabled())

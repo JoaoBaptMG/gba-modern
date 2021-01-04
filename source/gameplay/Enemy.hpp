@@ -47,6 +47,7 @@ private:
     context_t curCtx;                    // 4 bytes
     u16 scriptWaitTime;                  // 2 bytes
     u8 invCounter;                       // 1 byte
+    UniqueOamHandle oamHandle;           // 1 byte
 
 public:
     Enemy(EnemyScript script, GameScene* gameScene);

@@ -6,20 +6,32 @@
 //--------------------------------------------------------------------------------
 #include "OamManager.hpp"
 #include <algorithm>
+#include <tonc.h>
+#include "text/mGBADebugging.hpp"
 
-#define STACKALLOC(T, n) (T*)__builtin_alloca(sizeof(T) * (n))
-
-void sortOAM(OBJ_ATTR* dstOAM, const OBJ_ATTR* srcOAM, u32 objCount)
+void OamManager::sortOAM()
 {
-    // Construct a basic array of prios and ids
-    auto prioids = STACKALLOC(u32, objCount);
-    for (u32 i = 0; i < objCount; i++)
-        prioids[i] = (srcOAM[i].fill << 16) | i;
+    // Here, we'll do two bubble sort phase
+    bool notSorted = true;
+    while (notSorted)
+    {
+        notSorted = false;
 
-    // Sort the ids - this will ensure stable sort
-    std::sort(prioids, prioids+objCount);
+        auto sortPhase = [&](u8 i)
+        {
+            if (shadowOAM[i-1].fill > shadowOAM[i].fill)
+            {
+                notSorted = true;
+                using std::swap;
+                swap(shadowOAM[i-1], shadowOAM[i]);
+                swap(idByPos[i-1], idByPos[i]);
+                pos[idByPos[i-1]] = i-1;
+                pos[idByPos[i]] = i;
+            }
+        };
 
-    // Push the ids back
-    for (u32 i = 0; i < objCount; i++)
-        dstOAM[i] = srcOAM[prioids[i] & 0xFF];
+        // Forward phase and backward phase
+        for (u8 i = 1; i < objCount; i++) sortPhase(i);
+        for (u8 i = objCount-1; i > 0; i--) sortPhase(i);
+    }
 }

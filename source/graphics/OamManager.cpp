@@ -5,34 +5,95 @@
 // as sorting them
 //--------------------------------------------------------------------------------
 #include "OamManager.hpp"
+#include "graphics.hpp"
+#include "util/gba-assert.hpp"
 
-//#define DISABLE_OAM_SORTING
-void OamManager::pushAttrs(u16 attr0, u16 attr1, u16 attr2, u16 prio)
+UniqueOamHandle::UniqueOamHandle() : handle(graphics::oam.newHandle()) {}
+
+UniqueOamHandle::~UniqueOamHandle()
 {
-    ASSERT(objCount < MaxObjs);
-    shadowOAM[objCount].attr0 = attr0;
-    shadowOAM[objCount].attr1 = attr1;
-    shadowOAM[objCount].attr2 = attr2;
-    shadowOAM[objCount].fill = prio;
-    objCount++;
+    if (handle == NoObj) return;
+    graphics::oam.freeHandle(handle);
 }
 
-void sortOAM(OBJ_ATTR* dstOAM, const OBJ_ATTR* srcOAM, u32 objCount) IWRAM_CODE;
+OBJ_ATTR& UniqueOamHandle::operator*() const
+{
+    return graphics::oam.shadowOAM[graphics::oam.pos[handle]];
+}
+
+void UniqueOamHandle::setAttrs(u16 attr0, u16 attr1, u16 attr2, u16 prio) const
+{
+    auto& obj = operator*();
+    obj.attr0 = attr0;
+    obj.attr1 = attr1;
+    obj.attr2 = attr2;
+    obj.fill = prio;
+}
+
+UniqueOamHandle::UniqueOamHandle(UniqueOamHandle&& other) : handle(other.handle)
+{
+    other.handle = NoObj;
+}
+
+UniqueOamHandle& UniqueOamHandle::operator=(UniqueOamHandle&& other)
+{
+    std::swap(handle, other.handle);
+    return *this;
+}
+
+void OamManager::init()
+{ 
+    // First, initialize the shadow OAM
+    oam_init(shadowOAM, MaxObjs);
+
+    // Then, initialize the pos array, which doubles as a free list array
+    firstFreePos = 0;
+    for (u32 i = 1; i < MaxObjs; i++)
+        pos[i-1] = i;
+    pos[MaxObjs-1] = NoObj;
+
+    objCount = prevObjCount = 0;
+}
+
+u8 OamManager::newHandle()
+{
+    // Assert with an error
+    ASSERT(objCount < MaxObjs);
+
+    u8 nextObj = firstFreePos;
+    firstFreePos = pos[nextObj];
+
+    pos[nextObj] = objCount;
+    idByPos[objCount] = nextObj;
+    objCount++;
+
+    return nextObj;
+}
+
+void OamManager::freeHandle(u8 handle)
+{
+    // Move all the ones back
+    for (u32 i = pos[handle]+1; i < objCount; i++)
+    {
+        pos[idByPos[i]]--;
+        shadowOAM[i-1] = shadowOAM[i];
+        idByPos[i-1] = idByPos[i];
+    }
+    objCount--;
+
+    pos[handle] = firstFreePos;
+    firstFreePos = handle;
+}
 
 void OamManager::copyToOAM()
 {
-#ifndef DISABLE_OAM_SORTING
-    // Sort the objects
-    sortOAM(oam_mem, shadowOAM, objCount);
-#else
+    // Copy to OAM
     oam_copy(oam_mem, shadowOAM, objCount);
-#endif
 
-    // Copy the shadow OAM
     if (objCount < prevObjCount)
         obj_hide_multi(oam_mem + objCount, prevObjCount - objCount);
 
-    // "Reset" the OAM by hiding all objects
     prevObjCount = objCount;
-    objCount = 0;
+
+    mgba::log(mgba::Log::Debug, "Object count: ", objCount);
 }

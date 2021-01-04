@@ -27,6 +27,7 @@ class Player final
     SinglePalettePointer palPtr;
     u16 health, maxHealth, invCounter;
     u16 shootCooldown;
+    UniqueOamHandle oamHandle;
 
 public:
     vec2<s32f16> pos;

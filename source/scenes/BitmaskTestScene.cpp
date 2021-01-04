@@ -8,8 +8,6 @@
 #include "data/sprites/player-projectiles.hpp"
 #include "data/sprites/bitmask-test.hpp"
 
-#include "graphics/graphics.hpp"
-
 #include "gameplay/collision.hpp"
 #include "text/mGBADebugging.hpp"
 #include "util/profile.hpp"
@@ -43,8 +41,8 @@ void BitmaskTestScene::update()
     auto palIndex = 1 + result;
 
     // Push the bitmask test at the center
-    graphics::oam.pushRegular(vec2<int>(pos.x - 4, pos.y - 4), SpriteSize::s8x8_4bpp, 512, 0, 1);
-    graphics::oam.pushRegular(vec2(120 - 16, 80 - 16), SpriteSize::s32x32_4bpp, 513, palIndex, 1);
+    oamHandles[0].setRegular(vec2<int>(pos.x - 4, pos.y - 4), SpriteSize::s8x8_4bpp, 512, 0, 1);
+    oamHandles[1].setRegular(vec2(120 - 16, 80 - 16), SpriteSize::s32x32_4bpp, 513, palIndex, 1);
 
     if (mgba::isEnabled())
         mgba::log(mgba::Log::Debug, "Execution time: ", val, " cycles.");

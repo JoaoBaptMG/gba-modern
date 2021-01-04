@@ -68,6 +68,8 @@ int main()
             popScene = false;
         }
 
+        graphics::oam.sortOAM();
+
         if (mgba::isEnabled())
         {
             auto vcount = REG_VCOUNT;

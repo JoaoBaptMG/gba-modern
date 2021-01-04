@@ -28,6 +28,8 @@ void Explosions::init()
 
 void Explosions::update()
 {
+    u32 prevNumExplosions = numExplosions;
+
     // Update the explosions
     for (u32 i = 0; i < numExplosions;)
     {
@@ -37,6 +39,9 @@ void Explosions::update()
             explosions[i] = explosions[--numExplosions];
         else i++;
     }
+
+    while (--prevNumExplosions >= numExplosions)
+        explosionHandles[prevNumExplosions].obj = UniqueOamHandle::noObj();
 }
 
 void Explosions::pushGraphics()
@@ -46,7 +51,7 @@ void Explosions::pushGraphics()
     {
         auto pos = vec2<int>(explosions[i].pos) - vec2(8, 8);
         auto frame = explosions[i].counter / FramesPerFrame;
-        graphics::oam.pushRegular(pos, SpriteSize::s16x16_4bpp,
+        explosionHandles[i].obj.setRegular(pos, SpriteSize::s16x16_4bpp,
             smallExplosion[frame].getTileId(),
             smallPtr.getPalette(), 1, ExplosionPriority);
     }

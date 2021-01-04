@@ -65,7 +65,7 @@ void PlayerProjectiles::update()
             {
                 if (enemy.damage())
                 {
-                    gameScene().explosions.addSmallExplosion(epos);
+                    //gameScene().explosions.addSmallExplosion(epos);
                     gameScene().enemies.remove(&enemy);
                 }
                 projectiles[i].type = NoProjectile;
@@ -82,10 +82,10 @@ void PlayerProjectiles::update()
 
 void PlayerProjectiles::pushGraphics()
 {
-    u32 attr2add = tilePtr.getTileId() + ATTR2_PALBANK(palPtr.getPalette()) + (graphics::oam.objCount << 16);
-    pushProjectilesToOam(numProjectiles, projectiles, graphics::oam.shadowOAM + graphics::oam.objCount, ProjectileTypes, attr2add);
-    graphics::oam.objCount += numProjectiles;
-    ASSERT(graphics::oam.objCount <= MaxObjs);
+    //u32 attr2add = tilePtr.getTileId() + ATTR2_PALBANK(palPtr.getPalette()) + (graphics::oam.objCount << 16);
+    //pushProjectilesToOam(numProjectiles, projectiles, graphics::oam.shadowOAM + graphics::oam.objCount, ProjectileTypes, attr2add);
+    //graphics::oam.objCount += numProjectiles;
+    //ASSERT(graphics::oam.objCount <= MaxObjs);
 }
 
 GameScene& PlayerProjectiles::gameScene()
