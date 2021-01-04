@@ -26,7 +26,6 @@ class alignas(void*) UnorderedList final
 
     Cell cells[Count];
     Cell* firstFreeCell;
-    LightBitset<Count> usedCells;
 
 public:
     UnorderedList()
@@ -45,7 +44,6 @@ public:
         auto cell = firstFreeCell;
         firstFreeCell = cell->nextFreeCell;
         new (&cell->obj) T(std::forward<Ts>(ts)...);
-        usedCells.set(cell - cells);
 
         return cell->obj;
     }
@@ -60,7 +58,6 @@ public:
         std::launder(&cells[i].obj)->~T();
         cells[i].nextFreeCell = firstFreeCell;
         firstFreeCell = cells+i;
-        usedCells.reset(i);
     }
 
     void remove(T* obj)
@@ -72,10 +69,23 @@ public:
 
     void clear()
     {
-        for (std::size_t i = 0; i < Count; i++)
-            if (usedCells.test(i))
-                std::launder(&cells[i].obj)->~T();
-        usedCells.resetAll();
+        if constexpr (!std::is_trivially_destructible_v<T>)
+        {
+            // Build a list of not used cells
+            LightBitset<Count> freeCells;
+            for (auto cell = firstFreeCell; cell; cell = cell->nextFreeCell)
+                freeCells.set(cell - cells);
+
+            // And then go through the remaining of the cells
+            for (std::size_t i = 0; i < Count; i++)
+                if (!freeCells.test(i))
+                    std::launder(&cells[i].obj)->~T();
+        }
+
+        firstFreeCell = cells;
+        for (std::size_t i = 0; i < Count-1; i++)
+            cells[i].nextFreeCell = cells+(i+1);
+        cells[Count-1].nextFreeCell = nullptr;
     }
 
     UnorderedList(const UnorderedList&) = delete;
@@ -84,106 +94,17 @@ public:
 
     ~UnorderedList()
     {
-        for (std::size_t i = 0; i < Count; i++)
-            if (usedCells.test(i))
-                std::launder(&cells[i].obj)->~T();
+        if constexpr (!std::is_trivially_destructible_v<T>)
+        {
+            // Build a list of not used cells
+            LightBitset<Count> freeCells;
+            for (auto cell = firstFreeCell; cell; cell = cell->nextFreeCell)
+                freeCells.set(cell - cells);
+
+            // And then go through the remaining of the cells
+            for (std::size_t i = 0; i < Count; i++)
+                if (!freeCells.test(i))
+                    std::launder(&cells[i].obj)->~T();
+        }
     }
-
-private:
-    // Implementation trick based on https://stackoverflow.com/a/41306206/
-    // It is a forward iterator
-    template <bool Const>
-    class IteratorDetail final
-    {
-        // A pointer, because we would like to be able to order it
-        UnorderedList *list;
-        std::size_t id;
-
-    public:
-        // Iterator traits
-        using difference_type = std::intmax_t;
-        using value_type = std::conditional_t<Const, const T&, T&>;
-        using pointer = std::remove_reference_t<value_type>*;
-        using reference = value_type;
-        using iterator_category = std::forward_iterator_tag;
-
-        // The default constructors are enough, and the swap as well
-        IteratorDetail() = default;
-        IteratorDetail(const IteratorDetail&) = default;
-        IteratorDetail(IteratorDetail&&) = default;
-        IteratorDetail& operator=(const IteratorDetail&) = default;
-        IteratorDetail& operator=(IteratorDetail&&) = default;
-
-        // Iterator constructor
-        IteratorDetail(UnorderedList* list, std::size_t id)
-            : list(list), id(id) {}
-
-        // Dereference (iterator)
-        reference operator*() { return *std::launder(&list->cells[id].obj); }
-        const reference operator*() const { return *std::launder(&list->cells[id].obj); }
-
-        // Member dereference (input iterator)
-        pointer operator->() { return &operator*(); }
-        const pointer operator->() const { return &operator*(); }
-
-        // Check if the iterator is an end iterator
-        bool isEnd() const { return list == nullptr || id == Count; }
-
-        // Equality operation (input iterator)
-        // All the end iterators compare equal
-        bool operator==(const IteratorDetail& o) const
-        {
-            if (isEnd() || o.isEnd())
-                return isEnd() && o.isEnd();
-            return list == o.list && id == o.id;
-        }
-
-        // Inequality operation (input iterator)
-        bool operator!=(const IteratorDetail& o) const { return !(*this == o); }
-
-        // Pre-increment (input iterator)
-        IteratorDetail& operator++()
-        {
-            // Increment until it founds another used cell
-            for (id++; id < Count; id++)
-                if (list->usedCells.test(id)) break;
-
-            return *this;
-        }
-
-        // Post-increment (input iterator)
-        IteratorDetail operator++(int)
-        {
-            IteratorDetail it(*this);
-            operator++();
-            return it;
-        }
-    };
-
-    // Begin and end
-    template <bool Const>
-    IteratorDetail<Const> begin()
-    {
-        // Find the first used object
-        std::size_t id;
-        for (id = 0; id < Count; id++)
-            if (usedCells.test(id)) break;
-
-        return IteratorDetail<Const>(this, id);
-    }
-
-    template <bool Const>
-    IteratorDetail<Const> end() { return IteratorDetail<Const>(this, Count); }
-
-public:
-    using Iterator = IteratorDetail<false>;
-    using ConstIterator = IteratorDetail<true>;
-
-    Iterator begin() { return begin<false>(); }
-    ConstIterator begin() const { return begin<true>(); }
-    ConstIterator cbegin() const { return begin<true>(); }
-
-    Iterator end() { return end<false>(); }
-    ConstIterator end() const { return end<true>(); }
-    ConstIterator cend() const { return end<true>(); }
 };

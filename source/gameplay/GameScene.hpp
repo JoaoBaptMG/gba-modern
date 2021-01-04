@@ -11,7 +11,7 @@
 #include "Level.hpp"
 #include "Hud.hpp"
 #include "Background.hpp"
-#include "util/UnorderedList.hpp"
+#include "util/UnorderedIterableList.hpp"
 #include "Enemy.hpp"
 #include "EnemyProjectiles.hpp"
 #include "Explosions.hpp"
@@ -35,5 +35,5 @@ public:
     EnemyProjectiles enemyProjectiles;
     Explosions explosions;
 
-    UnorderedList<Enemy, NumEnemies> enemies;
+    UnorderedIterableList<Enemy, NumEnemies> enemies;
 };
