@@ -32,7 +32,7 @@ GameScene::GameScene()
     enemyProjectiles.init();
 
     // Initialize the explosion container
-    //explosions.init();
+    explosions.init();
 
     // Initialize the hud
     hud.init();
@@ -64,7 +64,7 @@ void GameScene::update()
     }
 
     enemyProjectiles.update();
-    //explosions.update();
+    explosions.update();
 
     background.offset.x += s32f8(0.5);
 
@@ -76,5 +76,5 @@ void GameScene::update()
         enemy.updateGraphics();
 
     enemyProjectiles.updateGraphics();
-    //explosions.updateGraphics();
+    explosions.updateGraphics();
 }

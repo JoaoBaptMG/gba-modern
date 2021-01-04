@@ -39,7 +39,7 @@ public:
     UniqueOamHandle& operator=(const UniqueOamHandle&) = delete;
 
     UniqueOamHandle(UniqueOamHandle&& other);
-    UniqueOamHandle& operator=(UniqueOamHandle&&);
+    UniqueOamHandle& operator=(UniqueOamHandle&& other);
 
     OBJ_ATTR& operator*() const;
     OBJ_ATTR* operator->() const { return &operator*(); }

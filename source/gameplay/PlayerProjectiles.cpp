@@ -65,8 +65,8 @@ void PlayerProjectiles::update()
             {
                 if (enemy.damage())
                 {
-                    //gameScene().explosions.addSmallExplosion(epos);
                     gameScene().enemies.remove(&enemy);
+                    gameScene().explosions.addSmallExplosion(epos);
                 }
                 projectiles[i].type = NoProjectile;
                 break;

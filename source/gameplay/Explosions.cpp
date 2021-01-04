@@ -28,20 +28,18 @@ void Explosions::init()
 
 void Explosions::update()
 {
-    u32 prevNumExplosions = numExplosions;
-
     // Update the explosions
     for (u32 i = 0; i < numExplosions;)
     {
         // Update the explosion counter
         explosions[i].counter++;
         if (explosions[i].counter == NumSmallExplosionFrames * FramesPerFrame)
+        {
             explosions[i] = explosions[--numExplosions];
+            explosionHandles[numExplosions].obj = UniqueOamHandle::noObj();
+        }
         else i++;
     }
-
-    while (--prevNumExplosions >= numExplosions)
-        explosionHandles[prevNumExplosions].obj = UniqueOamHandle::noObj();
 }
 
 void Explosions::updateGraphics()

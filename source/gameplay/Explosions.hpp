@@ -40,5 +40,6 @@ public:
         ASSERT(numExplosions < MaxExplosions);
         explosions[numExplosions] = { pos, 0, 0 };
         explosionHandles[numExplosions].obj = UniqueOamHandle();
+        numExplosions++;
     }
 };

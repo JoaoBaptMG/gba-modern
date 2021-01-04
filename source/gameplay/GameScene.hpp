@@ -33,7 +33,7 @@ public:
     Hud hud;
     Background background;
     EnemyProjectiles enemyProjectiles;
-    //Explosions explosions;
+    Explosions explosions;
 
     UnorderedIterableList<Enemy, NumEnemies> enemies;
 };
