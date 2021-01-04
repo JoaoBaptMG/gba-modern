@@ -28,7 +28,7 @@ class PlayerProjectiles final
 public:
     void init();
     void update();
-    void pushGraphics();
+    void updateGraphics();
 
     void add(vec2<s16f7> pos, vec2<s16f7> vel, u16 type)
     {

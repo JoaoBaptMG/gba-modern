@@ -44,7 +44,7 @@ void Explosions::update()
         explosionHandles[prevNumExplosions].obj = UniqueOamHandle::noObj();
 }
 
-void Explosions::pushGraphics()
+void Explosions::updateGraphics()
 {
     // Push the explosion graphics
     for (u32 i = 0; i < numExplosions; i++)

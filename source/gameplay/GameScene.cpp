@@ -69,12 +69,12 @@ void GameScene::update()
     background.offset.x += s32f8(0.5);
 
     // Push the graphics
-    player.pushGraphics();
-    playerProjectiles.pushGraphics();
+    player.updateGraphics();
+    playerProjectiles.updateGraphics();
 
     for (auto& enemy : enemies)
-        enemy.pushGraphics();
+        enemy.updateGraphics();
 
-    enemyProjectiles.pushGraphics();
-    //explosions.pushGraphics();
+    enemyProjectiles.updateGraphics();
+    //explosions.updateGraphics();
 }

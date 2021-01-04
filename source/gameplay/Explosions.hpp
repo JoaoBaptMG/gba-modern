@@ -33,7 +33,7 @@ class Explosions final
 public:
     void init();
     void update();
-    void pushGraphics();
+    void updateGraphics();
 
     inline void addSmallExplosion(vec2<s16> pos)
     {

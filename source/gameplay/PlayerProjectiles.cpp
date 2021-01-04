@@ -80,7 +80,7 @@ void PlayerProjectiles::update()
         [](const Projectile& proj) { return proj.type == NoProjectile; }) - projectiles;
 }
 
-void PlayerProjectiles::pushGraphics()
+void PlayerProjectiles::updateGraphics()
 {
     //u32 attr2add = tilePtr.getTileId() + ATTR2_PALBANK(palPtr.getPalette()) + (graphics::oam.objCount << 16);
     //pushProjectilesToOam(numProjectiles, projectiles, graphics::oam.shadowOAM + graphics::oam.objCount, ProjectileTypes, attr2add);

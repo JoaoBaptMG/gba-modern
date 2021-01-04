@@ -35,7 +35,7 @@ public:
     Player() {}
     void init(s32f16 x, s32f16 y);
     void update();
-    void pushGraphics();
+    void updateGraphics();
 
     u16 getHealth() const { return health; }
     u16 getMaxHealth() const { return maxHealth; }

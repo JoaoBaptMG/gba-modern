@@ -52,7 +52,7 @@ private:
 public:
     Enemy(EnemyScript script, GameScene* gameScene);
     void update();
-    void pushGraphics();
+    void updateGraphics();
     ~Enemy();
 
     // Called by script

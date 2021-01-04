@@ -99,7 +99,7 @@ void Player::damage(int amount)
     }
 }
 
-void Player::pushGraphics()
+void Player::updateGraphics()
 {
     // Push the sprite
     auto dp = vec2<int>(pos) - PlayerSize/2;

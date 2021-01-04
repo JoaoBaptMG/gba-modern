@@ -60,7 +60,7 @@ void Enemy::update()
     if (invCounter > 0) invCounter--;
 }
 
-void Enemy::pushGraphics()
+void Enemy::updateGraphics()
 {
     // Push the sprite, but only if the invCounter is not active
     auto dp = vec2<int>(pos) - SizeUtils::pixelSize(sprSize)/2;

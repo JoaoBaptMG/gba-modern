@@ -73,7 +73,7 @@ void EnemyProjectiles::update()
     }
 }
 
-void EnemyProjectiles::pushGraphics()
+void EnemyProjectiles::updateGraphics()
 {
     profile::begin32();
     //u32 attr2add = tilePtr.getTileId() + ATTR2_PALBANK(palPtr.getPalette()) + (graphics::oam.objCount << 16);
