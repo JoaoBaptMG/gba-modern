@@ -30,12 +30,22 @@ namespace mgba
         *REG_DEBUG_ENABLE = 0;
     }
 
+    class LogStringBuilder : public InplaceStringBuilder<255>
+    {
+        Log level;
+
+    public:
+        LogStringBuilder(Log level) : InplaceStringBuilder<255>(REG_DEBUG_STRING), level(level) {}
+        ~LogStringBuilder()
+        {
+            getString();
+            *REG_DEBUG_FLAGS = static_cast<u16>(level) | 0x100;
+        }
+    };
+
     template <typename... Ts>
     inline static void log(Log level, Ts&&... vs)
     {
-        InplaceStringBuilder<255> sb(REG_DEBUG_STRING);
-        sb.append(std::forward<Ts>(vs)...);
-        sb.getString(); // Important, to set the last equal to zero
-        *REG_DEBUG_FLAGS = static_cast<u16>(level) | 0x100;
+        LogStringBuilder(level).append(std::forward<Ts>(vs)...);
     }
 }

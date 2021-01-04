@@ -36,6 +36,11 @@ class InplaceStringBuilder
 public:
     InplaceStringBuilder(char* buffer) : cur(0), buffer(buffer) { buffer[0] = 0; }
 
+    // Disable copying and moving
+    InplaceStringBuilder(const InplaceStringBuilder&) = delete;
+    InplaceStringBuilder(InplaceStringBuilder&&) = delete;
+    InplaceStringBuilder& operator=(InplaceStringBuilder) = delete;
+
     void append(char ch)
     {
         if (cur < N) buffer[cur++] = ch;
