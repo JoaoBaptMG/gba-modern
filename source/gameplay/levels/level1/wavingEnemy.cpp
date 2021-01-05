@@ -47,6 +47,6 @@ void wavingEnemy(Enemy& enemy, GameScene& gameScene, u32 frameToShoot)
 
     HANDLE_TERM(enemy.waitForFrames(frameToShoot));
 
-    gameScene.enemyProjectiles.add(vec2<s16f7>(enemy.pos + vec2(-11, -7)), vec2<s16f7>(-ProjectileSpeed, 0), 1);
-    gameScene.enemyProjectiles.add(vec2<s16f7>(enemy.pos + vec2(-11, 7)), vec2<s16f7>(-ProjectileSpeed, 0), 1);
+    gameScene.projectiles.addEnemyProjectile(vec2<s16f7>(enemy.pos + vec2(-11, -7)), vec2<s16f7>(-ProjectileSpeed, 0), 1);
+    gameScene.projectiles.addEnemyProjectile(vec2<s16f7>(enemy.pos + vec2(-11, 7)), vec2<s16f7>(-ProjectileSpeed, 0), 1);
 }

@@ -7,13 +7,12 @@
 
 #include "scenes/IScene.hpp"
 #include "Player.hpp"
-#include "PlayerProjectiles.hpp"
 #include "Level.hpp"
 #include "Hud.hpp"
 #include "Background.hpp"
 #include "util/UnorderedIterableList.hpp"
 #include "Enemy.hpp"
-#include "EnemyProjectiles.hpp"
+#include "Projectiles.hpp"
 #include "Explosions.hpp"
 
 constexpr int HudSize = 16;
@@ -28,11 +27,10 @@ public:
     virtual ~GameScene() {}
 
     Player player;
-    PlayerProjectiles playerProjectiles;
     Level level;
     Hud hud;
     Background background;
-    EnemyProjectiles enemyProjectiles;
+    Projectiles projectiles;
     Explosions explosions;
 
     UnorderedIterableList<Enemy, NumEnemies> enemies;

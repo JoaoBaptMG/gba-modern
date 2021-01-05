@@ -13,7 +13,7 @@
 #include "data/sounds/player-shot.hpp"
 #include "data/sounds/player-dmg.hpp"
 
-constexpr int PlayerPriority = 8;
+constexpr int PlayerPriority = 16;
 constexpr s32f16 PlayerSpeed = 1.0; // pixels per frame
 constexpr int CommonCooldown = 8; // frames
 constexpr s16f7 ProjectileSpeed = 4.0; // pixels per frame
@@ -57,13 +57,13 @@ void Player::update()
             constexpr s32f16 Sin5 = gcem_d::sin(5);
 
             shootCooldown = CommonCooldown;
-            gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2, pos.y),
+            gameScene().projectiles.addPlayerProjectile(vec2<s16f7>(pos.x + PlayerWidth/2, pos.y),
                 vec2<s16f7>(ProjectileSpeed, 0), 0);
             
-            gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2 - 4, pos.y + 6),
+            gameScene().projectiles.addPlayerProjectile(vec2<s16f7>(pos.x + PlayerWidth/2 - 4, pos.y + 6),
                 vec2<s16f7>(Cos5 * ProjectileSpeed, Sin5 * ProjectileSpeed), 0);
             
-            gameScene().playerProjectiles.add(vec2<s16f7>(pos.x + PlayerWidth/2 - 4, pos.y - 6),
+            gameScene().projectiles.addPlayerProjectile(vec2<s16f7>(pos.x + PlayerWidth/2 - 4, pos.y - 6),
                 vec2<s16f7>(Cos5 * ProjectileSpeed, -Sin5 * ProjectileSpeed), 0);
 
             audio::playSound(data::sounds::player_shot.wav, 0.75);

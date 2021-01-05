@@ -13,7 +13,7 @@
 using Stack = std::array<std::byte, 256>;
 STACKPTR UnorderedList<Stack, NumEnemies> allStacks EWRAM_BSS;
 
-constexpr auto EnemyPriority = 6;
+constexpr auto EnemyPriority = 12;
 
 struct EnemyArgs
 {

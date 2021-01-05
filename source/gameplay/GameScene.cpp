@@ -29,8 +29,7 @@ GameScene::GameScene()
 
     // Initialize the projectile containers
     graphics::oam.setProjectilePrio(6);
-    playerProjectiles.init();
-    enemyProjectiles.init();
+    projectiles.init();
 
     // Initialize the explosion container
     explosions.init();
@@ -45,6 +44,7 @@ GameScene::GameScene()
 void GameScene::vblank()
 {
     hud.vblank();
+    projectiles.vblank();
     background.vblank();
 }
 
@@ -52,7 +52,6 @@ void GameScene::update()
 {
     // Update everything
     player.update();
-    playerProjectiles.update();
     level.update();
     hud.update();
 
@@ -64,18 +63,17 @@ void GameScene::update()
             enemies.remove(&enemy);
     }
 
-    enemyProjectiles.update();
+    projectiles.update();
     explosions.update();
 
     background.offset.x += s32f8(0.5);
 
     // Push the graphics
     player.updateGraphics();
-    playerProjectiles.updateGraphics();
 
     for (auto& enemy : enemies)
         enemy.updateGraphics();
 
-    enemyProjectiles.updateGraphics();
     explosions.updateGraphics();
+    projectiles.updateGraphics();
 }
