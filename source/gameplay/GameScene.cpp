@@ -28,6 +28,7 @@ GameScene::GameScene()
     player.init(PlayerWidth + 8, SCREEN_HEIGHT/2);
 
     // Initialize the projectile containers
+    graphics::oam.setProjectilePrio(6);
     playerProjectiles.init();
     enemyProjectiles.init();
 

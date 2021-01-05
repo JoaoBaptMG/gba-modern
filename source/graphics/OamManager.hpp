@@ -103,11 +103,11 @@ public:
 
 class OamManager final
 {
-    // The required array and size
-    u32 objCount, prevObjCount;
     alignas(void*) OBJ_ATTR shadowOAM[MaxObjs]; // This is stored and persistent
     u8 pos[MaxObjs], idByPos[MaxObjs];          // position on the shadow OAM table
-    u32 firstFreePos;                           // the first free position
+    u16 firstFreePos, projectilePrio;           // the first free position
+    u16 objCount, prevObjCount;                 // The required array and size
+    u16 preProjPos, prevPreProjPos;             // The position of the pre-projectile objects
 
     u8 newHandle();
     void freeHandle(u8 handle);
@@ -118,7 +118,10 @@ public:
     void sortOAM() IWRAM_CODE;
     void copyToOAM();
 
-    u32 size() const { return objCount; }
+    void setProjectilePrio(u32 prio) { projectilePrio = prio; }
+    u32 getProjectilePrio() const { return projectilePrio; }
+    u32 getPreProjPos() const { return preProjPos; }
+    u32 getObjCount() const { return objCount; }
 
     friend class UniqueOamHandle;
 };

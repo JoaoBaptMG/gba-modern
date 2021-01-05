@@ -53,6 +53,7 @@ void OamManager::init()
     pos[MaxObjs-1] = NoObj;
 
     objCount = prevObjCount = 0;
+    projectilePrio = 0;
 }
 
 u8 OamManager::newHandle()
@@ -87,13 +88,18 @@ void OamManager::freeHandle(u8 handle)
 
 void OamManager::copyToOAM()
 {
-    // Copy to OAM
-    oam_copy(oam_mem, shadowOAM, objCount);
+    u32 postProjObjs = objCount - preProjPos;
+    u32 prevPostProjObjs = prevObjCount - prevPreProjPos;
 
-    if (objCount < prevObjCount)
-        obj_hide_multi(oam_mem + objCount, prevObjCount - objCount);
+    // Copy to OAM and to its back
+    oam_copy(oam_mem, shadowOAM, preProjPos);
+    oam_copy(oam_mem+MaxObjs-postProjObjs, shadowOAM+preProjPos, postProjObjs);
 
+    if (preProjPos < prevPreProjPos)
+        obj_hide_multi(oam_mem+preProjPos, prevPreProjPos - preProjPos);
+    if (postProjObjs < prevPostProjObjs)
+        obj_hide_multi(oam_mem+MaxObjs-prevPostProjObjs, prevPostProjObjs - postProjObjs);
+    
     prevObjCount = objCount;
-
-    mgba::log(mgba::Log::Debug, "Object count: ", objCount);
+    prevPreProjPos = preProjPos;
 }

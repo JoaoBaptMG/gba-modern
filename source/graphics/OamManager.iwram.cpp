@@ -34,4 +34,8 @@ void OamManager::sortOAM()
         for (u8 i = 1; i < objCount; i++) sortPhase(i);
         for (u8 i = objCount-1; i > 0; i--) sortPhase(i);
     }
+
+    // Select the projectile position
+    preProjPos = std::lower_bound(shadowOAM, shadowOAM+objCount, projectilePrio,
+        [](const OBJ_ATTR& obj, int prio) { return (obj.fill & 127) < prio; }) - shadowOAM;
 }
