@@ -49,3 +49,7 @@ struct Font final
     }
 };
 
+struct FontHandle final
+{
+    Font ttf;
+};

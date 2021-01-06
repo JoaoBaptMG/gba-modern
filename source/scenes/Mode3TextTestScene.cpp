@@ -18,7 +18,7 @@ static const char String[] =
     u8"by\nwriting an extensive amount of\ntext, so we can hopefully\nmeasure its performance.";
 #endif
 
-Mode3TextTestScene::Mode3TextTestScene() : IScene(), writer(data::fonts::monogram_extended, vid_mem)
+Mode3TextTestScene::Mode3TextTestScene() : IScene(), writer(data::fonts::monogram_extended.ttf, vid_mem)
 {
     // Set the display registers
     REG_DISPCNT = DCNT_MODE3 | DCNT_BG2;

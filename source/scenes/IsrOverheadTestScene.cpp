@@ -21,7 +21,7 @@ void vcountInterrupt()
     REG_TM2CNT = TM_IRQ | TM_ENABLE;
 }
 
-IsrOverheadTestScene::IsrOverheadTestScene() : IScene(), writer(data::fonts::monogram_extended, vid_mem)
+IsrOverheadTestScene::IsrOverheadTestScene() : IScene(), writer(data::fonts::monogram_extended.ttf, vid_mem)
 {
     // Set the display registers
     REG_DISPCNT = DCNT_MODE3 | DCNT_BG2;

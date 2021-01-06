@@ -182,7 +182,7 @@ int fontExport(int argc, char **argv)
         hof << "#include \"data/Font.hpp\"" << std::endl << std::endl;
         hof << "namespace " << name.nmspace << std::endl;
         hof << "{" << std::endl;
-        hof << "    extern const Font " << name.fileName << ';' << std::endl;
+        hof << "    extern const FontHandle " << name.fileName << ';' << std::endl;
         hof << "}" << std::endl << std::endl;
     }
 
