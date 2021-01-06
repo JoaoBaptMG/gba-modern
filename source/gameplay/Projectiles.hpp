@@ -32,8 +32,8 @@ class Projectiles final
     void updatePlayerProjectiles();
     void updateEnemyProjectiles();
 
-    void computeClusters(u32* clusterPos);
-    void fillOAM(const u32* clusterPos);
+    void computeClusters(u16* clusterPos);
+    void fillOAM(const u16* clusterPos);
 
     Projectile playerProjectiles[MaxPlayerProjectiles];
     Projectile enemyProjectiles[MaxEnemyProjectiles];
@@ -43,6 +43,7 @@ class Projectiles final
     SinglePalettePointer playerPalPtr, enemyPalPtr;
 
     u16 projectileClusters[MaxClusters+1];
+    u16 clusterPositions[MaxClusters+1];
 
 public:
     void init();
@@ -73,5 +74,7 @@ public:
         ASSERT(numEnemyProjectiles < MaxEnemyProjectiles);
         enemyProjectiles[numEnemyProjectiles++] = { pos, vel, type, arg };
     }
+
+    u32 getTotalNumProjectiles() const { return numPlayerProjectiles + numEnemyProjectiles; }
 };
 

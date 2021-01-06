@@ -8,7 +8,7 @@
 #include "ProjectileDefinition.hpp"
 
 constexpr auto OfsY = 16;
-void Projectiles::computeClusters(u32* clusterPos)
+void Projectiles::computeClusters(u16* clusterPos)
 {
     // If we have too few sprites, no clustering is necessary, we can save a lot of cycles
     u32 maxObjsInCluster = MaxObjs - graphics::oam.getObjCount();
@@ -74,7 +74,7 @@ void Projectiles::computeClusters(u32* clusterPos)
 #pragma GCC optimize ("no-unroll-loops")
 #pragma GCC optimize ("no-peel-loops")
 
-void Projectiles::fillOAM(const u32* clusterPos)
+void Projectiles::fillOAM(const u16* clusterPos)
 {
     constexpr auto MaxPriorities = 15;
     // Now, we're going to do a counting sort by priority (we can use an u8 here)

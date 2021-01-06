@@ -40,6 +40,9 @@ void Projectiles::init()
 
     playerPalPtr = SinglePalettePointer(playerPalette);
     enemyPalPtr = SinglePalettePointer(enemyPalette);
+
+    for (u32 i = 0; i < MaxClusters+1; i++)
+        clusterPositions[i] = 512;
 }
 
 void Projectiles::update()
@@ -124,9 +127,8 @@ void Projectiles::updateGraphics()
 {
     // (the function is separated because we don't need the clusters later, so we can spare some stack)
     profile::begin16();
-    u32 clusterPos[MaxClusters];
-    computeClusters(clusterPos);
-    fillOAM(clusterPos);
+    computeClusters(clusterPositions);
+    fillOAM(clusterPositions);
     auto cycles = profile::end16();
 
     if (frame++ == 5)
@@ -139,11 +141,23 @@ void Projectiles::updateGraphics()
 void Projectiles::vblank()
 {
     // Copy the projectiles to OAM
-    u32 preProjPros = graphics::oam.getPreProjPos();
+    u32 preProjPos = graphics::oam.getPreProjPos();
     u32 maxProjectiles = MaxObjs - graphics::oam.getObjCount();
 
-    oam_copy(oam_mem + preProjPros, projectileOAM, projectileClusters[1]);
-    obj_hide_multi(oam_mem + preProjPros + projectileClusters[1], maxProjectiles - projectileClusters[1]);
+    oam_copy(oam_mem + preProjPos, projectileOAM, projectileClusters[1]);
+    obj_hide_multi(oam_mem + preProjPos + projectileClusters[1], maxProjectiles - projectileClusters[1]);
+
+    // Get the other clusters
+    for (u32 i = 0; clusterPositions[i] != 512; i++)
+    {
+        int line = clusterPositions[i] - OfsY;
+        if (line < 0) break;
+
+        u32 begin = projectileClusters[i+1];
+        u32 numObjects = projectileClusters[i+2] - begin;
+        graphics::hblankEffects.add32(line, projectileOAM + begin, 
+            oam_mem + preProjPos, numObjects * sizeof(OBJ_ATTR) / sizeof(u32));
+    }
 }
 
 GameScene& Projectiles::gameScene()
