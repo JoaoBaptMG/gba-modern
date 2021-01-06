@@ -68,7 +68,7 @@ int main()
             popScene = false;
         }
 
-        graphics::oam.sortOAM();
+        graphics::postUpdate();
 
         if (mgba::isEnabled())
         {

@@ -53,8 +53,8 @@ void Hud::vblank()
 void Hud::update()
 {
     // Add the two effects
-    graphics::hdma.addHdma16(HudSize, &clearAlpha, (void*)&REG_BLDY, 1);
-    graphics::hdma.addHdma16(SCREEN_HEIGHT - HudSize, &reloadAlpha, (void*)&REG_BLDY, 1);
+    graphics::hblankEffects.add16(HudSize, &clearAlpha, (void*)&REG_BLDY, 1);
+    graphics::hblankEffects.add16(SCREEN_HEIGHT - HudSize, &reloadAlpha, (void*)&REG_BLDY, 1);
 }
 
 GameScene& Hud::gameScene()

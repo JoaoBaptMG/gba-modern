@@ -24,7 +24,7 @@ static u16 palettesUsed EWRAM_BSS, palettesToFree EWRAM_BSS;
 
 static BuddyObjectAllocator buddy EWRAM_BSS;
 OamManager graphics::oam IWRAM_DATA;
-HblankDma graphics::hdma IWRAM_DATA;
+HblankEffects graphics::hblankEffects IWRAM_DATA;
 
 void graphics::init()
 {
@@ -34,11 +34,14 @@ void graphics::init()
     palettesUsed = 0;
     palettesToFree = 0;
     oam.init();
-    hdma.init();
+    hblankEffects.init();
 }
 
 void graphics::vblank()
 {
+    // Update the hblank
+    hblankEffects.vblank();
+
     // Do all the DMA commands
     u32* ptr = copyBuffer;
     while (ptr < copyBuffer+copyCount)
@@ -77,9 +80,6 @@ void graphics::vblank()
 
     // Copy to shadow OAM
     oam.copyToOAM();
-
-    // Update the hblank
-    hdma.vblank();
 }
 
 void graphics::update()
@@ -87,6 +87,12 @@ void graphics::update()
     // Commit the free tiles and the free palettes so we do not get the nasty bug
     buddy.commitFreeBlocks();
     commitFreePalettes();
+}
+
+void graphics::postUpdate()
+{
+    oam.sortOAM();
+    hblankEffects.flush();
 }
 
 void* graphics::newCopyCommand32(void* dst, u16 count)

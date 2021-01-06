@@ -9,7 +9,7 @@
 #include <array>
 
 #include "OamManager.hpp"
-#include "HblankDma.hpp"
+#include "HblankEffects.hpp"
 #include "SpriteSize.hpp"
 
 namespace graphics
@@ -25,6 +25,9 @@ namespace graphics
 
     // Updates the graphics module
     void update();
+
+    // Run after the entire frame
+    void postUpdate();
 
     // Schedule a DMA copy
     void* newCopyCommand32(void* dst, u16 count);
@@ -57,5 +60,5 @@ namespace graphics
     extern OamManager oam;
 
     // The HDMA manager
-    extern HblankDma hdma;
+    extern HblankEffects hblankEffects;
 }
