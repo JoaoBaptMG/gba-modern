@@ -27,7 +27,7 @@ SoundData loadWavFile(std::string file)
 
     if (!checkMagic(in, "RIFF"))
         throw std::domain_error("File " + file + " is not a valid RIFF file!");
-    auto chunkSize = readOne<std::uint32_t>(in);
+    readOne<std::uint32_t>(in);
     if (!checkMagic(in, "WAVE"))
         throw std::domain_error("File " + file + " is not a valid wave file!");
 
@@ -62,15 +62,28 @@ SoundData loadWavFile(std::string file)
     if (bitsPerSample != 8 && bitsPerSample != 16)
         throw std::domain_error("Invalid bits per sample value for file " + file + "!");
 
+    // Now, we are going to skip any data formats
+    bool hasData = false;
+    while (!in.eof())
+    {
+        if (checkMagic(in, "data"))
+        {
+            hasData = true;
+            break;
+        }
+        else
+        {
+            // Skip entire chunks
+            auto skipSize = readOne<std::uint32_t>(in);
+            in.seekg(skipSize, std::ios::cur);
+        }
+    }
+
     // Now, for the data format
-    if (!checkMagic(in, "data"))
+    if (!hasData)
         throw std::domain_error("Expected data chunk for file " + file + "!");
 
     auto dataSize = readOne<std::uint32_t>(in);
-
-    // Check for data consistency again
-    if (chunkSize != 36 + dataSize)
-        throw std::domain_error("Inconsistent size for file " + file + "!");
 
     SoundData sound;
     sound.samplingFreq = sourceSampleRate;
