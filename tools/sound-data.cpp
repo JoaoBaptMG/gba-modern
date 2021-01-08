@@ -242,7 +242,7 @@ float estimateIndexCodingSize(const std::vector<int>& val)
 
 void testCompression(const std::vector<float>& data)
 {
-    constexpr auto PacketSize = 4096;
+    constexpr auto PacketSize = 352;
     auto numPackets = data.size() / PacketSize;
 
     float accumMinSize = 0;
@@ -254,6 +254,9 @@ void testCompression(const std::vector<float>& data)
 
         auto ptr = data.data() + j * PacketSize;
         std::transform(ptr, ptr + PacketSize, byteSamples.begin(), floatToUnsigned8bitPcm);
+
+        std::vector<int> verbatim(PacketSize);
+        std::copy(byteSamples.begin(), byteSamples.end(), verbatim.begin());
 
         std::vector<int> constantResidual(PacketSize - 1);
         for (std::size_t i = 0; i < constantResidual.size(); i++)
@@ -269,10 +272,13 @@ void testCompression(const std::vector<float>& data)
 
         std::cout << "Packet #" << j << std::endl;
 
+        auto verbatimHuffmanSize = estimateHuffmanSize(verbatim);
         auto constantHuffmanSize = 1 + estimateHuffmanSize(constantResidual);
         auto linearHuffmanSize = 2 + estimateHuffmanSize(linearResidual);
         auto quadraticHuffmanSize = 3 + estimateHuffmanSize(quadraticResidual);
 
+        std::cout << "Total Huffman size for verbatim: " << verbatimHuffmanSize << " bytes ("
+                    << (100 * verbatimHuffmanSize / PacketSize) << "% rate)" << std::endl;
         std::cout << "Total Huffman size for constant predictor: " << constantHuffmanSize << " bytes ("
             << (100 * constantHuffmanSize / PacketSize) << "% rate)" << std::endl;
         std::cout << "Total Huffman size for linear predictor: " << linearHuffmanSize << " bytes ("
@@ -291,7 +297,7 @@ void testCompression(const std::vector<float>& data)
         std::cout << "Total index coding size for quadratic predictor: " << quadraticIndexCodingSize << " bytes ("
             << (100 * quadraticIndexCodingSize / PacketSize) << "% rate)" << std::endl << std::endl;
 
-        accumMinSize += std::min({ constantHuffmanSize, linearHuffmanSize, quadraticHuffmanSize,
+        accumMinSize += std::min({ verbatimHuffmanSize, constantHuffmanSize, linearHuffmanSize, quadraticHuffmanSize,
             constantIndexCodingSize, linearIndexCodingSize, quadraticIndexCodingSize, (float)PacketSize });
     }
 
