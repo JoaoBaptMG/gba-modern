@@ -145,7 +145,8 @@ void Projectiles::vblank()
     u32 maxProjectiles = MaxObjs - graphics::oam.getObjCount();
 
     oam_copy(oam_mem + preProjPos, projectileOAM, projectileClusters[1]);
-    obj_hide_multi(oam_mem + preProjPos + projectileClusters[1], maxProjectiles - projectileClusters[1]);
+    if (projectileClusters[1] < maxProjectiles)
+        obj_hide_multi(oam_mem + preProjPos + projectileClusters[1], maxProjectiles - projectileClusters[1]);
 
     // Get the other clusters
     for (u32 i = 0; clusterPositions[i] != 512; i++)
