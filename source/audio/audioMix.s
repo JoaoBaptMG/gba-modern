@@ -153,8 +153,8 @@ audioMix:
     ldmia   r0!, {r4-r5}            @ load 4 samples at once (they're interleaved)
     sub     r4, r4, lr              @ subtract the channel bias
     sub     r5, r5, lr              @ subtract the channel bias
-    and     r4, r12, r4, lsr #4     @ modulate the volume and wrap it back
-    and     r5, r12, r5, lsr #4     @ do the same for the odd samples
+    and     r4, r12, r4, lsr #5     @ modulate the volume and wrap it back (doing some internal attenuation)
+    and     r5, r12, r5, lsr #5     @ do the same for the odd samples 
     orr     r4, r4, r5, lsl #8      @ compose the samples again
     str     r5, [r1], #4            @ store them away
     subs    r3, #1                  @ check if there are more interactions
