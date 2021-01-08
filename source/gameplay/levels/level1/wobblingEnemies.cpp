@@ -12,6 +12,9 @@
 #include "gameplay/vecUtils.hpp"
 #include "gameplay/GameScene.hpp"
 
+#include "audio/audio.hpp"
+#include "data/sounds/enemy-shot1.hpp"
+
 // Declaration
 static StillImageAllocator image EWRAM_BSS(data::sprites::wobbling_enemy.png.tiles, SpriteSize::s16x16_4bpp);
 static SinglePaletteAllocator palette EWRAM_BSS(data::sprites::wobbling_enemy.png.palette);
@@ -76,4 +79,6 @@ void shootTowardsPlayer(Enemy& enemy, GameScene& gameScene)
         auto vel = vec * WobblingProjectileSpeed;
         gameScene.projectiles.addEnemyProjectile(vec2<s16f7>(enemy.pos), vec2<s16f7>(vel), 0);
     }
+
+    audio::playSound(data::sounds::enemy_shot1.wav, 0.5);
 }

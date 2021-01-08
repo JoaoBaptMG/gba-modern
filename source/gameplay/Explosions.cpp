@@ -7,6 +7,9 @@
 
 #include "data/sprites/small-explosion.hpp"
 
+#include "audio/audio.hpp"
+#include "data/sounds/explosion1.hpp"
+
 constexpr auto ExplosionPriority = 16;
 constexpr u32 FramesPerFrame = 4; // GBA frames / animation frame
 
@@ -53,4 +56,13 @@ void Explosions::updateGraphics()
             smallExplosion[frame].getTileId(),
             smallPtr.getPalette(), 1, ExplosionPriority);
     }
+}
+
+void Explosions::addSmallExplosion(vec2<s16> pos)
+{
+    ASSERT(numExplosions < MaxExplosions);
+    audio::playSound(data::sounds::explosion1.wav, 0.75);
+    explosions[numExplosions] = { pos, 0, 0 };
+    explosionHandles[numExplosions].obj = UniqueOamHandle();
+    numExplosions++;
 }

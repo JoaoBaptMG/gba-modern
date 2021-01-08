@@ -35,11 +35,5 @@ public:
     void update();
     void updateGraphics();
 
-    inline void addSmallExplosion(vec2<s16> pos)
-    {
-        ASSERT(numExplosions < MaxExplosions);
-        explosions[numExplosions] = { pos, 0, 0 };
-        explosionHandles[numExplosions].obj = UniqueOamHandle();
-        numExplosions++;
-    }
+    void addSmallExplosion(vec2<s16> pos);
 };

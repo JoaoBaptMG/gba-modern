@@ -13,6 +13,9 @@
 #include "gameplay/vecUtils.hpp"
 #include "util/generateTable.hpp"
 
+#include "audio/audio.hpp"
+#include "data/sounds/enemy-shot1.hpp"
+
 constexpr s32f16 MoveSpeed = 0.5;
 constexpr double ProjectileSpeed = 0.9;
 constexpr auto NumProjectiles = 16;
@@ -53,8 +56,9 @@ void bigLurker(Enemy& enemy, GameScene& gameScene, s32f16 y)
 
         for (const auto& vel : Directions[cluster&1])
             gameScene.projectiles.addEnemyProjectile(vec2<s16f7>(pos), vel - evel, 2);
-        cluster++;
 
+        audio::playSound(data::sounds::enemy_shot1.wav, 0.75);
+        cluster++;
         HANDLE_TERM(enemy.waitForFrames(20));
     }
 }

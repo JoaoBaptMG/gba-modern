@@ -9,6 +9,9 @@
 #include <array>
 #include <cstddef>
 
+#include "audio/audio.hpp"
+#include "data/sounds/enemy-dmg.hpp"
+
 // Provide outside storage for the stack
 using Stack = std::array<std::byte, 256>;
 STACKPTR UnorderedList<Stack, NumEnemies> allStacks EWRAM_BSS;
@@ -83,6 +86,7 @@ bool Enemy::damage(int amount)
 
     if (health > amount)
     {
+        audio::playSound(data::sounds::enemy_dmg.wav, 0.5);
         health -= amount;
         invCounter = 2;
         return false;

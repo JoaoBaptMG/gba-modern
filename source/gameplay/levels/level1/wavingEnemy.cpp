@@ -14,6 +14,9 @@
 #include "gameplay/GameScene.hpp"
 #include "util/generateTable.hpp"
 
+#include "audio/audio.hpp"
+#include "data/sounds/enemy-shot2.hpp"
+
 // Declaration
 static StillImageAllocator image EWRAM_BSS(data::sprites::waving_enemy.png.tiles, SpriteSize::s16x16_4bpp);
 static SinglePaletteAllocator palette EWRAM_BSS(data::sprites::waving_enemy.png.palette);
@@ -47,6 +50,10 @@ void wavingEnemy(Enemy& enemy, GameScene& gameScene, u32 frameToShoot)
 
     HANDLE_TERM(enemy.waitForFrames(frameToShoot));
 
-    gameScene.projectiles.addEnemyProjectile(vec2<s16f7>(enemy.pos + vec2(-11, -7)), vec2<s16f7>(-ProjectileSpeed, 0), 1);
-    gameScene.projectiles.addEnemyProjectile(vec2<s16f7>(enemy.pos + vec2(-11, 7)), vec2<s16f7>(-ProjectileSpeed, 0), 1);
+    if (enemy.onScreen())
+    {
+        gameScene.projectiles.addEnemyProjectile(vec2<s16f7>(enemy.pos + vec2(-11, -7)), vec2<s16f7>(-ProjectileSpeed, 0), 1);
+        gameScene.projectiles.addEnemyProjectile(vec2<s16f7>(enemy.pos + vec2(-11, 7)), vec2<s16f7>(-ProjectileSpeed, 0), 1);
+        audio::playSound(data::sounds::enemy_shot2.wav, 0.8);
+    }
 }
