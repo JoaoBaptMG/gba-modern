@@ -43,6 +43,12 @@ void Hud::init()
     // Set the score SBB to the correct place
     for (u32 i = 0; i < NumScoreTiles; i++)
         se_mem[31][ScoreTileBase + i] = SE_PALBANK(15) | (ScoreTiles + i);
+
+    // Set the two graphic effects
+    clearAlpha = 0;
+    reloadAlpha = 12;
+
+    REG_BLDY = reloadAlpha;
 }
 
 void Hud::vblank()
