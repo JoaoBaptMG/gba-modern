@@ -14,7 +14,8 @@
 #include "util/generateTable.hpp"
 
 constexpr s32f16 MoveSpeed = 0.5;
-constexpr double ProjectileSpeed = 0.3;
+constexpr double ProjectileSpeed = 0.9;
+constexpr auto NumProjectiles = 16;
 
 // Declaration
 static StillImageAllocator image EWRAM_BSS(data::sprites::big_lurker.png.tiles, SpriteSize::s32x32_4bpp);
@@ -31,23 +32,29 @@ void bigLurker(Enemy& enemy, GameScene& gameScene, s32f16 y)
     enemy.palPtr = SinglePalettePointer(palette);
     enemy.health = 32;
 
-    constexpr auto NumProjectiles = 24;
-
     HANDLE_TERM(enemy.waitForFrames(60));
-    while (enemy.onScreen())
+
+    constexpr auto Generator = [](u32 j)
     {
-        static const auto Directions = generateTable<NumProjectiles>([](u32 i)
-        { 
-            double deg = 360.0 * i / NumProjectiles; 
+        return generateTable<NumProjectiles>([j](u32 i)
+        {
+            double deg = 360.0 * (i + 0.5 * j) / NumProjectiles; 
             return vec2<s16f7>(gcem_d::cos(deg) * ProjectileSpeed, gcem_d::sin(deg) * ProjectileSpeed);
         });
+    };
 
+    static const std::array Directions{Generator(0), Generator(1)};
+
+    u32 cluster = 0;
+    while (enemy.onScreen() && cluster < 14)
+    {
         auto pos = vec2<s16f7>(enemy.pos);
         auto evel = vec2<s16f7>(MoveSpeed, 0);
 
-        for (const auto& vel : Directions)
+        for (const auto& vel : Directions[cluster&1])
             gameScene.projectiles.addEnemyProjectile(vec2<s16f7>(pos), vel - evel, 2);
+        cluster++;
 
-        HANDLE_TERM(enemy.waitForFrames(30));
+        HANDLE_TERM(enemy.waitForFrames(20));
     }
 }

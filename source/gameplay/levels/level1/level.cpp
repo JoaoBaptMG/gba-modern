@@ -33,5 +33,8 @@ void level1(LevelContext& level)
     level.at(16);
     level.addEnemy([](Enemy& enemy, GameScene& gameScene) { bigLurker(enemy, gameScene, 40); });
 
+    level.after(1.5);
+    level.addEnemy([](Enemy& enemy, GameScene& gameScene) { bigLurker(enemy, gameScene, 120); });
+
     level.atEndOfLevel();
 }
