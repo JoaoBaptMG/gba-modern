@@ -25,16 +25,12 @@ constexpr auto createFontSpriteArray()
 
     // Data on the font
     constexpr auto FontWidth = 8, SpaceWidth = 6;
-    constexpr auto LineHeight = 16, LineSpacing = 8;
-
-    // Data on the text
-    constexpr auto NumChars0 = 20, NumChars1 = 24;
-    constexpr auto NumSpaces = 4;
+    constexpr auto LineHeight = 16, LineSpacing = 4;
 
     // Number of sprites
     std::array<OBJ_ATTR, 128> textSprites{};
 
-    int y = (SCREEN_HEIGHT - (2 * LineHeight + LineSpacing + PakSpacing + PakHeight)) / 2;
+    int y = (SCREEN_HEIGHT - (3 * LineHeight + 2 * LineSpacing + PakSpacing + PakHeight)) / 2;
     int x = (SCREEN_WIDTH - PakWidth) / 2;
     textSprites[0].attr0 = ATTR0_Y(y) | ATTR0_SQUARE;
     textSprites[0].attr1 = ATTR1_X(x) | ATTR1_SIZE_32x32;
@@ -45,10 +41,16 @@ constexpr auto createFontSpriteArray()
     textSprites[1].attr1 = ATTR1_X(x) | ATTR1_SIZE_32x32 | ATTR1_HFLIP;
     textSprites[1].attr2 = ATTR2_ID(2 * PakData) | ATTR2_PALBANK(0);
 
+    y += PakHeight + PakSpacing;
+
     int i = 2;
     // Create the line plotter function
     auto createLine = [&](auto... chars)
     {
+        int NumSpaces = ((chars == _) + ...);
+        int NumChars = sizeof...(chars) - NumSpaces;
+        x = (SCREEN_WIDTH - (NumChars * FontWidth + NumSpaces * SpaceWidth)) / 2;
+
         for (int ch : { chars... })
         {
             if (ch == _) x += SpaceWidth;
@@ -61,16 +63,14 @@ constexpr auto createFontSpriteArray()
                 x += FontWidth;
             }
         }
+
+        y += LineHeight + LineSpacing;
     };
 
-    // Set up the line
-    y += PakHeight + PakSpacing;
-    x = (SCREEN_WIDTH - (NumChars0 * FontWidth + NumSpaces * SpaceWidth)) / 2;
+    // Set up the lines
     createLine(T,H,E,_,G,A,M,E,_,P,A,K,_,W,A,S,_,R,E,M,O,V,E,D);
-
-    y += LineHeight + LineSpacing;
-    x = (SCREEN_WIDTH - (NumChars1 * FontWidth + NumSpaces * SpaceWidth)) / 2; 
     createLine(P,L,E,A,S,E,_,R,E,I,N,S,E,R,T,_,T,H,E,_,G,A,M,E,_,P,A,K);
+    createLine(A,N,D,_,P,R,E,S,S,_,S,T,A,R,T);
 
     while (i < 128) textSprites[i++].attr0 = ATTR0_HIDE;
 
