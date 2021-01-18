@@ -173,19 +173,19 @@ tonc.zip:
 
 gcc-check:
 ifneq ($(GCC_VERSION),$(shell $(ARMCC) -dumpversion))
-	$(error "Wrong/out of date version of gcc! Please run `rm -rf gcc*` then `make` ato redownload GCC")
+	$(error "Wrong/out of date version of gcc! Please run `rm -rf gcc*` then `make` to redownload GCC")
 endif
 
 # Pull gcc
 gcc: gcc.tar.bz2
 ifeq (,$(GCC_PLATFORM))
-	$(error "This platform does not have a prebuilt arm-none-eabi; try to compile it from source and place it at $(GCC_NAME)")
+	$(error "This platform does not have a prebuilt arm-none-eabi toolchain; download and compile GCC $(GCC_VERSION) from source and place it at the gcc folder!")
 endif
 	mkdir gcc && tar xjf gcc.tar.bz2 -C gcc --strip-components 1
 
 gcc.tar.bz2:
 ifeq (,$(GCC_PLATFORM))
-	$(error "This platform does not have a prebuilt arm-none-eabi; try to compile it from source and place it at $(GCC_NAME)")
+	$(error "This platform does not have a prebuilt arm-none-eabi toolchain; download and compile GCC $(GCC_VERSION) from source and place it at the gcc folder!")
 endif
 	wget $(GCC_URL) -O gcc.tar.bz2
 
