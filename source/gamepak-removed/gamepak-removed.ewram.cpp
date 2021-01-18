@@ -128,8 +128,10 @@ void gamepakRemovedIsr()
             pal_obj_mem[1] = anim ? RGB15(27, 27, 27) : CLR_WHITE;
         }
 
-        // Check for the test mirror - it's volatile, the compiler will not optimize it
-        if (*const_cast<const volatile u32*>(&TestData) == TEST_TOKEN) break;
+        // Check if the start key is pressed (REG_KEYS is active-low)
+        if (!(REG_KEYS & KEY_START))
+            // Check for the test mirror - it's volatile, the compiler will not optimize it
+            if (*const_cast<const volatile u32*>(&TestData) == TEST_TOKEN) break;
     }
 
     // Undo all the changes (but the DMA)
