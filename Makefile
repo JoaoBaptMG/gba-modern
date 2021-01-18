@@ -14,7 +14,7 @@ ASFLAGS := -g $(ARCH)
 LDFLAGS	= -g $(ARCH) -Wl,--gc-sections -Wl,-Map,gba.map
 
 # Libraries
-TONC := tonclib/code/tonclib
+TONC := tonc/code/tonclib
 LIBRARIES := -nodefaultlibs -ltonc
 LIBDIRS := $(TONC)
 INCDIRS := external/gcem/include
@@ -166,7 +166,7 @@ download-deps: gcc tonc libsamplerate
 
 # Pull tonc
 tonc: tonc.zip
-	unzip -qq -n tonc.zip 'code/tonclib/*' -d tonclib
+	unzip -qq -n tonc.zip 'code/tonclib/*' -d tonc
 
 tonc.zip:
 	wget $(TONC_URL) -O tonc.zip
