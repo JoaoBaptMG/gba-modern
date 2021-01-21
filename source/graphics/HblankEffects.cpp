@@ -83,11 +83,13 @@ void HblankEffects::vblank()
     hblankCurIdx = 0;
     int nextLine = hblankLines[hblankCurFrame][0];
     if (nextLine == 255) REG_DISPSTAT &= ~DSTAT_VCT_IRQ;
+    else
+    {
+        nextLine = nextLine == 0 ? 227 : nextLine - 1;
+        REG_DISPSTAT = (REG_DISPSTAT & ~DSTAT_VCT_MASK) | DSTAT_VCT_IRQ | DSTAT_VCT(nextLine);
 
-    nextLine = nextLine == 0 ? 227 : nextLine - 1;
-    REG_DISPSTAT = (REG_DISPSTAT & ~DSTAT_VCT_MASK) | DSTAT_VCT_IRQ | DSTAT_VCT(nextLine);
-
-    // Now, reset the other frame it to zero
-    hblankLines[!hblankCurFrame][0] = 255;
-    curMaxEffects[!hblankCurFrame] = 0;
+        // Now, reset the other frame it to zero
+        hblankLines[!hblankCurFrame][0] = 255;
+        curMaxEffects[!hblankCurFrame] = 0;
+    }
 }
