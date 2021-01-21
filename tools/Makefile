@@ -29,20 +29,24 @@ $(PCH_OUT): $(PCH_SRC) $(PCH_INC)
 
 -include obj/*.d
 
-obj/%.o: %.c $(PCH_OUT)
+obj/%.o: %.c $(PCH_OUT) | $(LSRC_INSTALL_FOLDER)
 	@mkdir -p obj
 	$(CC) -MMD $(C_FLAGS) -include $(PCH_SRC) -c -o $@ $<
 
-obj/%.o: %.cpp $(PCH_OUT)
+obj/%.o: %.cpp $(PCH_OUT) | $(LSRC_INSTALL_FOLDER)
 	@mkdir -p obj
 	$(CXX) -MMD $(CPP_FLAGS) -include $(PCH_SRC) -c -o $@ $<
 
-tools: ../libsamplerate-install $(O_FILES)
+tools: $(LSRC_INSTALL_FOLDER) $(O_FILES)
 	$(CXX) $(CPP_FLAGS) -o $@ $(O_FILES) $(LIBS)
 
-../libsamplerate-install: ../libsamplerate
-	cd ../libsamplerate && ./configure --prefix $(LSRC_INSTALL_FOLDER) && make && make install
+$(LSRC_INSTALL_FOLDER): ../libsamplerate
+	cd ../libsamplerate && ./configure --prefix $(LSRC_INSTALL_FOLDER)
+	$(MAKE) -C ../libsamplerate
+	$(MAKE) -C ../libsamplerate install
 
 clean:
+	-$(MAKE) -C ../libsamplerate distclean
+	@rm -rf $(LSRC_INSTALL_FOLDER)
 	@rm -rf obj
 	@rm -f tools pch.hpp.gch
