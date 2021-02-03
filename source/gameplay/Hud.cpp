@@ -88,7 +88,7 @@ void Hud::update()
     for (int i = 0; i < end-vals; i++) str[5-i] = '0' + vals[i];
 
     // And write it
-    scoreWriter.write(0, 8, str, 8);
+    scoreWriter.write(5, 8, str, 8);
 }
 
 GameScene& Hud::gameScene()
