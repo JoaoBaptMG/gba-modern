@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------
-// Hud.hpp
+// UserInterface.hpp
 //--------------------------------------------------------------------------------
 // The class that shows the player's health meter, score and boss meter
 //--------------------------------------------------------------------------------
@@ -14,7 +14,7 @@
 
 class GameScene;
 
-class Hud final
+class UserInterface final
 {
     GameScene &gameScene();
 
@@ -22,7 +22,7 @@ class Hud final
     u16 clearAlpha, reloadAlpha;
 
 public:
-    Hud();
+    UserInterface();
     void init();
     void vblank();
     void update();

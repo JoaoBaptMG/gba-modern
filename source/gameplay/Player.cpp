@@ -42,7 +42,8 @@ void Player::update()
 
     // Keep the player on screen
     pos.x = std::clamp<s32f16>(pos.x, PlayerWidth/2, SCREEN_WIDTH - PlayerWidth/2);
-    pos.y = std::clamp<s32f16>(pos.y, HudSize + PlayerHeight/2, SCREEN_HEIGHT - HudSize - PlayerHeight/2);
+    pos.y = std::clamp<s32f16>(pos.y, UserInterfaceHeight + PlayerHeight/2,
+        SCREEN_HEIGHT - UserInterfaceHeight - PlayerHeight/2);
 
     // Decrease the invcounter
     if (invCounter > 0) invCounter--;

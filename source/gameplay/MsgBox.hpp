@@ -9,7 +9,7 @@
 
 #include "text/Tile4bppGlyphWriter.hpp"
 
-class Hud;
+class UserInterface;
 
 class MsgBox final
 {
@@ -26,7 +26,7 @@ class MsgBox final
     bool fullyOpen() const;
     bool fullyClosed() const { return openState == 0; }
 
-    Hud& hud();
+    UserInterface& userInterface();
 
 public:
     MsgBox();
@@ -38,5 +38,5 @@ public:
     void close();
     void update();
 
-    friend class Hud;
+    friend class UserInterface;
 };

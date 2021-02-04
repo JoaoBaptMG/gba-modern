@@ -8,7 +8,7 @@
 #include "scenes/IScene.hpp"
 #include "Player.hpp"
 #include "Level.hpp"
-#include "Hud.hpp"
+#include "UserInterface.hpp"
 #include "Background.hpp"
 #include "util/UnorderedIterableList.hpp"
 #include "Enemy.hpp"
@@ -16,7 +16,7 @@
 #include "Explosions.hpp"
 
 constexpr int NumEnemies = 64;
-constexpr int HudSize = 16;
+constexpr int UserInterfaceHeight = 16;
 
 class GameScene final : public IScene
 {
@@ -28,7 +28,7 @@ public:
 
     Player player;
     Level level;
-    Hud hud;
+    UserInterface userInterface;
     Background background;
     Projectiles projectiles;
     Explosions explosions;

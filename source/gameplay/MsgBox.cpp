@@ -5,24 +5,24 @@
 //--------------------------------------------------------------------------------
 #include "MsgBox.hpp"
 
-#include "Hud.hpp"
-#include "HudDefs.hpp"
+#include "UserInterface.hpp"
+#include "UserInterfaceDefs.hpp"
 #include "data/fonts/Sweet16.hpp"
 #include <cctype>
 
 constexpr auto InitX = 2;
 constexpr auto InitY = 16;
-constexpr auto LineWidth = 8 * huddefs::MsgBoxTileWidth - 4 - 2 * InitX;
+constexpr auto LineWidth = 8 * uidefs::MsgBoxTileWidth - 4 - 2 * InitX;
 
-MsgBox::MsgBox() : curText(), msgWriter(&HUD_TILE_BANK[huddefs::MsgBoxTiles], 8*huddefs::MsgBoxTileHeight), 
+MsgBox::MsgBox() : curText(), msgWriter(&UI_TILE_BANK[uidefs::MsgBoxTiles], 8*uidefs::MsgBoxTileHeight), 
     x(), y(), period(8), curWait(0), openState(0)
 {
-    constexpr auto TileBase = huddefs::MsgBoxTileBase;
+    constexpr auto TileBase = uidefs::MsgBoxTileBase;
 
     // Set the required tiles
-    for (int x = 0; x < huddefs::MsgBoxTileWidth; x++)
-        for (int y = 0; y < huddefs::MsgBoxTileHeight; y++)
-            HUD_SCREEN[TileBase + huddefs::TilePos(x, y)] = huddefs::MsgBoxTileHeight * x + y;
+    for (int x = 0; x < uidefs::MsgBoxTileWidth; x++)
+        for (int y = 0; y < uidefs::MsgBoxTileHeight; y++)
+            UI_SCREEN[TileBase + uidefs::TilePos(x, y)] = uidefs::MsgBoxTileHeight * x + y;
 }
 
 void MsgBox::displayMessage(const char* text, int period)
@@ -78,24 +78,24 @@ void MsgBox::update()
 
 void MsgBox::clearMessageTiles()
 {
-    memset32(&HUD_TILE_BANK[huddefs::MsgBoxTiles], 0, huddefs::NumMsgBoxTiles * sizeof(TILE)/sizeof(u32));
+    memset32(&UI_TILE_BANK[uidefs::MsgBoxTiles], 0, uidefs::NumMsgBoxTiles * sizeof(TILE)/sizeof(u32));
 }
 
 void MsgBox::showBox()
 {
-    for (int x = 0; x < huddefs::MsgBoxTileWidth; x++)
-        for (int y = 0; y < huddefs::MsgBoxTileHeight; y++)
-            HUD_SCREEN[huddefs::MsgBoxTileBase + huddefs::TilePos(x, y)] = SE_PALBANK(15) | 
-                (huddefs::MsgBoxTiles + huddefs::MsgBoxTileHeight * x + y);
+    for (int x = 0; x < uidefs::MsgBoxTileWidth; x++)
+        for (int y = 0; y < uidefs::MsgBoxTileHeight; y++)
+            UI_SCREEN[uidefs::MsgBoxTileBase + uidefs::TilePos(x, y)] = SE_PALBANK(15) | 
+                (uidefs::MsgBoxTiles + uidefs::MsgBoxTileHeight * x + y);
 }
 
 void MsgBox::hideBox()
 {
-    constexpr auto TileId = SE_PALBANK(15) | (huddefs::HudTiles - 1);
+    constexpr auto TileId = SE_PALBANK(15) | (uidefs::UserInterfaceTiles - 1);
 
-    for (int y = 0; y < huddefs::MsgBoxTileHeight; y++)
-        memset32(&HUD_SCREEN[huddefs::MsgBoxTileBase] + huddefs::TilePos(0, y),
-            TileId | (TileId << 16), huddefs::MsgBoxTileWidth * sizeof(u16)/sizeof(u32));
+    for (int y = 0; y < uidefs::MsgBoxTileHeight; y++)
+        memset32(&UI_SCREEN[uidefs::MsgBoxTileBase] + uidefs::TilePos(0, y),
+            TileId | (TileId << 16), uidefs::MsgBoxTileWidth * sizeof(u16)/sizeof(u32));
 }
 
 void MsgBox::putGlyph()
@@ -162,14 +162,14 @@ void MsgBox::putGlyph()
     }
 }
 
-bool MsgBox::fullyOpen() const { return openState == huddefs::MsgBoxMaxOpenState; }
+bool MsgBox::fullyOpen() const { return openState == uidefs::MsgBoxMaxOpenState; }
 
-Hud& MsgBox::hud()
+UserInterface& MsgBox::userInterface()
 {
     // Don't worry, I know what I'm doing
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
-    return *reinterpret_cast<Hud*>(
-        reinterpret_cast<std::byte*>(this) - offsetof(Hud, msgBox));
+    return *reinterpret_cast<UserInterface*>(
+        reinterpret_cast<std::byte*>(this) - offsetof(UserInterface, msgBox));
 #pragma GCC diagnostic pop
 }

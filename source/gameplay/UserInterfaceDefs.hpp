@@ -1,18 +1,18 @@
 //--------------------------------------------------------------------------------
-// HudDefs.hpp
+// UserInterfaceDefs.hpp
 //--------------------------------------------------------------------------------
-// Definitions used by both the Hud and the MsgBox classes
+// Definitions used by both the UserInterface and the MsgBox classes
 //--------------------------------------------------------------------------------
 #pragma once
 
 #include <tonc.h>
-#include "data/sprites/hud.hpp"
+#include "data/sprites/user-interface.hpp"
 
-#define HUD_TILE_BANK tile_mem[3]
-#define HUD_SCREEN se_mem[31]
-#define HUD_PALETTE pal_bg_bank[15]
+#define UI_TILE_BANK tile_mem[3]
+#define UI_SCREEN se_mem[31]
+#define UI_PALETTE pal_bg_bank[15]
 
-namespace huddefs
+namespace uidefs
 {
     constexpr auto TilePos(int x, int y) { return 32 * y + x; }
 
@@ -20,12 +20,12 @@ namespace huddefs
 
     constexpr auto NumScoreTiles = 5;
     constexpr auto ScoreTiles = TileEnd - NumScoreTiles;
-    constexpr auto HudTiles = ScoreTiles - sizeof(data::sprites::hud.png.tiles)/sizeof(TILE);
+    constexpr auto UserInterfaceTiles = ScoreTiles - sizeof(data::sprites::user_interface.png.tiles)/sizeof(TILE);
 
     constexpr auto MsgBoxTileWidth = 25, MsgBoxTileHeight = 6;
     constexpr auto MsgBoxMaxOpenState = 28;
     constexpr auto NumMsgBoxTiles = MsgBoxTileWidth * MsgBoxTileHeight;
-    constexpr auto MsgBoxTiles = HudTiles - NumMsgBoxTiles;
+    constexpr auto MsgBoxTiles = UserInterfaceTiles - NumMsgBoxTiles;
 
     constexpr auto PlayerHealthTileBase = TilePos(1, 1);
     constexpr auto ScoreTileBase = TilePos(25, 1);

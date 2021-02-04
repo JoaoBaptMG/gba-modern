@@ -1,19 +1,19 @@
 //--------------------------------------------------------------------------------
-// Hud.cpp
+// UserInterface.cpp
 //--------------------------------------------------------------------------------
 // The class that shows the player's health meter, score and boss meter
 //--------------------------------------------------------------------------------
-#include "Hud.hpp"
+#include "UserInterface.hpp"
 
 #include "GameScene.hpp"
 #include "data/fonts/monogram_extended.hpp"
 #include "util/uintDigits.h"
 
-#include "HudDefs.hpp"
+#include "UserInterfaceDefs.hpp"
 
-Hud::Hud() : scoreWriter(data::fonts::monogram_extended.ttf, &HUD_TILE_BANK[huddefs::ScoreTiles], 8) {}
+UserInterface::UserInterface() : scoreWriter(data::fonts::monogram_extended.ttf, &UI_TILE_BANK[uidefs::ScoreTiles], 8) {}
 
-void Hud::init()
+void UserInterface::init()
 {
     // Initialize BG0
     REG_BG0CNT = BG_CBB(3) | BG_SBB(31) | BG_REG_32x32;
@@ -23,19 +23,19 @@ void Hud::init()
     REG_BG0VOFS = 4;
 
     // Transfer the data to the end of the CBB
-    constexpr auto DataSize = sizeof(data::sprites::hud.png.tiles);
-    memcpy32(&HUD_TILE_BANK[huddefs::HudTiles], data::sprites::hud.png.tiles, DataSize/sizeof(u32));
+    constexpr auto DataSize = sizeof(data::sprites::user_interface.png.tiles);
+    memcpy32(&UI_TILE_BANK[uidefs::UserInterfaceTiles], data::sprites::user_interface.png.tiles, DataSize/sizeof(u32));
 
     // And set the SBB to the correct place
-    constexpr auto TileId = SE_PALBANK(15) | (huddefs::HudTiles - 1);
-    memset32(&HUD_SCREEN, TileId | (TileId << 16), sizeof(SCREENBLOCK)/sizeof(u32));
+    constexpr auto TileId = SE_PALBANK(15) | (uidefs::UserInterfaceTiles - 1);
+    memset32(&UI_SCREEN, TileId | (TileId << 16), sizeof(SCREENBLOCK)/sizeof(u32));
 
     // Transfer the palette
-    memcpy32(&HUD_PALETTE, data::sprites::hud.png.palette, sizeof(PALBANK)/sizeof(u32));
+    memcpy32(&UI_PALETTE, data::sprites::user_interface.png.palette, sizeof(PALBANK)/sizeof(u32));
 
     // Set the score SBB to the correct place
-    for (u32 i = 0; i < huddefs::NumScoreTiles; i++)
-        HUD_SCREEN[huddefs::ScoreTileBase + i] = SE_PALBANK(15) | (huddefs::ScoreTiles + i);
+    for (u32 i = 0; i < uidefs::NumScoreTiles; i++)
+        UI_SCREEN[uidefs::ScoreTileBase + i] = SE_PALBANK(15) | (uidefs::ScoreTiles + i);
 
     // Set the two graphic effects
     clearAlpha = 0;
@@ -44,18 +44,18 @@ void Hud::init()
     REG_BLDY = reloadAlpha;
 }
 
-void Hud::vblank()
+void UserInterface::vblank()
 {
     // Set the tiles here
-    constexpr auto TileBase = huddefs::PlayerHealthTileBase;
+    constexpr auto TileBase = uidefs::PlayerHealthTileBase;
     const Player& player = gameScene().player;
 
     int i;
     for (i = 0; i < player.getHealth(); i++)
-        HUD_SCREEN[TileBase+i] = SE_PALBANK(15) | huddefs::HudTiles;
+        UI_SCREEN[TileBase+i] = SE_PALBANK(15) | uidefs::UserInterfaceTiles;
     for (; i < player.getMaxHealth(); i++)
-        HUD_SCREEN[TileBase+i] = SE_PALBANK(15) | (huddefs::HudTiles + 1);
-    HUD_SCREEN[TileBase+i] = SE_PALBANK(15) | (huddefs::HudTiles + 2);
+        UI_SCREEN[TileBase+i] = SE_PALBANK(15) | (uidefs::UserInterfaceTiles + 1);
+    UI_SCREEN[TileBase+i] = SE_PALBANK(15) | (uidefs::UserInterfaceTiles + 2);
 
     // Reset the alpha blending
     REG_BLDCNT = BLD_TOP(BLD_BACKDROP | BLD_OBJ | BLD_BG3 | BLD_BG2 | BLD_BG1) | BLD_BLACK;
@@ -65,15 +65,15 @@ void Hud::vblank()
     reloadAlpha = 12;
 }
 
-void Hud::update()
+void UserInterface::update()
 {
     // Add the two effects
-    graphics::hblankEffects.add16(HudSize, &clearAlpha, (void*)&REG_BLDY, 1);
-    graphics::hblankEffects.add16(SCREEN_HEIGHT - HudSize - msgBox.openState,
+    graphics::hblankEffects.add16(UserInterfaceHeight, &clearAlpha, (void*)&REG_BLDY, 1);
+    graphics::hblankEffects.add16(SCREEN_HEIGHT - UserInterfaceHeight - msgBox.openState,
         &reloadAlpha, (void*)&REG_BLDY, 1);
 
     // Clear the score text
-    memset32(&HUD_TILE_BANK[huddefs::ScoreTiles], 0, huddefs::NumScoreTiles * sizeof(TILE)/sizeof(u32));
+    memset32(&UI_TILE_BANK[uidefs::ScoreTiles], 0, uidefs::NumScoreTiles * sizeof(TILE)/sizeof(u32));
 
     // Create the text
     char str[] = "      ";
@@ -87,12 +87,12 @@ void Hud::update()
     msgBox.update();
 }
 
-GameScene& Hud::gameScene()
+GameScene& UserInterface::gameScene()
 {
     // Don't worry, I know what I'm doing
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winvalid-offsetof"
     return *reinterpret_cast<GameScene*>(
-        reinterpret_cast<std::byte*>(this) - offsetof(GameScene, hud));
+        reinterpret_cast<std::byte*>(this) - offsetof(GameScene, userInterface));
 #pragma GCC diagnostic pop
 }

@@ -94,19 +94,19 @@ void LevelContext::addEnemy(EnemyScript script)
 void LevelContext::showMessage(const char* msg)
 {
     auto& scene = level().gameScene();
-    scene.hud.msgBox.displayMessage(msg);
+    scene.userInterface.msgBox.displayMessage(msg);
 }
 
 void LevelContext::showMessage(const char* msg, int period)
 {
     auto& scene = level().gameScene();
-    scene.hud.msgBox.displayMessage(msg, period);
+    scene.userInterface.msgBox.displayMessage(msg, period);
 }
 
 void LevelContext::closeMessage()
 {
     auto& scene = level().gameScene();
-    scene.hud.msgBox.close();
+    scene.userInterface.msgBox.close();
 }
 
 Level& LevelContext::level()

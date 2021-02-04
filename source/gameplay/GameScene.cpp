@@ -34,8 +34,8 @@ GameScene::GameScene()
     // Initialize the explosion container
     explosions.init();
 
-    // Initialize the hud
-    hud.init();
+    // Initialize the userInterface
+    userInterface.init();
 
     // Initialize the level runner
     level.playLevel(level1);
@@ -43,7 +43,7 @@ GameScene::GameScene()
 
 void GameScene::vblank()
 {
-    hud.vblank();
+    userInterface.vblank();
     projectiles.vblank();
     background.vblank();
 }
@@ -53,7 +53,7 @@ void GameScene::update()
     // Update everything
     player.update();
     level.update();
-    hud.update();
+    userInterface.update();
 
     // Update the enemies
     for (auto& enemy : enemies)
