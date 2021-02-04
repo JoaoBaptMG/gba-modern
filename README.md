@@ -29,4 +29,10 @@ The LodePNG files belong to Lode Vandevenne and can be found [here](https://lode
 
 The font _monogram.ttf_ belongs to Vinícius Menézio can be found [here](https://datagoblin.itch.io/monogram) under the CC0.
 
+The font _Sweet16.ttf_ belongs to Martin Sedlák and can be found [here](https://github.com/kmar/Sweet16Font) under the Boost Software License.
+
 The library GCE-Math used by generating LUTs belongs to Keith O'Hara and can be found [here](https://github.com/kthohr/gcem) under the Apache-2 License.
+
+The font _Spleen_, used on the "Game Pak removed" screen, belongs to Frederic Cambus and can be found [here](https://github.com/fcambus/spleen) under the BSD-2 license.
+
+Finally, the graphics for the "Game Pak removed" screen belong to Damian Yerrick (aka [pinobatch](https://github.com/pinobatch)) and are licensed under the CC0.
