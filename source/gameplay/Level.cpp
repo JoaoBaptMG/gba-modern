@@ -91,6 +91,24 @@ void LevelContext::addEnemy(EnemyScript script)
     scene.enemies.add(script, &scene);
 }
 
+void LevelContext::showMessage(const char* msg)
+{
+    auto& scene = level().gameScene();
+    scene.hud.msgBox.displayMessage(msg);
+}
+
+void LevelContext::showMessage(const char* msg, int period)
+{
+    auto& scene = level().gameScene();
+    scene.hud.msgBox.displayMessage(msg, period);
+}
+
+void LevelContext::closeMessage()
+{
+    auto& scene = level().gameScene();
+    scene.hud.msgBox.close();
+}
+
 Level& LevelContext::level()
 {
     return *static_cast<Level*>(this);

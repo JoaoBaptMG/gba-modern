@@ -10,6 +10,8 @@
 #include "text/Tile4bppGlyphWriter.hpp"
 #include "text/TextWriter.hpp"
 
+#include "MsgBox.hpp"
+
 class GameScene;
 
 class Hud final
@@ -24,4 +26,6 @@ public:
     void init();
     void vblank();
     void update();
+
+    MsgBox msgBox;
 };

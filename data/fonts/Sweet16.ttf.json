@@ -1,0 +1,5 @@
+{
+    "export-size": 16,
+    "export-range": [[32, 127]],
+    "override-vertical-stride": 14
+}

@@ -15,9 +15,8 @@
 #include "Projectiles.hpp"
 #include "Explosions.hpp"
 
-constexpr int HudSize = 16;
-constexpr int MessageBoxSize = 44;
 constexpr int NumEnemies = 64;
+constexpr int HudSize = 16;
 
 class GameScene final : public IScene
 {

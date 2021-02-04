@@ -13,8 +13,11 @@
 void level1(LevelContext& level)
 {
     level.levelLength(30);
+    level.at(0.5);
+    level.showMessage("Use the \2Control Pad\1 to move your ship. Press \2A\1 to shoot, and watch out for the enemies!");
 
     level.at(4);
+    level.closeMessage();
     for (int i = 0; i < 7; i++)
     {
         level.addEnemy(wobblingEnemyUp);

@@ -23,6 +23,9 @@ public:
     void afterFrames(u16 offset);
     void atEndOfLevel();
     void addEnemy(EnemyScript script);
+    void showMessage(const char* msg);
+    void showMessage(const char* msg, int period);
+    void closeMessage();
 
     inline void levelLength(double secs) { levelLengthFrames(60 * secs); }
     inline void at(double secs) { atFrames(60 * secs); }
