@@ -1,1 +1,3 @@
 *.s linguist-language=Assembly
+tools/nlohmann/* linguist-vendored
+tools/lodepng.* linguist-vendored
