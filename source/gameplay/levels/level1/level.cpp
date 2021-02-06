@@ -16,7 +16,7 @@ void level1(LevelContext& level)
     level.at(0.5);
     level.showMessage("Use the \2Control Pad\1 to move your ship. Press \2A\1 to shoot, and watch out for the enemies!");
 
-    level.at(4);
+    level.at(6);
     level.closeMessage();
     for (int i = 0; i < 7; i++)
     {
@@ -25,7 +25,7 @@ void level1(LevelContext& level)
         level.after(1.0 / 3.0);
     }
 
-    level.at(8);
+    level.at(10);
     for (u32 i = 0; i < 12; i++)
     {
         level.addEnemy([fts = (12 + 25*i) & 127](Enemy& enemy, GameScene& gameScene)
@@ -33,10 +33,10 @@ void level1(LevelContext& level)
         level.after(0.3);
     }
 
-    level.at(16);
+    level.at(20);
     level.addEnemy([](Enemy& enemy, GameScene& gameScene) { bigLurker(enemy, gameScene, 40); });
 
-    level.after(1.5);
+    level.after(2);
     level.addEnemy([](Enemy& enemy, GameScene& gameScene) { bigLurker(enemy, gameScene, 120); });
 
     level.atEndOfLevel();

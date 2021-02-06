@@ -39,6 +39,7 @@ GameScene::GameScene()
 
     // Initialize the level runner
     level.playLevel(level1);
+    userInterface.displayLevel(1);
 }
 
 void GameScene::vblank()

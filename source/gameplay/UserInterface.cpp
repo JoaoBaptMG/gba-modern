@@ -11,6 +11,14 @@
 
 #include "UserInterfaceDefs.hpp"
 
+template <typename... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template <typename... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
+template <typename... Ts> auto ignore_monostate(Ts... ts)
+{
+    return overloaded{[](std::monostate){}, ts...};
+}
+
 UserInterface::UserInterface() : scoreWriter(data::fonts::monogram_extended.ttf, &UI_TILE_BANK[uidefs::ScoreTiles], 8) {}
 
 void UserInterface::init()
@@ -84,7 +92,15 @@ void UserInterface::update()
     // And write it
     scoreWriter.write(5, 8, str, 8);
 
+    // Update the message box and the signs
     msgBox.update();
+
+    // Update the signs
+    std::visit(ignore_monostate([](auto& sign) { sign.update(); }), sign);
+    if (std::visit(overloaded{
+            [](std::monostate){ return false; },
+            [](auto& sign) { return sign.isComplete(); }
+        }, sign)) sign.emplace<0>();
 }
 
 GameScene& UserInterface::gameScene()
