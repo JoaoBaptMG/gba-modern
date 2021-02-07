@@ -9,50 +9,42 @@
 #include <type_traits>
 #include <tonc_types.h>
 
-namespace detail
+namespace detail::background
 {
-    struct Empty1 {};
-    struct Empty2 {};
-
-    struct BackgroundDataTilesBase
+    template <std::size_t _DataSize, bool _Is8bpp>
+    struct Data
     {
-        const void* tiles;
-        const SCR_ENTRY* scrEntries;
+        static constexpr const bool Is8bpp = _Is8bpp;
+        static constexpr const std::size_t DataSize = _DataSize;
+        u8 tiles[_DataSize];
     };
+    template <bool Is8bpp> struct Data<0, Is8bpp> {};
 
-    template <std::size_t Size>
-    struct BackgroundDataStaticTiles : BackgroundDataTilesBase
+    template <std::size_t _SeWidth, std::size_t _SeHeight>
+    struct ScreenEntries
     {
-        constexpr static const std::size_t CharDataSize = Size;
+        static constexpr const std::size_t SeWidth = _SeWidth;
+        static constexpr const std::size_t SeHeight = _SeHeight;
+        SCR_ENTRY scrEntries[_SeWidth*_SeHeight];
+        auto getEntry(std::size_t x, std::size_t y) const
+        { return scrEntries[y*_SeWidth + x]; }
     };
+    template <std::size_t Dummy> struct ScreenEntries<Dummy, 0> {};
+    template <std::size_t Dummy> struct ScreenEntries<0, Dummy> {};
+    template <> struct ScreenEntries<0, 0> {};
 
-    struct BackgroundDataDynamicTiles : BackgroundDataTilesBase
-    {
-        std::uint32_t charDataSize;
-    };
+    template <std::size_t PaletteCount>
+    struct Palettes { PALBANK palettes[PaletteCount]; };
+    template <> struct Palettes<0> {};
 
-    struct BackgroundDataScrSize
-    {
-        std::uint16_t seWidth, seHeight;
-    };
-
-    struct BackgroundDataPalettes
-    {
-        std::uint16_t numPalettes, is8bpp;
-        const std::uint16_t* palettes;
-    };
+    template <std::size_t DataSize, bool Is8bpp, std::size_t SeWidth, std::size_t SeHeight, std::size_t PaletteCount>
+    struct BackgroundData final : Data<DataSize, Is8bpp>, ScreenEntries<SeWidth, SeHeight>, Palettes<PaletteCount> {};
 }
 
-template <std::size_t StaticSize, bool ExportSizes, bool ExportPalettes>
-struct BackgroundData final : std::conditional_t<StaticSize == (std::size_t)-1, 
-        detail::BackgroundDataDynamicTiles, detail::BackgroundDataStaticTiles<StaticSize>>,
-    std::conditional_t<ExportSizes, detail::BackgroundDataScrSize, detail::Empty1>,
-    std::conditional_t<ExportPalettes, detail::BackgroundDataPalettes, detail::Empty2> {};
+using detail::background::BackgroundData;
 
-using FullBackgroundData = BackgroundData<(std::size_t)-1, true, true>;
-
-template <std::size_t StaticSize, bool ExportSizes, bool ExportPalettes>
+template <std::size_t DataSize, bool Is8bpp, std::size_t SeWidth, std::size_t SeHeight, std::size_t PaletteCount>
 struct BackgroundHandle final
 {
-    BackgroundData<StaticSize, ExportSizes, ExportPalettes> png;
+    BackgroundData<DataSize, Is8bpp, SeWidth, SeHeight, PaletteCount> png;
 };

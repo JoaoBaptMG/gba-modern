@@ -38,11 +38,11 @@ struct LevelSignData
 {
     u32 charDataSize;
     const void* tiles;
-    const u16* scrEntries;
-    const u16* palettes;
+    const SCR_ENTRY* scrEntries;
+    const PALBANK* palettes;
 };
 
-#define BUILD_SIGN(v) { v.CharDataSize, v.tiles, v.scrEntries, v.palettes }
+#define BUILD_SIGN(v) { v.DataSize, v.tiles, v.scrEntries, v.palettes }
 static const LevelSignData LevelSigns[] =
 {
     BUILD_SIGN(data::backgrounds::level_numbers::_1.png),
@@ -62,7 +62,7 @@ LevelSign::LevelSign(int level)
 
     // Transfer the tiles to their designated space
     memcpy32(&UI_TILE_BANK[uidefs::SignTiles], data::backgrounds::level_mark.png.tiles,
-        data::backgrounds::level_mark.png.CharDataSize / sizeof(u32));
+        data::backgrounds::level_mark.png.DataSize / sizeof(u32));
     memcpy32(&UI_SIGN_PALETTE, curLevelSign.palettes, sizeof(PALBANK)/sizeof(u32));
 
     memcpy32(&UI_TILE_BANK[uidefs::SignTiles + uidefs::NumLevelTextTiles],
@@ -93,16 +93,16 @@ LevelSign::LevelSign(int level)
 
     // Set the appropriate values
     u32 tileId = 0;
-    for (int y = 0; y < uidefs::LevelSignTileHeight; y++)
-        for (int x = 0; x < uidefs::LevelMarkerTileWidth; x++)
+    for (u32 y = 0; y < uidefs::LevelSignTileHeight; y++)
+        for (u32 x = 0; x < uidefs::LevelMarkerTileWidth; x++)
             UI_SCREEN[uidefs::SignTileBase + uidefs::TilePos(x, y)] = 
                 data::backgrounds::level_mark.png.scrEntries[tileId++] + uidefs::SignTiles;
         
     tileId = 0;
-    for (int y = 0; y < uidefs::LevelSignTileHeight; y++)
-        for (int x = 0; x < uidefs::LevelNumberTileWidth; x++)
+    for (u32 y = 0; y < uidefs::LevelSignTileHeight; y++)
+        for (u32 x = 0; x < uidefs::LevelNumberTileWidth; x++)
         {
-            int xx = uidefs::LevelMarkerTileWidth + uidefs::LevelSignTileSpacing + x;
+            u32 xx = uidefs::LevelMarkerTileWidth + uidefs::LevelSignTileSpacing + x;
             UI_SCREEN[uidefs::SignTileBase + uidefs::TilePos(xx, y)] =
                 curLevelSign.scrEntries[tileId++] + uidefs::SignTiles + uidefs::NumLevelTextTiles;
         }

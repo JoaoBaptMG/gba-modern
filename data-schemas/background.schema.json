@@ -13,8 +13,6 @@
         "group-height": { "type": "integer", "description": "The height of the 'block' in which to regroup this image in tiles" },
         "preserve-order": { "type": "boolean", "description": "If true, the colors will not be rearranged and the palettes must form groups of 16." },
         "export-palettes": { "type": "boolean", "description": "If false, the palettes will be supressed from the final exported file. Default is true." },
-        "export-sizes": { "type": "boolean", "description": "If false, the size data will not be generated. Default is true." },
-        "static-char-size": { "type": "boolean", "description": "If true, the size will be exported as a static template parameter, and not inside the asm." },
         "remap-palettes":
         {
             "type": "array",

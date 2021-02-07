@@ -1,8 +1,6 @@
 {
     "$schema": "../../data-schemas/background.schema.json",
-    "export-sizes": false,
     "export-palettes": false,
     "preserve-order": true,
-    "static-char-size": true,
     "remap-palettes": [14]
 }

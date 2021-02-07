@@ -11,16 +11,39 @@
 
 class GameScene;
 
+struct DynamicBackgroundData
+{
+    u32 charDataSize;
+    u16 seWidth, seHeight, numPalettes, is8bpp;
+    const void* tiles;
+    const SCR_ENTRY* scrEntries;
+    const PALBANK* palettes;
+};
+
+template <std::size_t DataSize, bool Is8bpp, std::size_t SeWidth, std::size_t SeHeight, std::size_t PaletteCount>
+DynamicBackgroundData getDynamicBackgroundData(
+    const BackgroundData<DataSize, Is8bpp, SeWidth, SeHeight, PaletteCount>& background)
+{
+    return { DataSize, SeWidth, SeHeight, PaletteCount, Is8bpp, 
+        background.tiles, background.scrEntries, background.palettes };
+}
+
 class Background final
 {
     GameScene& gameScene();
-    const FullBackgroundData* curBackground;
+
+    void load(const DynamicBackgroundData& background);
 
 public:
     Background() {}
     void init();
-    void load(const FullBackgroundData& background);
     void vblank();
+
+    template <std::size_t DataSize, bool Is8bpp, std::size_t SeWidth, std::size_t SeHeight, std::size_t PaletteCount>
+    void load(const BackgroundData<DataSize, Is8bpp, SeWidth, SeHeight, PaletteCount>& background)
+    {
+        load(getDynamicBackgroundData(background));
+    }
 
     vec2<s32f8> offset;
 };

@@ -24,15 +24,15 @@ constexpr auto getMaxNumberDataSize()
 {
     using namespace data::backgrounds::level_numbers;
     return std::max({ 
-        _1.png.CharDataSize,
-        _2.png.CharDataSize,
-        _3.png.CharDataSize,
-        _4.png.CharDataSize,
-        _5.png.CharDataSize,
-        _6.png.CharDataSize,
-        _7.png.CharDataSize,
-        _8.png.CharDataSize,
-        _9.png.CharDataSize,
+        _1.png.DataSize,
+        _2.png.DataSize,
+        _3.png.DataSize,
+        _4.png.DataSize,
+        _5.png.DataSize,
+        _6.png.DataSize,
+        _7.png.DataSize,
+        _8.png.DataSize,
+        _9.png.DataSize,
     });
 }
 
@@ -50,14 +50,14 @@ namespace uidefs
     constexpr auto NumScoreTiles = 5;
     constexpr auto ScoreTiles = TileEnd - NumScoreTiles;
 
-    constexpr auto NumLevelTextTiles = data::backgrounds::level_mark.png.CharDataSize/sizeof(TILE);
+    constexpr auto NumLevelTextTiles = data::backgrounds::level_mark.png.DataSize/sizeof(TILE);
     constexpr auto NumLevelNumberTiles = getMaxNumberDataSize()/sizeof(TILE);
     constexpr auto NumLevelSignTiles = NumLevelTextTiles + NumLevelNumberTiles;
 
-    constexpr auto LevelMarkerTileWidth = 20;
-    constexpr auto LevelNumberTileWidth = 4;
+    constexpr auto LevelMarkerTileWidth = data::backgrounds::level_mark.png.SeWidth;
+    constexpr auto LevelNumberTileWidth = data::backgrounds::level_numbers::_1.png.SeWidth;
+    constexpr auto LevelSignTileHeight = data::backgrounds::level_mark.png.SeHeight;
     constexpr auto LevelSignTileSpacing = 1;
-    constexpr auto LevelSignTileHeight = 6;
 
     constexpr auto NumSignTiles = std::max(NumLevelSignTiles, std::size_t());
     constexpr auto SignTiles = ScoreTiles - NumSignTiles;

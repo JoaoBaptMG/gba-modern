@@ -78,6 +78,7 @@ int backgroundExport(int argc, char **argv)
 
     auto name = deriveSpecialName(in);
 
+    std::size_t characterSize, seWidth, seHeight, paletteCount;
     if (is8bpp)
     {
         // Generate the palette file
@@ -94,6 +95,12 @@ int backgroundExport(int argc, char **argv)
 
         // And write the file
         writeBackground(of, name, state, palettes, gstate);
+        
+        // Information to the header data
+        characterSize = state.chars.size() * sizeof(Character8bpp);
+        seWidth = state.screenEntries.width();
+        seHeight = state.screenEntries.height();
+        paletteCount = palettes.size();
     }
     else
     {
@@ -108,6 +115,12 @@ int backgroundExport(int argc, char **argv)
 
         auto [state4bpp, palettes] = convertBackgroundTo4bpp(state, image.palette, preserveOrder, remapPalettes);
         writeBackground(of, name, state4bpp, palettes, gstate);
+
+        // Information to the header data
+        characterSize = state4bpp.chars.size() * sizeof(Character4bpp);
+        seWidth = state4bpp.screenEntries.width();
+        seHeight = state4bpp.screenEntries.height();
+        paletteCount = palettes.size();
     }
 
     // Write the header
@@ -122,13 +135,9 @@ int backgroundExport(int argc, char **argv)
         hof << "#include \"data/BackgroundData.hpp\"" << std::endl << std::endl;
         hof << "namespace " << name.nmspace << std::endl;
         hof << "{" << std::endl;
-        hof << "    extern const BackgroundHandle<";
-        if (gstate.staticCharSize)
-            hof << (state.chars.size() * (is8bpp ? sizeof(Character8bpp) : sizeof(Character4bpp))) << ", ";
-        else hof << "(std::size_t)-1, ";
-        hof << (gstate.exportSizes ? "true" : "false") << ", ";
-        hof << (gstate.exportPalettes ? "true" : "false") << "> ";
-        hof << name.fileName << ';' << std::endl;
+        hof << "    extern const BackgroundHandle<" << characterSize;
+        hof << (is8bpp ? ", true, " : ", false, ") << seWidth << ", " << seHeight;
+        hof << ", " << paletteCount << "> " << name.fileName << ';' << std::endl;
         hof << "}" << std::endl << std::endl;
     }
 
@@ -144,28 +153,9 @@ void writeBackground(std::ostream& of, const SpecialName& name, const State<Char
     of << "    .align 2" << std::endl;
     of << "    .global " << name.mangledName << std::endl;
     of << "    .hidden " << name.mangledName << std::endl;
-    of << name.mangledName << ":" << std::endl;
-
-    // Export the metadata
-    constexpr bool is8bpp = std::is_same<Character, Character8bpp>::value;
-
-    of << "    .word ts_" << name.fileName << "_chars, ts_" << name.fileName << "_screenEntries" << std::endl;
-    if (!gstate.staticCharSize)
-        of << "    .word " << (state.chars.size() * sizeof(Character)) << std::endl;
-
-    if (gstate.exportSizes) of << "    .hword " << state.screenEntries.width() << ", " << state.screenEntries.height() << std::endl;
-    if (gstate.exportPalettes)
-    {
-        of << "    .hword " << palettes.size() << ", " << (int)is8bpp << std::endl;
-        of << "    .word ts_" << name.fileName << "_palette" << std::endl;
-    }
+    of << name.mangledName << ':';
 
     // Now, the chars, screen entries and palettes
-    of << std::endl;
-    of << "    .section .rodata" << std::endl;
-    of << "    .align 2" << std::endl;
-    of << "    .hidden ts_" << name.fileName << "_chars" << std::endl;
-    of << "ts_" << name.fileName << "_chars:";
     for (const auto& c : state.chars)
     {
         std::size_t index = 0;
@@ -178,11 +168,7 @@ void writeBackground(std::ostream& of, const SpecialName& name, const State<Char
         }
     }
 
-    of << std::endl << std::endl;
-    of << "    .section .rodata" << std::endl;
-    of << "    .align 2" << std::endl;
-    of << "    .hidden ts_" << name.fileName << "_screenEntries" << std::endl;
-    of << "ts_" << name.fileName << "_screenEntries:";
+    of << std::endl;
     std::size_t id = 0;
     for (std::size_t j = 0; j < state.screenEntries.height(); j += gstate.groupHeight)
         for (std::size_t i = 0; i < state.screenEntries.width(); i += gstate.groupWidth)
@@ -200,12 +186,7 @@ void writeBackground(std::ostream& of, const SpecialName& name, const State<Char
 
     if (gstate.exportPalettes)
     {
-        of << std::endl << std::endl;
-        of << "    .section .rodata" << std::endl;
-        of << "    .align 2" << std::endl;
-        of << "    .hidden ts_" << name.fileName << "_palette" << std::endl;
-        of << "ts_" << name.fileName << "_palette:";
-
+        of << std::endl;
         for (const auto& palette : palettes)
         {
             std::size_t id = 0;
@@ -216,7 +197,6 @@ void writeBackground(std::ostream& of, const SpecialName& name, const State<Char
                 of << toHex(c, 4);
                 id++;
             }
-            of << std::endl;
         }
     }
 

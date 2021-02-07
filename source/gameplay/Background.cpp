@@ -18,7 +18,7 @@ void Background::init()
 }
 
 // Load a new background
-void Background::load(const FullBackgroundData& background)
+void Background::load(const DynamicBackgroundData& background)
 {
     // Flip the 8bpp switch
     if (background.is8bpp) REG_BG1CNT |= BG_8BPP;
