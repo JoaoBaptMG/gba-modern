@@ -24,18 +24,18 @@ void Background::load(const FullBackgroundData& background)
     if (background.is8bpp) REG_BG1CNT |= BG_8BPP;
     else REG_BG1CNT &= ~BG_8BPP;
 
-    // Load all the chars to the first character block
-    memcpy32(&tile_mem[0], background.chars, background.charDataSize/sizeof(u32));
+    // Load all the tiles to the first character block
+    memcpy32(&tile_mem[0], background.tiles, background.charDataSize/sizeof(u32));
 
     // Special case for if the screen block is exactly 32 tiles long
-    if (background.tileWidth == 32)
-        memcpy32(&se_mem[30], background.tiles, background.tileHeight * (32*sizeof(u16)/sizeof(u32)));
+    if (background.seWidth == 32)
+        memcpy32(&se_mem[30], background.scrEntries, background.seHeight * (32*sizeof(u16)/sizeof(u32)));
     else // Pick up the slow way
     {
-        for (u32 j = 0; j < background.tileHeight; j++)
+        for (u32 j = 0; j < background.seHeight; j++)
         {
-            u32 numTiles = std::min<u32>(32, background.tileWidth);
-            memcpy16(&se_mem[30][32*j], &background.tiles[background.tileWidth*j], numTiles);
+            u32 numTiles = std::min<u32>(32, background.seWidth);
+            memcpy16(&se_mem[30][32*j], &background.scrEntries[background.seWidth*j], numTiles);
         }
     }
 

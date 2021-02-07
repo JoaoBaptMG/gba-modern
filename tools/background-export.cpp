@@ -55,12 +55,12 @@ int backgroundExport(int argc, char **argv)
 
     State<Character8bpp> state;
     auto width = image.chars.width(), height = image.chars.height();
-    state.tiles.resize(width, height);
+    state.screenEntries.resize(width, height);
 
-    // Add all the tiles to the state
+    // Add all the screenblock entries to the state
     for (std::size_t j = 0; j < height; j++)
         for (std::size_t i = 0; i < width; i++)
-            state.tiles(i, j) = state.addCharacter(image.chars(i, j));
+            state.screenEntries(i, j) = state.addCharacter(image.chars(i, j));
 
     // Check validity
     std::size_t maxSize = is8bpp ? 512 : 1024;
@@ -149,18 +149,18 @@ void writeBackground(std::ostream& of, const SpecialName& name, const State<Char
     // Export the metadata
     constexpr bool is8bpp = std::is_same<Character, Character8bpp>::value;
 
-    of << "    .word ts_" << name.fileName << "_chars, ts_" << name.fileName << "_tiles" << std::endl;
+    of << "    .word ts_" << name.fileName << "_chars, ts_" << name.fileName << "_screenEntries" << std::endl;
     if (!gstate.staticCharSize)
         of << "    .word " << (state.chars.size() * sizeof(Character)) << std::endl;
 
-    if (gstate.exportSizes) of << "    .hword " << state.tiles.width() << ", " << state.tiles.height() << std::endl;
+    if (gstate.exportSizes) of << "    .hword " << state.screenEntries.width() << ", " << state.screenEntries.height() << std::endl;
     if (gstate.exportPalettes)
     {
         of << "    .hword " << palettes.size() << ", " << (int)is8bpp << std::endl;
         of << "    .word ts_" << name.fileName << "_palette" << std::endl;
     }
 
-    // Now, the chars, tiles and palettes
+    // Now, the chars, screen entries and palettes
     of << std::endl;
     of << "    .section .rodata" << std::endl;
     of << "    .align 2" << std::endl;
@@ -181,15 +181,15 @@ void writeBackground(std::ostream& of, const SpecialName& name, const State<Char
     of << std::endl << std::endl;
     of << "    .section .rodata" << std::endl;
     of << "    .align 2" << std::endl;
-    of << "    .hidden ts_" << name.fileName << "_tiles" << std::endl;
-    of << "ts_" << name.fileName << "_tiles:";
+    of << "    .hidden ts_" << name.fileName << "_screenEntries" << std::endl;
+    of << "ts_" << name.fileName << "_screenEntries:";
     std::size_t id = 0;
-    for (std::size_t j = 0; j < state.tiles.height(); j += gstate.groupHeight)
-        for (std::size_t i = 0; i < state.tiles.width(); i += gstate.groupWidth)
+    for (std::size_t j = 0; j < state.screenEntries.height(); j += gstate.groupHeight)
+        for (std::size_t i = 0; i < state.screenEntries.width(); i += gstate.groupWidth)
         {
-            std::size_t cellWidth = std::min(state.tiles.width() - i, gstate.groupWidth);
-            std::size_t cellHeight = std::min(state.tiles.height() - j, gstate.groupHeight);
-            for (const auto& tile : state.tiles.make_view(i, j, cellWidth, cellHeight))
+            std::size_t cellWidth = std::min(state.screenEntries.width() - i, gstate.groupWidth);
+            std::size_t cellHeight = std::min(state.screenEntries.height() - j, gstate.groupHeight);
+            for (const auto& tile : state.screenEntries.make_view(i, j, cellWidth, cellHeight))
             {
                 if (id % 8 == 0) of << std::endl << "    .hword ";
                 else of << ", ";

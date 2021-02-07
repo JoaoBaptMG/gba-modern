@@ -8,7 +8,7 @@ struct State
 {
     std::vector<Character> chars;
     std::map<Character, std::uint16_t> charIndices;
-    util::grid<std::uint16_t> tiles;
+    util::grid<std::uint16_t> screenEntries;
 
     auto addCharacter(const Character& character)
     {

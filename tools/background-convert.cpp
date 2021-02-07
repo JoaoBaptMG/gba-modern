@@ -16,13 +16,13 @@ ConversionResult convertBackgroundTo4bpp(const State<Character8bpp>& state8bpp,
     const std::array<Color, 256>& originalPalette, bool preserveOrder,
     const std::vector<std::size_t>& remapPalettes)
 {
-    // If preserveOrder is set, it will just check whether the tile has uniform tiles
+    // If preserveOrder is set, it will just check whether the tiles have uniform palettes
     if (preserveOrder)
     {
         auto numChars = state8bpp.chars.size();
         State<Character4bpp> state;
         state.chars.resize(numChars);
-        state.tiles.resize(state8bpp.tiles.width(), state8bpp.tiles.height());
+        state.screenEntries.resize(state8bpp.screenEntries.width(), state8bpp.screenEntries.height());
 
         std::vector<std::size_t> paletteMaps(numChars);
         // Check for each character whether we have a common palette
@@ -54,12 +54,12 @@ ConversionResult convertBackgroundTo4bpp(const State<Character8bpp>& state8bpp,
             }
         }
 
-        // Check the tiles so they can be corrected
-        for (std::size_t j = 0; j < state8bpp.tiles.height(); j++)
-            for (std::size_t i = 0; i < state8bpp.tiles.width(); i++)
+        // Check the screenblock entries so they can be corrected
+        for (std::size_t j = 0; j < state8bpp.screenEntries.height(); j++)
+            for (std::size_t i = 0; i < state8bpp.screenEntries.width(); i++)
             {
                 // Get the actual tile id
-                auto data = state8bpp.tiles(i, j);
+                auto data = state8bpp.screenEntries(i, j);
                 auto tile = data & 0x3FF;
 
                 auto color = paletteMaps[tile];
@@ -67,7 +67,7 @@ ConversionResult convertBackgroundTo4bpp(const State<Character8bpp>& state8bpp,
                     throw std::domain_error("remap-palettes array provided is too small!");
 
                 // And compose the palette map on it
-                state.tiles(i, j) = data | (remapPalettes[color] << 12);
+                state.screenEntries(i, j) = data | (remapPalettes[color] << 12);
             }
 
         // Generate the palette file
@@ -188,30 +188,30 @@ ConversionResult convertBackgroundTo4bpp(const State<Character8bpp>& state8bpp,
             charCorrespondences[i] = state.addCharacter(char4bpp);
         }
 
-        // Assign the new tile indices
-        state.tiles.resize(state8bpp.tiles.width(), state8bpp.tiles.height());
-        for (std::size_t j = 0; j < state8bpp.tiles.height(); j++)
+        // Assign the new screenblock entry indices
+        state.screenEntries.resize(state8bpp.screenEntries.width(), state8bpp.screenEntries.height());
+        for (std::size_t j = 0; j < state8bpp.screenEntries.height(); j++)
         {
-            for (std::size_t i = 0; i < state8bpp.tiles.width(); i++)
+            for (std::size_t i = 0; i < state8bpp.screenEntries.width(); i++)
             {
                 // Decompose the tile index into its id and flags
-                auto charId = state8bpp.tiles(i, j) & 0x3ff;
+                auto charId = state8bpp.screenEntries(i, j) & 0x3ff;
 
                 // Put only the old flags in the state
-                state.tiles(i, j) = state8bpp.tiles(i, j) ^ charId;
+                state.screenEntries(i, j) = state8bpp.screenEntries(i, j) ^ charId;
 
                 // Compose the old flags with the new correspondent tile index
                 // This is done as a bitwise-XOR operation because the
                 // reversal flags behave as a XOR (reversed with reversed = normal)
                 auto newId = charCorrespondences[charId];
-                state.tiles(i, j) ^= newId;
+                state.screenEntries(i, j) ^= newId;
 
                 // Compose the palette in the last 4 bits of the index
-                state.tiles(i, j) |= setIds[sets.find(charId)] << 12;
+                state.screenEntries(i, j) |= setIds[sets.find(charId)] << 12;
 
                 // Since the first char is always empty, setting it to anything else
                 // doesn't make sense
-                if (newId == 0) state.tiles(i, j) = 0;
+                if (newId == 0) state.screenEntries(i, j) = 0;
             }
         }
 

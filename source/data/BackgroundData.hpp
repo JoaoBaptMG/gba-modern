@@ -7,32 +7,33 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <tonc_types.h>
 
 namespace detail
 {
     struct Empty1 {};
     struct Empty2 {};
 
-    struct BackgroundDataCharsBase
+    struct BackgroundDataTilesBase
     {
-        const void* chars;
-        const std::uint16_t* tiles;
+        const void* tiles;
+        const SCR_ENTRY* scrEntries;
     };
 
     template <std::size_t Size>
-    struct BackgroundDataStaticChars : BackgroundDataCharsBase
+    struct BackgroundDataStaticTiles : BackgroundDataTilesBase
     {
         constexpr static const std::size_t CharDataSize = Size;
     };
 
-    struct BackgroundDataDynamicChars : BackgroundDataCharsBase
+    struct BackgroundDataDynamicTiles : BackgroundDataTilesBase
     {
         std::uint32_t charDataSize;
     };
 
-    struct BackgroundDataTileSize
+    struct BackgroundDataScrSize
     {
-        std::uint16_t tileWidth, tileHeight;
+        std::uint16_t seWidth, seHeight;
     };
 
     struct BackgroundDataPalettes
@@ -44,8 +45,8 @@ namespace detail
 
 template <std::size_t StaticSize, bool ExportSizes, bool ExportPalettes>
 struct BackgroundData final : std::conditional_t<StaticSize == (std::size_t)-1, 
-        detail::BackgroundDataDynamicChars, detail::BackgroundDataStaticChars<StaticSize>>,
-    std::conditional_t<ExportSizes, detail::BackgroundDataTileSize, detail::Empty1>,
+        detail::BackgroundDataDynamicTiles, detail::BackgroundDataStaticTiles<StaticSize>>,
+    std::conditional_t<ExportSizes, detail::BackgroundDataScrSize, detail::Empty1>,
     std::conditional_t<ExportPalettes, detail::BackgroundDataPalettes, detail::Empty2> {};
 
 using FullBackgroundData = BackgroundData<(std::size_t)-1, true, true>;
