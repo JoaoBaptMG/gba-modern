@@ -3,8 +3,18 @@
 
 struct Offset { int x, y; };
 
+struct GlobalState
+{
+    bool exportPalettes = true;
+    bool exportSizes = true;
+    bool staticCharSize = false;
+    std::size_t groupWidth = 1;
+    std::size_t groupHeight = 1;
+};
+
 template <typename Character>
-void writeBackground(std::ostream& of, const SpecialName& name, const State<Character>& state, const std::vector<Palette>& palettes);
+void writeBackground(std::ostream& of, const SpecialName& name, const State<Character>& state,
+    const std::vector<Palette>& palettes, const GlobalState& gstate);
 
 int backgroundExport(int argc, char **argv)
 {
@@ -17,21 +27,31 @@ int backgroundExport(int argc, char **argv)
     std::string out = argv[3];
     std::string outh = argv[4];
 
-    // Load the image
-    auto image = convertImageToCharacters8bpp(loadPngToImage(in));
-
     // Load the companion .json file
     std::ifstream inf;
     inf.open(in + ".json");
 
     // Get the main attributes (if the file is loaded)
     bool is8bpp = false;
+    bool preserveOrder = false;
+    std::vector<std::size_t> remapPalettes{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+    GlobalState gstate;
     if (inf.good())
     {
         nlohmann::json j;
         inf >> j;
         if (j.contains("is8bpp")) j.at("is8bpp").get_to(is8bpp);
+        if (j.contains("export-palettes")) j.at("export-palettes").get_to(gstate.exportPalettes);
+        if (j.contains("export-sizes")) j.at("export-sizes").get_to(gstate.exportSizes);
+        if (j.contains("group-width")) j.at("export-sizes").get_to(gstate.groupWidth);
+        if (j.contains("group-height")) j.at("export-sizes").get_to(gstate.groupHeight);
+        if (j.contains("static-char-size")) j.at("static-char-size").get_to(gstate.staticCharSize);
+        if (j.contains("preserve-order")) j.at("preserve-order").get_to(preserveOrder);
+        if (preserveOrder && j.contains("remap-palettes")) j.at("remap-palettes").get_to(remapPalettes);
     }
+
+    // Load the image
+    auto image = convertImageToCharacters8bpp(loadPngToImage(in), 256, preserveOrder);
 
     State<Character8bpp> state;
     auto width = image.chars.width(), height = image.chars.height();
@@ -73,13 +93,21 @@ int backgroundExport(int argc, char **argv)
         palettes[0][0] = 0;
 
         // And write the file
-        writeBackground(of, name, state, palettes);
+        writeBackground(of, name, state, palettes, gstate);
     }
     else
     {
         // Do the conversion and write
-        auto [state4bpp, palettes] = convertBackgroundTo4bpp(state, image.palette);
-        writeBackground(of, name, state4bpp, palettes);
+        if (preserveOrder)
+        {
+            auto numPalettes = (image.actualColors + 15) / 16;
+            if (remapPalettes.size() < numPalettes)
+                throw std::domain_error("remap-palettes array provided is too small!");
+            remapPalettes.resize(numPalettes);
+        }
+
+        auto [state4bpp, palettes] = convertBackgroundTo4bpp(state, image.palette, preserveOrder, remapPalettes);
+        writeBackground(of, name, state4bpp, palettes, gstate);
     }
 
     // Write the header
@@ -94,7 +122,13 @@ int backgroundExport(int argc, char **argv)
         hof << "#include \"data/BackgroundData.hpp\"" << std::endl << std::endl;
         hof << "namespace " << name.nmspace << std::endl;
         hof << "{" << std::endl;
-        hof << "    extern const BackgroundHandle " << name.fileName << ';' << std::endl;
+        hof << "    extern const BackgroundHandle<";
+        if (gstate.staticCharSize)
+            hof << (state.chars.size() * (is8bpp ? sizeof(Character8bpp) : sizeof(Character4bpp))) << ", ";
+        else hof << "(std::size_t)-1, ";
+        hof << (gstate.exportSizes ? "true" : "false") << ", ";
+        hof << (gstate.exportPalettes ? "true" : "false") << "> ";
+        hof << name.fileName << ';' << std::endl;
         hof << "}" << std::endl << std::endl;
     }
 
@@ -102,7 +136,8 @@ int backgroundExport(int argc, char **argv)
 }
 
 template <typename Character>
-void writeBackground(std::ostream& of, const SpecialName& name, const State<Character>& state, const std::vector<Palette>& palettes)
+void writeBackground(std::ostream& of, const SpecialName& name, const State<Character>& state,
+    const std::vector<Palette>& palettes, const GlobalState& gstate)
 {
     // The main structure
     of << "    .section .rodata" << std::endl;
@@ -113,11 +148,17 @@ void writeBackground(std::ostream& of, const SpecialName& name, const State<Char
 
     // Export the metadata
     constexpr bool is8bpp = std::is_same<Character, Character8bpp>::value;
-    of << "    .hword " << state.tiles.width() << ", " << state.tiles.height() << std::endl;
-    of << "    .hword " << (state.chars.size() * sizeof(Character));
-    of << ", " << toHex((is8bpp << 15) | palettes.size(), 4) << std::endl;
-    of << "    .word ts_" << name.fileName << "_chars, ts_" << name.fileName;
-    of << "_tiles, ts_" << name.fileName << "_palette" << std::endl;
+
+    of << "    .word ts_" << name.fileName << "_chars, ts_" << name.fileName << "_tiles" << std::endl;
+    if (!gstate.staticCharSize)
+        of << "    .word " << (state.chars.size() * sizeof(Character)) << std::endl;
+
+    if (gstate.exportSizes) of << "    .hword " << state.tiles.width() << ", " << state.tiles.height() << std::endl;
+    if (gstate.exportPalettes)
+    {
+        of << "    .hword " << palettes.size() << ", " << (int)is8bpp << std::endl;
+        of << "    .word ts_" << name.fileName << "_palette" << std::endl;
+    }
 
     // Now, the chars, tiles and palettes
     of << std::endl;
@@ -141,33 +182,43 @@ void writeBackground(std::ostream& of, const SpecialName& name, const State<Char
     of << "    .section .rodata" << std::endl;
     of << "    .align 2" << std::endl;
     of << "    .hidden ts_" << name.fileName << "_tiles" << std::endl;
-    of << "ts_" << name.fileName << "_tiles:" << std::endl;
+    of << "ts_" << name.fileName << "_tiles:";
     std::size_t id = 0;
-    for (const auto& tile : state.tiles)
-    {
-        if (id % 16 == 0) of << std::endl << "    .hword ";
-        else of << ", ";
-        of << toHex(tile, 4);
-        id++;
-    }
-
-    of << std::endl << std::endl;
-    of << "    .section .rodata" << std::endl;
-    of << "    .align 2" << std::endl;
-    of << "    .hidden ts_" << name.fileName << "_palette" << std::endl;
-    of << "ts_" << name.fileName << "_palette:" << std::endl;
-
-    for (const auto& palette : palettes)
-    {
-        of << "    .hword ";
-        bool nf = false;
-        for (Color c : palette)
+    for (std::size_t j = 0; j < state.tiles.height(); j += gstate.groupHeight)
+        for (std::size_t i = 0; i < state.tiles.width(); i += gstate.groupWidth)
         {
-            if (nf) of << ", ";
-            of << toHex(c, 4);
-            nf = true;
+            std::size_t cellWidth = std::min(state.tiles.width() - i, gstate.groupWidth);
+            std::size_t cellHeight = std::min(state.tiles.height() - j, gstate.groupHeight);
+            for (const auto& tile : state.tiles.make_view(i, j, cellWidth, cellHeight))
+            {
+                if (id % 8 == 0) of << std::endl << "    .hword ";
+                else of << ", ";
+                of << toHex(tile, 4);
+                id++;
+            }
         }
-        of << std::endl;
+
+    if (gstate.exportPalettes)
+    {
+        of << std::endl << std::endl;
+        of << "    .section .rodata" << std::endl;
+        of << "    .align 2" << std::endl;
+        of << "    .hidden ts_" << name.fileName << "_palette" << std::endl;
+        of << "ts_" << name.fileName << "_palette:";
+
+        for (const auto& palette : palettes)
+        {
+            std::size_t id = 0;
+            for (Color c : palette)
+            {
+                if (id % 8 == 0) of << std::endl << "    .hword ";
+                else of << ", ";
+                of << toHex(c, 4);
+                id++;
+            }
+            of << std::endl;
+        }
     }
+
     of << std::endl;
 }

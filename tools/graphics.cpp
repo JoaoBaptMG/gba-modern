@@ -14,7 +14,8 @@ static void throwCodeError(std::size_t maxColors)
     throw std::domain_error("Detected pixel with code higher than the maximum permitted (" + std::to_string(maxColors-1) + ")");
 }
 
-static auto reducePalette(std::array<Color, 256> &palette, std::size_t numColors, std::size_t maxColors, std::size_t &actualColors)
+static auto reducePalette(std::array<Color, 256> &palette, std::size_t numColors, std::size_t maxColors,
+    std::size_t &actualColors, bool preserveOrder = false)
 {
     // Use a map to count the number of distinct palette entries
     std::map<Color, std::size_t> colors;
@@ -28,6 +29,8 @@ static auto reducePalette(std::array<Color, 256> &palette, std::size_t numColors
         throw std::invalid_argument("Image must have at most " + std::to_string(maxColors) + " distinct colors!");
 
     actualColors = index;
+
+    if (preserveOrder) return increasingMap();
 
     std::array<std::size_t, 256> paletteMap;
     std::array<Color, 256> newPalette;
@@ -88,8 +91,8 @@ CharacterData8bpp convertImageToCharacters8bpp(const Image8bpp& image, std::size
 
     // Try to reduce palette
     charData.actualColors = 256;
-    auto paletteMap = preserveOrder ? increasingMap() : reducePalette(charData.palette, 
-        image.palette.size(), maxColors, charData.actualColors);
+    auto paletteMap = reducePalette(charData.palette, image.palette.size(), maxColors,
+        charData.actualColors, preserveOrder);
 
     // Convert to characters
     std::size_t tw = image.width/8, th = image.height/8;

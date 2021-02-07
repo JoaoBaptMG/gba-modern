@@ -14,12 +14,12 @@ class GameScene;
 class Background final
 {
     GameScene& gameScene();
-    const BackgroundData* curBackground;
+    const FullBackgroundData* curBackground;
 
 public:
     Background() {}
     void init();
-    void load(const BackgroundData& background);
+    void load(const FullBackgroundData& background);
     void vblank();
 
     vec2<s32f8> offset;

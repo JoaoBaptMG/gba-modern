@@ -38,5 +38,6 @@ struct ConversionResult
 };
 
 ConversionResult convertBackgroundTo4bpp(const State<Character8bpp>& state8bpp,
-    const std::array<Color, 256>& originalPalette);
+    const std::array<Color, 256>& originalPalette, bool preserveOrder,
+    const std::vector<std::size_t>& remapPalettes);
 

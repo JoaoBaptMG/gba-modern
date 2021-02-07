@@ -8,7 +8,25 @@
     "properties":
     {
         "$schema": {"type": "string", "description": "The schema to validate this json for" },
-        "is8bpp": { "type": "boolean", "description": "Whether to export this sprite as 8bpp characters" }
+        "is8bpp": { "type": "boolean", "description": "Whether to export this sprite as 8bpp characters" },
+        "group-width": { "type": "integer", "description": "The width of the 'block' in which to regroup this image in tiles" },
+        "group-height": { "type": "integer", "description": "The height of the 'block' in which to regroup this image in tiles" },
+        "preserve-order": { "type": "boolean", "description": "If true, the colors will not be rearranged and the palettes must form groups of 16." },
+        "export-palettes": { "type": "boolean", "description": "If false, the palettes will be supressed from the final exported file. Default is true." },
+        "export-sizes": { "type": "boolean", "description": "If false, the size data will not be generated. Default is true." },
+        "static-char-size": { "type": "boolean", "description": "If true, the size will be exported as a static template parameter, and not inside the asm." },
+        "remap-palettes":
+        {
+            "type": "array",
+            "description": "An array describing the remapping of the palettes present",
+            "uniqueItems": true,
+            "items":
+            { 
+                "type": "integer",
+                "description": "This ID will be the new ID associated with the current palette.",
+                "minimum": 0, "maximum": 15
+            }
+        }
     },
     "additionalProperties": false
 }
