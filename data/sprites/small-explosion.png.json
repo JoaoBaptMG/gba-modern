@@ -1,4 +1,5 @@
 {
+    "$schema": "../../data-schemas/sprite.schema.json",
     "group-width": 2,
     "group-height": 2
 }

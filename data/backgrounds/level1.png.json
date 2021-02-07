@@ -1,3 +1,4 @@
 {
+    "$schema": "../../data-schemas/sprite.schema.json",
     "is8bpp": true
 }

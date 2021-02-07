@@ -1,3 +1,4 @@
 {
+    "$schema": "../../data-schemas/sprite.schema.json",
     "export-palette": false
 }

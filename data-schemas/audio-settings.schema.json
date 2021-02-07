@@ -1,0 +1,26 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://github.com/JoaoBaptMG/gba-modern/tree/master/data-schemas/sprite.schema.json",
+    "title": "Font definition",
+    "description": "The attributes used for exporting a font using tools/tools sprite-export",
+    "type": "object",
+
+    "properties": 
+    {
+        "$schema": {"type": "string", "description": "The schema to validate this json for" },
+        "sampling-frequency":
+        {
+            "type": "integer",
+            "description": "The sampling frequency used by the audio engine. Can be only one of those: 5374, 10512, 13379, 18157, 21024, 26758, 31536, 36314, 40137, 42048.",
+            "enum": [5374, 10512, 13379, 18157, 21024, 26758, 31536, 36314, 40137, 42048]
+        },
+        "num-channels":
+        {
+            "type": "integer",
+            "description": "The number of simultaneous channels that is managed by the audio engine.",
+            "minimum": 1
+        }
+    },
+    "required": ["sampling-frequency", "num-channels"],
+    "additionalProperties": false
+}

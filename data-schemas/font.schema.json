@@ -1,0 +1,32 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://github.com/JoaoBaptMG/gba-modern/tree/master/data-schemas/sprite.schema.json",
+    "title": "Font definition",
+    "description": "The attributes used for exporting a font using tools/tools sprite-export",
+    "type": "object",
+
+    "properties":
+    {
+        "$schema": {"type": "string", "description": "The schema to validate this json for" },
+        "export-size": { "type": "integer", "minimum": 1, "description": "The size in which to export this font." },
+        "export-range":
+        {
+            "type": "array",
+            "description": "The ranges of characters to export the font with.",
+            "items":
+            {
+                "type": "array",
+                "description": "A range composed of a first and a last character.",
+                "items":
+                [
+                    { "type": "number", "description": "The first character to export from that range." },
+                    { "type": "number", "description": "The last character to export from that range." }
+                ],
+                "additionalItems": false
+            }
+        },
+        "override-vertical-stride": { "type": "integer", "minimum": 1, "description": "The vertical stride to use instead of the one embedded in the font file." }
+    },
+
+    "required": ["export-size", "export-range"]
+}

@@ -1,4 +1,5 @@
 {
+    "$schema": "../data-schemas/audio-settings.schema.json",
     "sampling-frequency": 21024,
     "num-channels": 16
 }
