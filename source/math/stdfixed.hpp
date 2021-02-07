@@ -6,7 +6,7 @@
 #pragma once
 
 #include "fixed.hpp"
-#include "tonc.h"
+#include <tonc_types.h>
 
 #include <cstdint>
 
