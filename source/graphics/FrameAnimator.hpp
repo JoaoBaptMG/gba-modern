@@ -12,7 +12,7 @@
 #include "graphics.hpp"
 #include "graphics/AnimationPose.hpp"
 #include "graphics/SpriteSize.hpp"
-#include "data/AnimatedPng.hpp"
+#include "data/AnimationFrame.hpp"
 #include "util/AllocatorPointer.hpp"
 #include "util/integer-sequence-utils.hpp"
 
@@ -53,7 +53,7 @@ class FrameStore final : public Allocator<FrameStore<Png, Size>>
 {
     // Useful typedefs
     using TPng = std::remove_cv_t<std::remove_reference_t<decltype(Png)>>;
-    constexpr static const auto N = TPng::__png::NumAnimationFrames;
+    constexpr static const auto N = TPng::NumAnimationFrames;
     using Indices = bit_sequence_t<N>;
     using Sizes = exp2_seq_t<Indices>;
     using PrefixSizes = prefix_sum_t<Sizes>;

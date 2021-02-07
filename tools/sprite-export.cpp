@@ -31,14 +31,14 @@ void from_json(const nlohmann::json& j, AnimationPose& af)
 template <typename T>
 void writeCharData(std::ostream& of, const State& state, const T& charData);
 template <typename T>
-void writeHeaderData(std::ostream& hof, const State& state, const T& charData, bool generateBitmask);
+void writeHeaderData(std::ostream& hof, const State& state, const T& charData, std::size_t bitmaskSize);
 
 void writeCharAnimationData(std::ofstream& of, const State& state, std::size_t totalNumFrames);
 
 using AnimationData = std::map<std::string, AnimationPose>;
 template <typename T>
 void writeAnimatedHeaderData(std::ostream &hof, const State &state, const T& charData,
-    const AnimationData &animations, std::size_t frameStep, std::size_t totalNumFrames, bool generateBitmask);
+    const AnimationData &animations, std::size_t frameStep, std::size_t totalNumFrames, std::size_t bitmaskSize);
 
 void writeBitmaskData(std::ostream& of, const Bitmask& bitmask);
 
@@ -100,34 +100,31 @@ int spriteExport(int argc, char **argv)
     hof << "// " << outh << std::endl;
     hof << "// " << std::endl;
     hof << "#pragma once" << std::endl << std::endl;
-    if (exportAnimation)
-    {
-        hof << "#include \"data/AnimatedPng.hpp\"" << std::endl;
-        hof << "#include \"graphics/AnimationPose.hpp\"" << std::endl;
-    }
-    else hof << "#include \"data/DataPng.hpp\"" << std::endl;
+    hof << "#include \"data/Sprite.hpp\"" << std::endl;
+    if (exportAnimation) hof << "#include \"graphics/AnimationPose.hpp\"" << std::endl;
     hof << std::endl;
 
-    auto exportChars = [&](auto charData)
+    auto exportChars = [&](auto charData, const Bitmask& bitmask)
     {
         charData.palette[0] = 0;
         writeCharData(of, state, charData);
 
-        if (!exportAnimation) writeHeaderData(hof, state, charData, generateBitmask);
+        if (generateBitmask) writeBitmaskData(of, bitmask);
+
+        if (!exportAnimation) writeHeaderData(hof, state, charData, bitmask.data.size());
         else
         {
             auto framesX = (charData.chars.width() + state.groupWidth - 1) / state.groupWidth;
             auto framesY = (charData.chars.height() + state.groupHeight - 1) / state.groupHeight;
             writeCharAnimationData(of, state, framesX * framesY);
-            writeAnimatedHeaderData(hof, state, charData, animations, frameStep, framesX * framesY, generateBitmask);
+            writeAnimatedHeaderData(hof, state, charData, animations, frameStep, framesX * framesY, bitmask.data.size());
         } 
     };
 
     auto image = loadPngToImage(in);
-    if (!is8bpp) exportChars(convertImageToCharacters4bpp(image, maxColors, preserveOrder));
-    else exportChars(convertImageToCharacters8bpp(image, maxColors, preserveOrder));
-
-    if (generateBitmask) writeBitmaskData(of, generateImageBitmask(image));
+    auto bitmask = generateBitmask ? generateImageBitmask(image) : Bitmask{};
+    if (!is8bpp) exportChars(convertImageToCharacters4bpp(image, maxColors, preserveOrder), bitmask);
+    else exportChars(convertImageToCharacters8bpp(image, maxColors, preserveOrder), bitmask);
 
     of.close();
     hof.close();
@@ -187,7 +184,7 @@ void writeCharAnimationData(std::ofstream& of, const State& state, std::size_t t
 }
 
 template <typename T>
-void writeHeaderData(std::ostream& hof, const State& state, const T& charData, bool generateBitmask)
+void writeHeaderData(std::ostream& hof, const State& state, const T& charData, std::size_t bitmaskSize)
 {
     hof << "namespace " << state.name.nmspace << std::endl;
     hof << '{' << std::endl;
@@ -195,37 +192,38 @@ void writeHeaderData(std::ostream& hof, const State& state, const T& charData, b
     std::size_t charSize = charData.chars.width() * charData.chars.height() * charData.chars.at(0, 0).size();
     std::size_t paletteSize = state.exportPalette ? charData.palette.size() : 0;
 
-    auto structName = generateBitmask ? "BitmaskPng" : "DataPng";
-    hof << "    extern const " << structName << "<" << charSize << ", " << paletteSize << "> ";
-    hof << state.name.fileName << ';' << std::endl;
+    hof << "    extern const SpriteHandle<" << charSize << ", " << paletteSize << ", ";
+    hof << bitmaskSize << "> " << state.name.fileName << ';' << std::endl;
 
     hof << '}' << std::endl << std::endl;
 }
 
 template <typename T>
 void writeAnimatedHeaderData(std::ostream &hof, const State &state, const T& charData,
-    const AnimationData &animations, std::size_t frameStep, std::size_t totalNumFrames, bool generateBitmask)
+    const AnimationData &animations, std::size_t frameStep, std::size_t totalNumFrames, std::size_t bitmaskSize)
 {
     hof << "namespace " << state.name.nmspace << std::endl;
     hof << '{' << std::endl;
 
-    hof << "    struct __animation_" << state.name.fileName << " final" << std::endl;
+    hof << "    namespace __animation" << std::endl;
     hof << "    {" << std::endl;
+    hof << "        struct _ani_" << state.name.fileName << " final" << std::endl;
+    hof << "        {" << std::endl;
 
     for (const auto& p : animations)
     {
-        hof << "        constexpr static const AnimationPose " << p.first << " = { ";
+        hof << "            constexpr static const AnimationPose " << p.first << " = { ";
         hof << p.second.init << ", " << p.second.repeat << ", " << p.second.end << " };" << std::endl;
     }
 
-    hof << "    };" << std::endl;
+    hof << "        };" << std::endl;
+    hof << "    }" << std::endl;
 
     std::size_t charSize = charData.chars.width() * charData.chars.height() * charData.chars.at(0, 0).size();
     std::size_t paletteSize = state.exportPalette ? charData.palette.size() : 0;
 
-    auto structName = generateBitmask ? "AnimatedBitmaskPng" : "AnimatedPng";
-    hof << "    extern const " << structName << "<" << charSize << ", " << paletteSize << ", " << totalNumFrames;
-    hof << ", __animation_" << state.name.fileName << "> " << state.name.fileName << ';' << std::endl;
+    hof << "    extern const SpriteHandle<" << charSize << ", " << paletteSize << ", " << bitmaskSize << ", " << totalNumFrames;
+    hof << ", __animation::_ani_" << state.name.fileName << "> " << state.name.fileName << ';' << std::endl;
 
     hof << '}' << std::endl << std::endl;
 }

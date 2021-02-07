@@ -8,7 +8,7 @@
 
 #include <tonc.h>
 #include "graphics/SpriteSize.hpp"
-#include "data/AnimatedPng.hpp"
+#include "data/AnimationFrame.hpp"
 #include "graphics/AnimationPose.hpp"
 #include "graphics/ObjectTilePointer.hpp"
 
