@@ -8,7 +8,7 @@
 #include "scenes/IScene.hpp"
 #include "Player.hpp"
 #include "Level.hpp"
-#include "UserInterface.hpp"
+#include "ui/UserInterface.hpp"
 #include "Background.hpp"
 #include "util/UnorderedIterableList.hpp"
 #include "Enemy.hpp"
