@@ -8,8 +8,33 @@
 #include <tonc.h>
 #include <algorithm>
 #include "data/sprites/user-interface.hpp"
-#include "data/sprites/level-marker.hpp"
-#include "data/sprites/level-numbers.hpp"
+#include "data/backgrounds/level-mark.hpp"
+
+#include "data/backgrounds/level-numbers/_1.hpp"
+#include "data/backgrounds/level-numbers/_2.hpp"
+#include "data/backgrounds/level-numbers/_3.hpp"
+#include "data/backgrounds/level-numbers/_4.hpp"
+#include "data/backgrounds/level-numbers/_5.hpp"
+#include "data/backgrounds/level-numbers/_6.hpp"
+#include "data/backgrounds/level-numbers/_7.hpp"
+#include "data/backgrounds/level-numbers/_8.hpp"
+#include "data/backgrounds/level-numbers/_9.hpp"
+
+constexpr auto getMaxNumberDataSize()
+{
+    using namespace data::backgrounds::level_numbers;
+    return std::max({ 
+        _1.png.CharDataSize,
+        _2.png.CharDataSize,
+        _3.png.CharDataSize,
+        _4.png.CharDataSize,
+        _5.png.CharDataSize,
+        _6.png.CharDataSize,
+        _7.png.CharDataSize,
+        _8.png.CharDataSize,
+        _9.png.CharDataSize,
+    });
+}
 
 #define UI_TILE_BANK tile_mem[3]
 #define UI_SCREEN se_mem[31]
@@ -25,13 +50,14 @@ namespace uidefs
     constexpr auto NumScoreTiles = 5;
     constexpr auto ScoreTiles = TileEnd - NumScoreTiles;
 
-    constexpr auto NumLevelTextTiles = sizeof(data::sprites::level_marker.png.tiles)/sizeof(TILE);
-    constexpr auto NumLevelNumberTiles = sizeof(data::sprites::level_numbers.png.tiles)/sizeof(TILE) / 9;
+    constexpr auto NumLevelTextTiles = data::backgrounds::level_mark.png.CharDataSize/sizeof(TILE);
+    constexpr auto NumLevelNumberTiles = getMaxNumberDataSize()/sizeof(TILE);
     constexpr auto NumLevelSignTiles = NumLevelTextTiles + NumLevelNumberTiles;
 
-    constexpr auto LevelMarkerTileWidth = 22;
-    constexpr auto LevelNumberTileWidth = 5;
-    constexpr auto LevelSignTileHeight = 7;
+    constexpr auto LevelMarkerTileWidth = 20;
+    constexpr auto LevelNumberTileWidth = 4;
+    constexpr auto LevelSignTileSpacing = 1;
+    constexpr auto LevelSignTileHeight = 6;
 
     constexpr auto NumSignTiles = std::max(NumLevelSignTiles, std::size_t());
     constexpr auto SignTiles = ScoreTiles - NumSignTiles;

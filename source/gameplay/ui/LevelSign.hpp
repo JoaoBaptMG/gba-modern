@@ -7,7 +7,7 @@
 
 #include <tonc.h>
 
-constexpr auto SignHeight = 56;
+constexpr auto SignHeight = 48;
 
 class LevelSign final
 {
@@ -18,6 +18,9 @@ class LevelSign final
     u32 restoreDmaRegister;
     s16 hofsUpdates[SignHeight + 1];
     s16 levelOffset;
+
+    s16 newVofsRegister;
+    s16 restoreVofsRegister;
 
     int numFrames;
 
