@@ -6,8 +6,6 @@ struct Offset { int x, y; };
 struct GlobalState
 {
     bool exportPalettes = true;
-    bool exportSizes = true;
-    bool staticCharSize = false;
     std::size_t groupWidth = 1;
     std::size_t groupHeight = 1;
 };
@@ -42,10 +40,8 @@ int backgroundExport(int argc, char **argv)
         inf >> j;
         if (j.contains("is8bpp")) j.at("is8bpp").get_to(is8bpp);
         if (j.contains("export-palettes")) j.at("export-palettes").get_to(gstate.exportPalettes);
-        if (j.contains("export-sizes")) j.at("export-sizes").get_to(gstate.exportSizes);
-        if (j.contains("group-width")) j.at("export-sizes").get_to(gstate.groupWidth);
-        if (j.contains("group-height")) j.at("export-sizes").get_to(gstate.groupHeight);
-        if (j.contains("static-char-size")) j.at("static-char-size").get_to(gstate.staticCharSize);
+        if (j.contains("group-width")) j.at("group-width").get_to(gstate.groupWidth);
+        if (j.contains("group-height")) j.at("group-height").get_to(gstate.groupHeight);
         if (j.contains("preserve-order")) j.at("preserve-order").get_to(preserveOrder);
         if (preserveOrder && j.contains("remap-palettes")) j.at("remap-palettes").get_to(remapPalettes);
     }
@@ -122,6 +118,8 @@ int backgroundExport(int argc, char **argv)
         seHeight = state4bpp.screenEntries.height();
         paletteCount = palettes.size();
     }
+
+    if (!gstate.exportPalettes) paletteCount = 0;
 
     // Write the header
     {
