@@ -11,6 +11,13 @@
 
 void OamManager::sortOAM()
 {
+    // If there are no objects, avoid sorting
+    if (objCount == 0)
+    {
+        preProjPos = 0;
+        return;
+    }
+
     // Here, we'll do two bubble sort phase
     bool notSorted = true;
     while (notSorted)
