@@ -243,7 +243,9 @@ SECTIONS
 	}>iwram = 0xff
 
 	__iwram_overlay_end = . ;
-	__ewram_lma = __iwram_overlay_lma + (__iwram_overlay_end - __iwram_overlay_start) ;
+	__ewram_lma = __iwram_overlay_lma + SIZEOF(.iwram0) + SIZEOF(.iwram1) + SIZEOF(.iwram2) +
+		SIZEOF(.iwram3) + SIZEOF(.iwram4) + SIZEOF(.iwram5) + SIZEOF(.iwram6) +
+		SIZEOF(.iwram7) + SIZEOF(.iwram8) + SIZEOF(.iwram9) ;
 
 	__iheap_start = . ;
 
