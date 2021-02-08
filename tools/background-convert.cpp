@@ -168,20 +168,19 @@ ConversionResult convertBackgroundTo4bpp(const State<Character8bpp>& state8bpp,
         {
             // Build the 4bpp version
             Character4bpp char4bpp;
+            const auto& pal = charColors[sets.find(i)];
+            
             for (std::size_t j = 0; j < 32; j++)
             {
-                const auto& pal = charColors[sets.find(i)];
-
                 auto firstCode = state8bpp.chars[i][2*j];
                 auto firstId = firstCode == 0 ? 0 :
-                    std::lower_bound(pal.begin(), pal.end(), originalPalette[firstCode]) - pal.begin();
+                    std::lower_bound(pal.begin(), pal.end(), originalPalette[firstCode]) - pal.begin() + 1;
                 
                 auto secondCode = state8bpp.chars[i][2*j+1];
                 auto secondId = secondCode == 0 ? 0 :
-                    std::lower_bound(pal.begin(), pal.end(), originalPalette[secondCode]) - pal.begin();
+                    std::lower_bound(pal.begin(), pal.end(), originalPalette[secondCode]) - pal.begin() + 1;
 
-                // Palettes are 1-based
-                char4bpp[j] = (firstId+1) | ((secondId+1) << 4);
+                char4bpp[j] = firstId | (secondId << 4);
             }
 
             // Add it to the state and store its id
