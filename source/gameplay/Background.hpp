@@ -31,7 +31,6 @@ DynamicBackgroundData getDynamicBackgroundData(
 class Background final
 {
     GameScene& gameScene();
-
     void load(const DynamicBackgroundData& background);
 
 public:
@@ -41,9 +40,7 @@ public:
 
     template <std::size_t DataSize, bool Is8bpp, std::size_t SeWidth, std::size_t SeHeight, std::size_t PaletteCount>
     void load(const BackgroundData<DataSize, Is8bpp, SeWidth, SeHeight, PaletteCount>& background)
-    {
-        load(getDynamicBackgroundData(background));
-    }
+    { load(getDynamicBackgroundData(background)); }
 
     vec2<s32f8> offset;
 };

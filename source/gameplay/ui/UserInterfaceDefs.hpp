@@ -22,17 +22,16 @@
 
 constexpr auto getMaxNumberDataSize()
 {
-    using namespace data::backgrounds::level_numbers;
     return std::max({ 
-        _1.png.DataSize,
-        _2.png.DataSize,
-        _3.png.DataSize,
-        _4.png.DataSize,
-        _5.png.DataSize,
-        _6.png.DataSize,
-        _7.png.DataSize,
-        _8.png.DataSize,
-        _9.png.DataSize,
+        sizeof(data::backgrounds::level_numbers::_1.png.tiles),
+        sizeof(data::backgrounds::level_numbers::_2.png.tiles),
+        sizeof(data::backgrounds::level_numbers::_3.png.tiles),
+        sizeof(data::backgrounds::level_numbers::_4.png.tiles),
+        sizeof(data::backgrounds::level_numbers::_5.png.tiles),
+        sizeof(data::backgrounds::level_numbers::_6.png.tiles),
+        sizeof(data::backgrounds::level_numbers::_7.png.tiles),
+        sizeof(data::backgrounds::level_numbers::_8.png.tiles),
+        sizeof(data::backgrounds::level_numbers::_9.png.tiles),
     });
 }
 
@@ -50,7 +49,7 @@ namespace uidefs
     constexpr auto NumScoreTiles = 5;
     constexpr auto ScoreTiles = TileEnd - NumScoreTiles;
 
-    constexpr auto NumLevelTextTiles = data::backgrounds::level_mark.png.DataSize/sizeof(TILE);
+    constexpr auto NumLevelTextTiles = sizeof(data::backgrounds::level_mark.png.tiles) / sizeof(TILE);
     constexpr auto NumLevelNumberTiles = getMaxNumberDataSize()/sizeof(TILE);
     constexpr auto NumLevelSignTiles = NumLevelTextTiles + NumLevelNumberTiles;
 

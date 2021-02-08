@@ -14,13 +14,11 @@
 namespace detail::sprite
 {
     template <std::size_t DataSize>
-    struct Data { u8 tiles[DataSize]; };
-
-    template <> struct Data<0> {};
+    struct Tiles { u8 tiles[DataSize]; };
+    template <> struct Tiles<0> {};
 
     template <std::size_t ColorCount>
     struct Palette { u16 palette[ColorCount]; };
-
     template <> struct Palette<0> {};
 
     template <std::size_t BitmaskStructSize>
@@ -29,7 +27,6 @@ namespace detail::sprite
         BitmaskData bitmask;
         u16 __actualBitmaskData[BitmaskStructSize];
     };
-
     template <> struct Bitmask<0> {};
 
     template <std::size_t FrameCount, typename AnimationPoses>
@@ -45,7 +42,7 @@ namespace detail::sprite
 
     template <std::size_t DataSize, std::size_t ColorCount, std::size_t BitmaskStructSize,
         std::size_t FrameCount = 0, typename AnimationPoses = void>
-    struct Sprite final : Data<DataSize>, Palette<ColorCount>, Bitmask<BitmaskStructSize>,
+    struct Sprite final : Tiles<DataSize>, Palette<ColorCount>, Bitmask<BitmaskStructSize>,
         Animation<FrameCount, AnimationPoses> {};
 };
 

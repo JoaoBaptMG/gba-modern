@@ -11,14 +11,13 @@
 
 namespace detail::background
 {
-    template <std::size_t _DataSize, bool _Is8bpp>
-    struct Data
+    template <std::size_t DataSize, bool _Is8bpp>
+    struct Tiles
     {
         static constexpr const bool Is8bpp = _Is8bpp;
-        static constexpr const std::size_t DataSize = _DataSize;
-        u8 tiles[_DataSize];
+        u8 tiles[DataSize];
     };
-    template <bool Is8bpp> struct Data<0, Is8bpp> {};
+    template <bool Is8bpp> struct Tiles<0, Is8bpp> {};
 
     template <std::size_t _SeWidth, std::size_t _SeHeight>
     struct ScreenEntries
@@ -26,8 +25,7 @@ namespace detail::background
         static constexpr const std::size_t SeWidth = _SeWidth;
         static constexpr const std::size_t SeHeight = _SeHeight;
         SCR_ENTRY scrEntries[_SeWidth*_SeHeight];
-        auto getEntry(std::size_t x, std::size_t y) const
-        { return scrEntries[y*_SeWidth + x]; }
+        auto getEntry(u32 x, u32 y) const { return scrEntries[y*_SeWidth + x]; }
     };
     template <std::size_t Dummy> struct ScreenEntries<Dummy, 0> {};
     template <std::size_t Dummy> struct ScreenEntries<0, Dummy> {};
@@ -38,7 +36,7 @@ namespace detail::background
     template <> struct Palettes<0> {};
 
     template <std::size_t DataSize, bool Is8bpp, std::size_t SeWidth, std::size_t SeHeight, std::size_t PaletteCount>
-    struct BackgroundData final : Data<DataSize, Is8bpp>, ScreenEntries<SeWidth, SeHeight>, Palettes<PaletteCount> {};
+    struct BackgroundData final : Tiles<DataSize, Is8bpp>, ScreenEntries<SeWidth, SeHeight>, Palettes<PaletteCount> {};
 }
 
 using detail::background::BackgroundData;

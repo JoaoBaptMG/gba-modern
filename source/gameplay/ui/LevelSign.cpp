@@ -36,13 +36,13 @@ constexpr static const auto WobbleTable = generateTable<64>([](std::size_t i)
 
 struct LevelSignData
 {
-    u32 charDataSize;
+    u32 tileDataSize;
     const void* tiles;
     const SCR_ENTRY* scrEntries;
     const PALBANK* palettes;
 };
 
-#define BUILD_SIGN(v) { v.DataSize, v.tiles, v.scrEntries, v.palettes }
+#define BUILD_SIGN(v) { sizeof(v.tiles), v.tiles, v.scrEntries, v.palettes }
 static const LevelSignData LevelSigns[] =
 {
     BUILD_SIGN(data::backgrounds::level_numbers::_1.png),
@@ -62,11 +62,11 @@ LevelSign::LevelSign(int level)
 
     // Transfer the tiles to their designated space
     memcpy32(&UI_TILE_BANK[uidefs::SignTiles], data::backgrounds::level_mark.png.tiles,
-        data::backgrounds::level_mark.png.DataSize / sizeof(u32));
+        sizeof(data::backgrounds::level_mark.png) / sizeof(u32));
     memcpy32(&UI_SIGN_PALETTE, curLevelSign.palettes, sizeof(PALBANK)/sizeof(u32));
 
     memcpy32(&UI_TILE_BANK[uidefs::SignTiles + uidefs::NumLevelTextTiles],
-        curLevelSign.tiles, curLevelSign.charDataSize/sizeof(u32));
+        curLevelSign.tiles, curLevelSign.tileDataSize / sizeof(u32));
 
     // Set the number of frames
     numFrames = MaxNumFrames;
@@ -115,7 +115,6 @@ LevelSign::~LevelSign()
     memset32(&UI_SCREEN[uidefs::SignTileBase], TileId | (TileId << 16), 
         32 * uidefs::LevelSignTileHeight * sizeof(SCR_ENTRY) / sizeof(u32));
 }
-
 
 void LevelSign::update()
 {
