@@ -195,7 +195,7 @@ void writeHeaderData(std::ostream& hof, const State& state, const T& charData, s
     hof << "    extern const SpriteHandle<" << charSize << ", " << paletteSize << ", ";
     hof << bitmaskSize << "> " << state.name.fileName << ';' << std::endl;
 
-    hof << '}' << std::endl << std::endl;
+    hof << '}' << std::endl;
 }
 
 template <typename T>
@@ -225,7 +225,7 @@ void writeAnimatedHeaderData(std::ostream &hof, const State &state, const T& cha
     hof << "    extern const SpriteHandle<" << charSize << ", " << paletteSize << ", " << bitmaskSize << ", " << totalNumFrames;
     hof << ", __animation::_ani_" << state.name.fileName << "> " << state.name.fileName << ';' << std::endl;
 
-    hof << '}' << std::endl << std::endl;
+    hof << '}' << std::endl;
 }
 
 void writeBitmaskData(std::ostream& of, const Bitmask& bitmask)

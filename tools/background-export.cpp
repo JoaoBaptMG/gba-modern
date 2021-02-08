@@ -136,7 +136,7 @@ int backgroundExport(int argc, char **argv)
         hof << "    extern const BackgroundHandle<" << characterSize;
         hof << (is8bpp ? ", true, " : ", false, ") << seWidth << ", " << seHeight;
         hof << ", " << paletteCount << "> " << name.fileName << ';' << std::endl;
-        hof << "}" << std::endl << std::endl;
+        hof << "}" << std::endl;
     }
 
     return 0;
