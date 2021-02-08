@@ -31,15 +31,14 @@ void UserInterface::init()
     REG_BG0VOFS = 4;
 
     // Transfer the data to the end of the CBB
-    constexpr auto DataSize = sizeof(data::sprites::user_interface.png.tiles);
-    memcpy32(&UI_TILE_BANK[uidefs::UserInterfaceTiles], data::sprites::user_interface.png.tiles, DataSize/sizeof(u32));
+    data::copyTiles(&UI_TILE_BANK[uidefs::UserInterfaceTiles], data::sprites::user_interface.png);
 
     // And set the SBB to the correct place
     constexpr auto TileId = SE_PALBANK(15) | (uidefs::UserInterfaceTiles - 1);
     memset32(&UI_SCREEN, TileId | (TileId << 16), sizeof(SCREENBLOCK)/sizeof(u32));
 
     // Transfer the palette
-    memcpy32(&UI_PALETTE, data::sprites::user_interface.png.palette, sizeof(PALBANK)/sizeof(u32));
+    data::copyPalette(&UI_PALETTE, data::sprites::user_interface.png);
 
     // Set the score SBB to the correct place
     for (u32 i = 0; i < uidefs::NumScoreTiles; i++)

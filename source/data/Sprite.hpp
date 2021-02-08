@@ -6,7 +6,7 @@
 #pragma once
 
 #include <cstdint>
-#include <tonc_types.h>
+#include <tonc.h>
 #include <type_traits>
 #include "BitmaskData.hpp"
 #include "AnimationFrame.hpp"
@@ -54,3 +54,22 @@ struct SpriteHandle final
 {
     Sprite<DataSize, ColorCount, BitmaskStructSize, FrameCount, AnimationPoses> png;
 };
+
+namespace data
+{
+    template <std::size_t DataSize, std::size_t ColorCount, std::size_t BitmaskStructSize,
+        std::size_t FrameCount, typename AnimationPoses>
+    std::enable_if_t<DataSize != 0> 
+    copyTiles(void* dest, const Sprite<DataSize, ColorCount, BitmaskStructSize, FrameCount, AnimationPoses>& sprite)
+    {
+        memcpy32(dest, sprite.tiles, sizeof(sprite.tiles)/sizeof(u32));
+    }
+
+    template <std::size_t DataSize, std::size_t ColorCount, std::size_t BitmaskStructSize,
+        std::size_t FrameCount, typename AnimationPoses>
+    std::enable_if_t<ColorCount != 0> 
+    copyPalette(void* dest, const Sprite<DataSize, ColorCount, BitmaskStructSize, FrameCount, AnimationPoses>& sprite)
+    {
+        memcpy32(dest, sprite.palette, (sizeof(sprite.palette)+sizeof(u32)-1)/sizeof(u32));
+    }
+}

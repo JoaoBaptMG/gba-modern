@@ -7,7 +7,7 @@
 
 #include <cstdint>
 #include <type_traits>
-#include <tonc_types.h>
+#include <tonc.h>
 
 namespace detail::background
 {
@@ -46,3 +46,27 @@ struct BackgroundHandle final
 {
     BackgroundData<DataSize, Is8bpp, SeWidth, SeHeight, PaletteCount> png;
 };
+
+namespace data
+{
+    template <std::size_t DataSize, bool Is8bpp, std::size_t SeWidth, std::size_t SeHeight, std::size_t PaletteCount>
+    std::enable_if_t<DataSize != 0> 
+    copyTiles(void* dest, const BackgroundData<DataSize, Is8bpp, SeWidth, SeHeight, PaletteCount>& background)
+    {
+        memcpy32(dest, background.tiles, sizeof(background.tiles)/sizeof(u32));
+    }
+
+    template <std::size_t DataSize, bool Is8bpp, std::size_t SeWidth, std::size_t SeHeight, std::size_t PaletteCount>
+    std::enable_if_t<SeWidth != 0 && SeHeight != 0> 
+    copyScrEntries(void* dest, const BackgroundData<DataSize, Is8bpp, SeWidth, SeHeight, PaletteCount>& background)
+    {
+        memcpy32(dest, background.scrEntries, sizeof(background.scrEntries)/sizeof(u32));
+    }
+
+    template <std::size_t DataSize, bool Is8bpp, std::size_t SeWidth, std::size_t SeHeight, std::size_t PaletteCount>
+    std::enable_if_t<PaletteCount != 0>
+    copyPalettes(void* dest, const BackgroundData<DataSize, Is8bpp, SeWidth, SeHeight, PaletteCount>& background)
+    {
+        memcpy32(dest, background.palettes, sizeof(background.palettes)/sizeof(u32));
+    }
+}

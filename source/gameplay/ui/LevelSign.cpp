@@ -61,10 +61,8 @@ LevelSign::LevelSign(int level)
     const auto& curLevelSign = LevelSigns[level - 1];
 
     // Transfer the tiles to their designated space
-    memcpy32(&UI_TILE_BANK[uidefs::SignTiles], data::backgrounds::level_mark.png.tiles,
-        sizeof(data::backgrounds::level_mark.png) / sizeof(u32));
+    data::copyTiles(&UI_TILE_BANK[uidefs::SignTiles], data::backgrounds::level_mark.png);
     memcpy32(&UI_SIGN_PALETTE, curLevelSign.palettes, sizeof(PALBANK)/sizeof(u32));
-
     memcpy32(&UI_TILE_BANK[uidefs::SignTiles + uidefs::NumLevelTextTiles],
         curLevelSign.tiles, curLevelSign.tileDataSize / sizeof(u32));
 
