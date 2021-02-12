@@ -12,7 +12,6 @@
 #include "audioBuffers.hpp"
 
 // Materialize the mix buffers
-s16 intermediateBuffer[audio::BufferSize];
 s8 audioMixBuffers[2][audio::BufferSize];
 s8* curAudioMixBuffer;
 u32 curFrame;
@@ -79,12 +78,12 @@ void audio::stopSound(u32 channel)
     audioChannels[channel].sound = nullptr;
 }
 
-extern "C" void audioMix(s16* intBuffer, s8* curMixBuffer, AudioChannel* channels) IWRAM_CODE;
+extern "C" void audioMix(s8* curMixBuffer, AudioChannel* channels) IWRAM_CODE;
 
 void audio::mix()
 {
     profile::begin16();
-    audioMix(intermediateBuffer, curAudioMixBuffer, audioChannels);
+    audioMix(curAudioMixBuffer, audioChannels);
     auto val = profile::end16();
 
     if (mgba::isEnabled())
