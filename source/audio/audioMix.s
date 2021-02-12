@@ -158,7 +158,7 @@ audioMix:
     and     r4, r12, r4, lsr #5     @ modulate the volume and wrap it back (doing some internal attenuation)
     and     r5, r12, r5, lsr #5     @ do the same for the odd samples 
     orr     r4, r4, r5, lsl #8      @ compose the samples again
-    str     r5, [r0], #4            @ store them away
+    str     r4, [r0], #4            @ store them away
     subs    r3, #1                  @ check if there are more interactions
     bne     .perFinalSampleQuad     @ go back if there are
 
