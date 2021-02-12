@@ -50,3 +50,9 @@ struct is_explicitly_convertible
 
 template <typename U, typename T>
 static constexpr bool is_explicitly_convertible_v = is_explicitly_convertible<U, T>::value;
+
+template <template<typename> typename Pred, typename... Ts>
+constexpr bool all_of_pred = (Pred<Ts>::value && ...);
+
+template <template<typename> typename Pred, typename... Ts>
+constexpr bool any_of_pred = (Pred<Ts>::value && ...);

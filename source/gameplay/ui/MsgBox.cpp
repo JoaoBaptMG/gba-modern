@@ -111,7 +111,7 @@ void MsgBox::putGlyph()
             if (*curText == '\n')
             {
                 x = InitX;
-                y += font.verticalStride;
+                y += font.VerticalStride;
             }
             else if (*curText == ' ')
             {
@@ -132,7 +132,7 @@ void MsgBox::putGlyph()
                         if (testX > InitX + LineWidth)
                         {
                             x = InitX;
-                            y += font.verticalStride;
+                            y += font.VerticalStride;
                             break;
                         }
                     }
@@ -152,7 +152,7 @@ void MsgBox::putGlyph()
                 if (x > InitX + LineWidth)
                 {
                     x = InitX;
-                    y += font.verticalStride;
+                    y += font.VerticalStride;
                 }
 
                 curText++;

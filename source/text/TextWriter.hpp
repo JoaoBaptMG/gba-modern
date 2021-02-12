@@ -21,15 +21,13 @@ inline static u32 decodeUtf8(const char*& str)
 template <typename GlyphWriter>
 class TextWriter final
 {
-    const Font& font;
-
 public:
     template <typename... Ts>
-    TextWriter(const Font& font, Ts&&... vs)
-        : font(font), glyphWriter(std::forward<Ts>(vs)...) {}
+    TextWriter(Ts&&... vs) : glyphWriter(std::forward<Ts>(vs)...) {}
 
     // Put an entire string in the screen
-    void write(int x, int y, const char* str, COLOR color)
+    template <typename Font> std::enable_if_t<IsFont<Font>>
+    write(int x, int y, const char* str, COLOR color, const Font& font)
     {
         s16 px = x;
         u32 ch;
@@ -38,7 +36,7 @@ public:
             if (ch == '\n')
             {
                 x = px;
-                y += font.verticalStride;
+                y += font.VerticalStride;
             }
             else
             {
@@ -50,14 +48,15 @@ public:
     }
 
     // Quick shortcut for StringBuilder
-    template <std::size_t N>
-    void write(int x, int y, StringBuilder<N>& sb, COLOR color)
+    template <typename Font, std::size_t N> std::enable_if_t<IsFont<Font>>
+    write(int x, int y, StringBuilder<N>& sb, COLOR color, const Font& font)
     {
-        write(x, y, sb.getString(), color);
+        write(x, y, sb.getString(), color, font);
     }
 
     // Put a single char in the screen
-    void putChar(int x, int y, u32 ch, COLOR color)
+    template <typename Font> std::enable_if_t<IsFont<Font>>
+    putChar(int x, int y, u32 ch, COLOR color, const Font& font)
     {
         glyphWriter.putGlyph(x, y, font.glyphFor(ch), color);
     }

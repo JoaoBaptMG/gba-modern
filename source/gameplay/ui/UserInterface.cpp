@@ -19,7 +19,7 @@ template <typename... Ts> auto ignore_monostate(Ts... ts)
     return overloaded{[](std::monostate){}, ts...};
 }
 
-UserInterface::UserInterface() : scoreWriter(data::fonts::monogram_extended.ttf, &UI_TILE_BANK[uidefs::ScoreTiles], 8) {}
+UserInterface::UserInterface() : scoreWriter(&UI_TILE_BANK[uidefs::ScoreTiles], 8) {}
 
 void UserInterface::init()
 {
@@ -89,7 +89,7 @@ void UserInterface::update()
     for (int i = 0; i < end-vals; i++) str[5-i] = '0' + vals[i];
 
     // And write it
-    scoreWriter.write(5, 8, str, 8);
+    scoreWriter.write(5, 8, str, 8, data::fonts::monogram_extended.ttf);
 
     // Update the message box and the signs
     msgBox.update();

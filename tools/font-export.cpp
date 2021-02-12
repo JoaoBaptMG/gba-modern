@@ -82,7 +82,7 @@ int fontExport(int argc, char **argv)
     // Push each glyph to the rectangle
     std::vector<GlyphData> glyphs;
     for (const auto& v : exportIntervals)
-        for (std::size_t i = v[0]; i < v[1]; i++)
+        for (std::size_t i = v[0]; i <= v[1]; i++)
             glyphs.push_back(getGlyph(face, i));
 
     // Compute the glyph buffer
@@ -96,7 +96,6 @@ int fontExport(int argc, char **argv)
     auto name = deriveSpecialName(in);
 
     // Write the data file
-    // Write the data
     {
         std::ofstream of;
         of.exceptions(std::ofstream::failbit | std::ofstream::badbit);
@@ -112,20 +111,7 @@ int fontExport(int argc, char **argv)
         of << "    .hidden " << name.mangledName << std::endl;
         of << name.mangledName << ":" << std::endl;
 
-        // Write the font metadata
-        of << "    .word fnt_" << name.fileName << "_glyphs" << std::endl;
-        of << "    .hword " << verticalStride << ", " << minOfsY << std::endl;
-        of << "    .word " << toHex(exportIntervals[0][0] + (exportIntervals[0][1] << 16), 8);
-        for (std::size_t i = 1; i < exportIntervals.size(); i++)
-            of << ", " << toHex(exportIntervals[i][0] + (exportIntervals[i][1] << 16), 8);
-        of << ", 0" << std::endl << std::endl;
-
-        // Now the glyph metadata
-        of << "    .section .rodata" << std::endl;
-        of << "    .align 2" << std::endl;
-        of << "    .hidden fnt_" << name.fileName << "_glyphs" << std::endl;
-        of << "fnt_" << name.fileName << "_glyphs:" << std::endl;
-
+        // Write the glyph metadata
         for (std::size_t i = 0; i < glyphs.size(); i++)
         {
             const auto& glyph = glyphs[i];
@@ -182,7 +168,17 @@ int fontExport(int argc, char **argv)
         hof << "#include \"data/Font.hpp\"" << std::endl << std::endl;
         hof << "namespace " << name.nmspace << std::endl;
         hof << "{" << std::endl;
-        hof << "    extern const FontHandle " << name.fileName << ';' << std::endl;
+        hof << "    extern const FontHandle<" << verticalStride << "," << std::endl << "        ";
+
+        bool nf = false;
+        for (const auto& v : exportIntervals)
+        {
+            if (nf) hof << "," << std::endl << "        ";
+            hof << "detail::font::GlyphInterval<" << v[0] << ", " << v[1] << '>';
+            nf = true;
+        }
+
+        hof << std::endl << "    > " << name.fileName << ';' << std::endl;
         hof << "}" << std::endl;
     }
 

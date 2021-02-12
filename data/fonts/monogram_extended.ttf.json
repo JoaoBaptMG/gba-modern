@@ -1,6 +1,6 @@
 {
     "$schema": "../../data-schemas/font.schema.json",
     "export-size": 16,
-    "export-range": [[32, 127]],
+    "export-range": [[32, 126]],
     "override-vertical-stride": 12
 }

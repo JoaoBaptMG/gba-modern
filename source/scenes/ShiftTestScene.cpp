@@ -14,12 +14,14 @@
 extern "C" u32 lslAsm(u32 a, u32 s) IWRAM_CODE;
 extern "C" u32 lsrAsm(u32 a, u32 b) IWRAM_CODE;
 
-ShiftTestScene::ShiftTestScene() : IScene(), writer(data::fonts::monogram_extended.ttf, vid_mem)
+ShiftTestScene::ShiftTestScene() : IScene(), writer(vid_mem)
 {
     // Set the display registers
     REG_DISPCNT = DCNT_MODE3 | DCNT_BG2;
 
-    writer.write(4, 12, "Off-Range Shift Test", colors::DeepSkyBlue);
+    const auto& font = data::fonts::monogram_extended.ttf;
+
+    writer.write(4, 12, "Off-Range Shift Test", colors::DeepSkyBlue, font);
 
     StringBuilder<1024> sb;
     sb.append("240 lsl 0x3   = ", lslAsm(240, 0x3), '\n');
@@ -34,5 +36,5 @@ ShiftTestScene::ShiftTestScene() : IScene(), writer(data::fonts::monogram_extend
     sb.append("240 lsr 0x83  = ", lsrAsm(240, 0x83), '\n');
     sb.append("240 lsr 0x103 = ", lsrAsm(240, 0x103));
 
-    writer.write(4, 36, sb, colors::White);
+    writer.write(4, 36, sb, colors::White, font);
 }

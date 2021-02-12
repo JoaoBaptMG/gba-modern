@@ -21,7 +21,7 @@ void vcountInterrupt()
     REG_TM2CNT = TM_IRQ | TM_ENABLE;
 }
 
-IsrOverheadTestScene::IsrOverheadTestScene() : IScene(), writer(data::fonts::monogram_extended.ttf, vid_mem)
+IsrOverheadTestScene::IsrOverheadTestScene() : IScene(), writer(vid_mem)
 {
     // Set the display registers
     REG_DISPCNT = DCNT_MODE3 | DCNT_BG2;
@@ -34,10 +34,12 @@ IsrOverheadTestScene::IsrOverheadTestScene() : IScene(), writer(data::fonts::mon
 
 void IsrOverheadTestScene::update()
 {
+    const auto& font = data::fonts::monogram_extended.ttf;
+
     // Clear some lines
     memset32(vid_mem+240*80, 0, 240*20/2);
 
     StringBuilder<64> sb;
     sb.append("Available hblank cycles: ", cycleCount, " cycles.");
-    writer.write(4, 96, sb, colors::LimeGreen);
+    writer.write(4, 96, sb, colors::LimeGreen, font);
 }
