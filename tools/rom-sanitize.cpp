@@ -113,8 +113,8 @@ int romSanitize(int argc, char **argv)
 
     rptr = std::fill_n(rptr, 2, 0);
 
-    // Pad the ROM with zeros
-    rom.resize(nextPot(rom.size()));
+    // Pad the ROM with FFs (easier for the hardware)
+    rom.resize(nextPot(rom.size()), 0xFF);
 
     writeFile(out, rom);
 
