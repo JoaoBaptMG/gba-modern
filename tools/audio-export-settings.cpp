@@ -3,7 +3,7 @@
 #include <cmath>
 
 // The allowed frequencies (based on https://deku.gbadev.org/program/sound1.html)
-static const std::size_t AllowedFreqs[] = { 5374, 10512, 13379, 18157, 21024, 26758, 31536, 36314, 40137, 42048 };
+static const std::size_t AllowedFreqs[] = { 5734, 10512, 13379, 18157, 21024, 26758, 31536, 36314, 40137, 42048 };
 constexpr static auto AllowedFreqSize = sizeof(AllowedFreqs)/sizeof(AllowedFreqs[0]);
 
 constexpr static std::size_t NumCyclesInVblank = 280896;
