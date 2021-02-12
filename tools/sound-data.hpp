@@ -17,4 +17,3 @@ static inline std::uint8_t floatToUnsigned8bitPcm(float v)
 {
     return (int)std::round(v * 127) + 128;
 }
-

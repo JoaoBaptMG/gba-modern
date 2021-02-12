@@ -114,7 +114,7 @@ std::vector<float> resampleMono(const std::vector<float>& samples, float srcRate
     // A pitch change > than 1 changes the pitch of the sound for a high pitch
     // that means the natural frequencies change by a factor of pitchChange, which means
     // the new sound runs as if the source frequency was multiplied by pitchChange
-    double srcRatio = (double)pitchChange * srcRate / dstRate;
+    double srcRatio = dstRate / ((double)pitchChange * srcRate);
 
     // Deduce a good value for the size of the new vector
     auto size = std::max(samples.size(), std::size_t(2.5 * samples.size() * srcRatio));
