@@ -96,16 +96,15 @@ endif
 # Now, the actual rules
 .PHONY: all clean clean-everything clean-downloads download-deps build-tools gcc-check
 
-all: bin/game.gba | gcc-check
+all: bin/game.gba | download-deps gcc-check
 
 # Now, make the game
-bin/game.gba: download-deps build-tools tools/tools bin/game.elf | gcc-check
+bin/game.gba: bin/game.elf | download-deps gcc-check
 	@mkdir -p bin
-	@echo "Sanitizing final file"
 	@$(ARMOC) -O binary $(@:.gba=.elf) $@
-	@tools/tools rom-sanitize $@ gba.json $@
+	tools/tools rom-sanitize $@ gba.json $@
 
-bin/game.elf: build/data/audio-settings.hpp $(OFILES) | gcc-check
+bin/game.elf: build/data/audio-settings.hpp $(OFILES) | download-deps gcc-check
 	@mkdir -p bin
 	@echo "Linking"
 	@$(ARMLD) $(LDFLAGS) -specs=gba.specs $(filter-out %crt0.o, $(OFILES)) $(LIBPATHS) $(LIBRARIES) -o $@
@@ -113,54 +112,54 @@ bin/game.elf: build/data/audio-settings.hpp $(OFILES) | gcc-check
 
 -include $(DFILES)
 
-build/data/%.o: build/data/%.s | gcc-check
+build/data/%.o: build/data/%.s gcc | gcc-check
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
 
-build/data/sprites/%.s build/data/sprites/%.hpp: data/sprites/%.png tools/tools | gcc-check
+build/data/sprites/%.s build/data/sprites/%.hpp: data/sprites/%.png tools/tools | build-tools
 	@mkdir -p $(@D)
 	tools/tools sprite-export $(filter %.png,$^) $(basename $@).s $(basename $@).hpp
 
-build/data/backgrounds/%.s build/data/backgrounds/%.hpp: data/backgrounds/%.png tools/tools | gcc-check
+build/data/backgrounds/%.s build/data/backgrounds/%.hpp: data/backgrounds/%.png tools/tools | build-tools
 	@mkdir -p $(@D)
 	tools/tools background-export $(filter %.png,$^) $(basename $@).s $(basename $@).hpp
 
-build/data/fonts/%.s build/data/fonts/%.hpp: data/fonts/%.ttf data/fonts/%.ttf.json tools/tools | gcc-check
+build/data/fonts/%.s build/data/fonts/%.hpp: data/fonts/%.ttf data/fonts/%.ttf.json tools/tools | build-tools
 	@mkdir -p $(@D)
 	tools/tools font-export $(filter %.ttf,$^) $(basename $@).s $(basename $@).hpp
 
-build/data/audio-settings.hpp build/data/audio-settings.json: data/audio.json tools/tools | gcc-check
+build/data/audio-settings.hpp build/data/audio-settings.json: data/audio.json tools/tools | build-tools
 	@mkdir -p $(@D)
 	tools/tools audio-export-settings $(filter %.json,$^) $(basename $@).hpp $(basename $@).json
 
-build/data/sounds/%.s build/data/sounds/%.hpp: data/sounds/%.wav build/data/audio-settings.json tools/tools | gcc-check
+build/data/sounds/%.s build/data/sounds/%.hpp: data/sounds/%.wav build/data/audio-settings.json tools/tools | build-tools
 	@mkdir -p $(@D)
 	tools/tools sound-export $(filter %.wav,$^) $(basename $@).s $(basename $@).hpp build/data/audio-settings.json
 
 # Source files - those order-only prerequisites ensure that the resources are build *before* the sources
 # this is important because the .d files aren't generated yet, and they need to be so the source compilation
 # doesn't fail because the resource headers weren't yet compiled
-build/%.iwram.o: %.iwram.cpp | gcc-check $(RSRC_HFILES)
+build/%.iwram.o: %.iwram.cpp gcc tonc | gcc-check $(RSRC_HFILES)
 	@mkdir -p $(@D)
 	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
 
-build/%.iwram.o: %.iwram.c | gcc-check $(RSRC_HFILES)
+build/%.iwram.o: %.iwram.c gcc tonc | gcc-check $(RSRC_HFILES)
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
 
-build/%.ewram.o: %.ewram.cpp | gcc-check $(RSRC_HFILES)
+build/%.ewram.o: %.ewram.cpp gcc tonc | gcc-check $(RSRC_HFILES)
 	@mkdir -p $(@D)
 	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -mlong-calls -c $< -o $@
 
-build/%.o: %.cpp | gcc-check $(RSRC_HFILES)
+build/%.o: %.cpp gcc tonc | gcc-check $(RSRC_HFILES)
 	@mkdir -p $(@D)
 	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
 
-build/%.o: %.c | gcc-check $(RSRC_HFILES)
+build/%.o: %.c gcc tonc | gcc-check $(RSRC_HFILES)
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-build/%.o: %.s | gcc-check $(RSRC_HFILES)
+build/%.o: %.s gcc tonc | gcc-check $(RSRC_HFILES)
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
 
@@ -199,10 +198,10 @@ libsamplerate.tar.gz:
 	wget $(LSRC_URL) -O libsamplerate.tar.gz
 
 # Tools
-tools/tools: build-tools
-
 build-tools: libsamplerate
 	$(MAKE) -C tools
+
+tools/tools: build-tools
 
 clean:
 	rm -rf bin build
