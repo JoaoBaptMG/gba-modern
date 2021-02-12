@@ -54,6 +54,6 @@ void wavingEnemy(Enemy& enemy, GameScene& gameScene, u32 frameToShoot)
     {
         gameScene.projectiles.addEnemyProjectile(vec2<s16f7>(enemy.pos + vec2(-11, -7)), vec2<s16f7>(-ProjectileSpeed, 0), 1);
         gameScene.projectiles.addEnemyProjectile(vec2<s16f7>(enemy.pos + vec2(-11, 7)), vec2<s16f7>(-ProjectileSpeed, 0), 1);
-        audio::playSound(data::sounds::enemy_shot2.wav, 0.8);
+        audio::playSound(data::sounds::enemy_shot2.wav, audio::Volume(0.8));
     }
 }

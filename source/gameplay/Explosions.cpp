@@ -61,7 +61,7 @@ void Explosions::updateGraphics()
 void Explosions::addSmallExplosion(vec2<s16> pos)
 {
     ASSERT(numExplosions < MaxExplosions);
-    audio::playSound(data::sounds::explosion1.wav, 0.75);
+    audio::playSound(data::sounds::explosion1.wav, audio::Volume(0.75));
     explosions[numExplosions] = { pos, 0, 0 };
     explosionHandles[numExplosions].obj = UniqueOamHandle();
     numExplosions++;

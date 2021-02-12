@@ -57,7 +57,7 @@ void bigLurker(Enemy& enemy, GameScene& gameScene, s32f16 y)
         for (const auto& vel : Directions[cluster&1])
             gameScene.projectiles.addEnemyProjectile(vec2<s16f7>(pos), vel - evel, 2);
 
-        audio::playSound(data::sounds::enemy_shot1.wav, 0.75);
+        audio::playSound(data::sounds::enemy_shot1.wav, audio::Volume(0.75));
         cluster++;
         HANDLE_TERM(enemy.waitForFrames(20));
     }

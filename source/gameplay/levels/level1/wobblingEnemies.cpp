@@ -80,5 +80,5 @@ void shootTowardsPlayer(Enemy& enemy, GameScene& gameScene)
         gameScene.projectiles.addEnemyProjectile(vec2<s16f7>(enemy.pos), vec2<s16f7>(vel), 0);
     }
 
-    audio::playSound(data::sounds::enemy_shot1.wav, 0.5);
+    audio::playSound(data::sounds::enemy_shot1.wav, audio::Volume(0.5));
 }

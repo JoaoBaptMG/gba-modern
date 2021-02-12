@@ -86,7 +86,7 @@ bool Enemy::damage(int amount)
 
     if (health > amount)
     {
-        audio::playSound(data::sounds::enemy_dmg.wav, 0.5);
+        audio::playSound(data::sounds::enemy_dmg.wav, audio::Volume(0.5));
         health -= amount;
         invCounter = 2;
         return false;

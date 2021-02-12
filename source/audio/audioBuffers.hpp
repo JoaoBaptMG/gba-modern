@@ -9,9 +9,10 @@
 #include <tonc.h>
 
 // Declare the mix buffers
-extern s16 intermediateBuffer[audio::BufferSize];
-extern s8 audioMixBuffers[2][audio::BufferSize];
-extern s8* curAudioMixBuffer;
+extern s8 audioMixBuffersLeft[2][audio::BufferSize];
+extern s8 audioMixBuffersRight[2][audio::BufferSize];
+extern s8* curAudioMixBufferLeft;
+extern s8* curAudioMixBufferRight;
 extern u32 curFrame;
 
 // The audio vblank is internal
