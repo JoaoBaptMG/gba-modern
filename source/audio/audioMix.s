@@ -91,7 +91,6 @@ audioMix:
     stmdb   r1, {r9, r10}               @ store the sums back in the stack
 
     cmp     r6, #1 << 12                @ check if the play speed is exactly 1
-    tsteq   r5, #3 << 12                @ check if the position is properly aligned
     bne     .bendPath                 @ and go to the non-optimized path if that's the case
 
     @ struct Sound
@@ -107,6 +106,9 @@ audioMix:
     orrls   r0, r0, #1 << 31            @ mark a flag if the end of the sound is reached
     push    {r4, r5, lr}                @ push required variables
     add     r4, r4, r5, lsr #12         @ add the position to the pointer
+
+    tst     r5, #3 << 12                @ check for unaligned position
+    bne     .unalignedFastLoad          @ go for the semi-optimised unaligned version
 
     @ The intermediate buffer is interleaved, meaning that, for each 4 halfwords, we have
     @ bufferL[0], bufferL[2], bufferL[1], bufferL[3],
@@ -131,6 +133,7 @@ audioMix:
     bne     .perSampleQuad
 
     pop     {r4, r5, lr}                @ restore the original pointer, position and number written to buffer
+.fastAfterProcessing:
     add     r5, r5, lr, lsl #12         @ add the buffer size regardless
     tst     r0, #1 << 31                @ check if the sound's end was detected
     beq     .finishProcessing           @ move on if it was not
@@ -146,6 +149,8 @@ audioMix:
     beq     .finishProcessing           @ bail out if there is no data left to be sent
     push    {r4, r5, lr}                @ push the required variables again
     add     r4, r4, r5, lsr #12         @ get the up-to-date pointer to the data
+    tst     r5, #3 << 12                @ check for unaligned position
+    bne     .unalignedFastLoad          @ go for the semi-optimised unaligned version
     b       .perSampleQuad              @ send the remaining data if there is still data to be sent
 
 .stopChannel:
@@ -203,6 +208,104 @@ audioMix:
     @ pop all registers and return
     pop     {r4-r11, lr}
     bx      lr
+
+.unalignedFastLoad:
+    push    {r0, r2}                    @ save two more registers for the task
+    and     r5, r4, #3                  @ get the "unalignment measure" off the bank
+    bic     r4, r4, #3                  @ and erase it from the pointer
+
+    @ Now, we are going to do some self-modifying code trickery here
+    @ We are going to modify the second byte of the instruction
+    @ "mov r0, r2, lsr #8". In this byte, the upper 4 bits represent
+    @ the destination register and the lower 4 bits are the upper 4 bits
+    @ (out of a 5-bit shift bleeding into the first byte); so if we set
+    @ this byte to shift<<2, we're essentially modifying the instruction to
+    @ mean "mov r0, r2, lsr #(shift<<3)"; which can be used to dynamically
+    @ alter the instruction according to the "unalignment measure"
+    mov     r5, r5, lsl #2
+    strb    r5, .firstModifyPoint+1
+    strb    r5, .secondModifyPoint+5
+
+    @ The second code injection is in the "orr r5, r0, r2, lsl #4"
+    @ if we set the second byte to 0x50 + (16 - (shift<<2)), we change
+    @ it to "orr r5, r0, r2, lsl #(32 - (shift<<3))", to cater for the
+    @ "unalignment measure".
+    rsb     r5, r5, #0x60               @ set the correct bits in the instruction
+    strb    r5, .secondModifyPoint+1
+
+    ldr     r2, [r4]                    @ load a word
+.firstModifyPoint:
+    mov     r0, r2, lsr #8              @ move the rest of the word to the bank
+
+.perSampleQuadUnaligned:
+    ldr     r2, [r4, #4]!               @ load the next word
+.secondModifyPoint:
+    orr     r5, r0, r2, lsl #24         @ combine the previous bank and the current word
+    mov     r0, r2, lsr #8              @ move the rest of the word to the bank
+
+    @ do the rest of the processing
+.recoverFromUnalignedPadding:
+    and     r6, r3, r5, lsr #8          @ mask the odd samples
+    and     r5, r3, r5                  @ mask the even samples
+    mul     r9, r5, r7                  @ modulate for the left channel
+    mul     r10, r6, r7                 @ modulate the odd samples
+    ldmia   r1, {r11-r12}               @ load the left buffer
+    add     r11, r11, r9                @ add the even samples
+    add     r12, r12, r10               @ add the odd samples
+    stmia   r1!, {r11-r12}              @ store the left buffer back
+    mul     r9, r5, r8                  @ modulate for the right channel
+    mul     r10, r6, r8                 @ modulate the even samples
+    ldmia   r1, {r11-r12}               @ load the right buffer
+    add     r11, r11, r9                @ add the even samples
+    add     r12, r12, r10               @ add the odd samples
+    stmia   r1!, {r11-r12}              @ store the right buffer back
+    subs    lr, lr, #4                  @ decrease the counter
+    bhi     .perSampleQuadUnaligned
+    popeq   {r0, r2, r4, r5, lr}        @ pop everything
+    beq     .fastAfterProcessing        @ the rest is just machinery
+
+.unalignedPadding:
+    @ special case for when the counter dips below zero
+    @ the only way we an arrive here is if a looping sample goes to the
+    @ unaligned branch (because all sound data is aligned), so it must be the case
+    @ that there's a loop length. Let's go get it
+    sub     r1, r1, #16                 @ rewind a single chunk
+    ldr     r12, [sp, #8]               @ load the previous pointer
+    ldr     r12, [r12, #-4]             @ load the loop length into r12
+    ldr     r6, [sp, #16]               @ get the lr and "hijack" it
+    sub     r6, r6, lr                  @ subtract the original lr
+    str     r6, [sp, #16]               @ and put it back in place
+    add     lr, lr, #1                  @ branch based on lr, so this is to keep the branches safe
+    sub     pc, pc, lr, lsl #4          @ and now branch based on a decision
+    mov     r0, r0                      @ to clear the pipeline
+
+    @ first, when lr = -1
+    ldr     r2, [r4, #-4]               @ load a word
+    mov     r5, r2, lsr #8              @ store the three last bytes
+    sub     r4, r4, r12                 @ subtract the current pointer by the loop length
+    b       .fillInTheRest1             @ fill in what is needed
+
+    @ now, lr = -2
+    ldrh    r5, [r4, #-2]               @ load a halfword
+    sub     r4, r4, r12                 @ subtract the current pointer by the loop length
+    b       .fillInTheRest2             @ fill in what is needed
+    mov     r0, r0                      @ padding
+
+    @ finally, lr = -3
+    ldrb    r5, [r4, #-1]               @ load a byte
+    sub     r4, r4, r12                 @ subtract the current pointer by the loop length
+
+.fillInTheRest3:
+    ldrb    r2, [r4], #1                    @ load a single byte
+    orr     r5, r5, r2, lsl #8              @ place it on the correct place
+.fillInTheRest2:
+    ldrb    r2, [r4], #1                    @ load a single byte
+    orr     r5, r5, r2, lsl #16             @ place it on the correct place
+.fillInTheRest1:
+    ldrb    r2, [r4], #1                    @ load a single byte
+    orr     r5, r5, r2, lsl #24             @ place it on the correct place
+    mov     lr, #4                          @ set a last place
+    b       .recoverFromUnalignedPadding    @ and branch
 
 .bendPath:
     @ Here we have:
