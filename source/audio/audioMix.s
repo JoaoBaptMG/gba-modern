@@ -117,18 +117,12 @@ audioMix:
     ldr     r5, [r4], #4                @ load four samples
     and     r6, r3, r5, lsr #8          @ mask the odd samples
     and     r5, r3, r5                  @ mask the even samples
-    mul     r9, r5, r7                  @ modulate for the left channel
-    mul     r10, r6, r7                 @ modulate the odd samples
-    ldmia   r1, {r11-r12}               @ load the left buffer
-    add     r11, r11, r9                @ add the even samples
-    add     r12, r12, r10               @ add the odd samples
-    stmia   r1!, {r11-r12}              @ store the left buffer back
-    mul     r9, r5, r8                  @ modulate for the right channel
-    mul     r10, r6, r8                 @ modulate the even samples
-    ldmia   r1, {r11-r12}               @ load the right buffer
-    add     r11, r11, r9                @ add the even samples
-    add     r12, r12, r10               @ add the odd samples
-    stmia   r1!, {r11-r12}              @ store the right buffer back
+    ldmia   r1, {r9-r12}                @ load the left and right buffers
+    mla     r9, r5, r7, r9              @ modulate and add the left even samples
+    mla     r10, r6, r7, r10            @ modulate and add the left odd samples
+    mla     r11, r5, r8, r11            @ modulate and add the right even samples
+    mla     r12, r6, r8, r12            @ modulate and add the right odd samples
+    stmia   r1!, {r9-r12}               @ store the buffers back
     subs    lr, lr, #4                  @ decrease the counter
     bne     .perSampleQuad
 
@@ -244,27 +238,20 @@ audioMix:
     mov     r0, r2, lsr #8              @ move the rest of the word to the bank
 
     @ do the rest of the processing
-.recoverFromUnalignedPadding:
+.recoverFromUnalignedOverflow:
     and     r6, r3, r5, lsr #8          @ mask the odd samples
     and     r5, r3, r5                  @ mask the even samples
-    mul     r9, r5, r7                  @ modulate for the left channel
-    mul     r10, r6, r7                 @ modulate the odd samples
-    ldmia   r1, {r11-r12}               @ load the left buffer
-    add     r11, r11, r9                @ add the even samples
-    add     r12, r12, r10               @ add the odd samples
-    stmia   r1!, {r11-r12}              @ store the left buffer back
-    mul     r9, r5, r8                  @ modulate for the right channel
-    mul     r10, r6, r8                 @ modulate the even samples
-    ldmia   r1, {r11-r12}               @ load the right buffer
-    add     r11, r11, r9                @ add the even samples
-    add     r12, r12, r10               @ add the odd samples
-    stmia   r1!, {r11-r12}              @ store the right buffer back
+    ldmia   r1, {r9-r12}                @ load the left and right buffers
+    mla     r9, r5, r7, r9              @ modulate and add the left even samples
+    mla     r10, r6, r7, r10            @ modulate and add the left odd samples
+    mla     r11, r5, r8, r11            @ modulate and add the right even samples
+    mla     r12, r6, r8, r12            @ modulate and add the right odd samples
+    stmia   r1!, {r9-r12}               @ store the buffers back
     subs    lr, lr, #4                  @ decrease the counter
     bhi     .perSampleQuadUnaligned
     popeq   {r0, r2, r4, r5, lr}        @ pop everything
     beq     .fastAfterProcessing        @ the rest is just machinery
 
-.unalignedPadding:
     @ special case for when the counter dips below zero
     @ the only way we an arrive here is if a looping sample goes to the
     @ unaligned branch (because all sound data is aligned), so it must be the case
@@ -273,7 +260,7 @@ audioMix:
     ldr     r12, [sp, #8]               @ load the previous pointer
     ldr     r12, [r12, #-4]             @ load the loop length into r12
     ldr     r6, [sp, #16]               @ get the lr and "hijack" it
-    sub     r6, r6, lr                  @ subtract the original lr
+    sub     r6, r6, lr                  @ subtract the negative overflow (aka add it)
     str     r6, [sp, #16]               @ and put it back in place
     add     lr, lr, #1                  @ branch based on lr, so this is to keep the branches safe
     sub     pc, pc, lr, lsl #4          @ and now branch based on a decision
@@ -305,7 +292,7 @@ audioMix:
     ldrb    r2, [r4], #1                    @ load a single byte
     orr     r5, r5, r2, lsl #24             @ place it on the correct place
     mov     lr, #4                          @ set a last place
-    b       .recoverFromUnalignedPadding    @ and branch
+    b       .recoverFromUnalignedOverflow   @ and branch
 
 .bendPath:
     @ Here we have:
@@ -331,18 +318,12 @@ audioMix:
     add     r5, r5, r6                  @ add the playing speed  
 
     @ now do the processing
-    mul     r9, r0, r7                  @ modulate for the left channel
-    mul     r10, r2, r7                 @ modulate the odd samples
-    ldmia   r1, {r11-r12}               @ load the left buffer
-    add     r11, r11, r9                @ add the even samples
-    add     r12, r12, r10               @ add the odd samples
-    stmia   r1!, {r11-r12}              @ store the left buffer back
-    mul     r9, r0, r8                  @ modulate for the right channel
-    mul     r10, r2, r8                 @ modulate the odd samples
-    ldmia   r1, {r11-r12}               @ load the right buffer
-    add     r11, r11, r9                @ add the even samples
-    add     r12, r12, r10               @ add the odd samples
-    stmia   r1!, {r11-r12}              @ store the right buffer back
+    ldmia   r1, {r9-r12}                @ load the left and right buffers
+    mla     r9, r0, r7, r9              @ modulate and add the left even samples
+    mla     r10, r2, r7, r10            @ modulate and add the left odd samples
+    mla     r11, r0, r8, r11            @ modulate and add the right even samples
+    mla     r12, r2, r8, r12            @ modulate and add the right odd samples
+    stmia   r1!, {r9-r12}               @ store the buffers back
     subs    lr, lr, #4                  @ decrease the counter
     bne     .noCheckBendPerSampleQuad
 
@@ -381,20 +362,14 @@ audioMix:
     add     r5, r5, r6                  @ add the playing speed 
 
     @ now do the processing
-    push    {r11-r12}                   @ push them into stack
-    mul     r9, r11, r7                 @ modulate for the left channel
-    mul     r10, r12, r7                @ modulate the odd samples
-    ldmia   r1, {r11-r12}               @ load the left buffer
-    add     r11, r11, r9                @ add the even samples
-    add     r12, r12, r10               @ add the odd samples
-    stmia   r1!, {r11-r12}              @ store the left buffer back
-    pop     {r11-r12}                   @ restore the old values
-    mul     r9, r11, r8                 @ modulate for the right channel
-    mul     r10, r12, r8                @ modulate the odd samples
-    ldmia   r1, {r11-r12}               @ load the right buffer
-    add     r11, r11, r9                @ add the even samples
-    add     r12, r12, r10               @ add the odd samples
-    stmia   r1!, {r11-r12}              @ store the right buffer back
+    ldmia   r1, {r9-r10}                @ load the left buffer
+    mla     r9, r11, r7, r9             @ modulate and add the left even samples
+    mla     r10, r12, r7, r10           @ modulate and add the left odd samples
+    stmia   r1!, {r9-r10}               @ store the left buffer back
+    ldmia   r1, {r9-r10}                @ load the right buffer
+    mla     r9, r11, r8, r9             @ modulate and add the right even samples
+    mla     r10, r12, r8, r10           @ modulate and add the right odd samples
+    stmia   r1!, {r9-r10}               @ store the right buffer back
     subs    lr, lr, #4                  @ decrease the counter
     bne     .bendPerSampleQuad
     b       .noCheckAfterProcessing
@@ -427,20 +402,14 @@ audioMix:
 
 .bendOverflow:
     @ same processing case, but go to the pad buffer instead
-    push    {r11-r12}                   @ push them into stack
-    mul     r9, r11, r7                 @ modulate for the left channel
-    mul     r10, r12, r7                @ modulate the odd samples
-    ldmia   r1, {r11-r12}               @ load the left buffer
-    add     r11, r11, r9                @ add the even samples
-    add     r12, r12, r10               @ add the odd samples
-    stmia   r1!, {r11-r12}              @ store the left buffer back
-    pop     {r11-r12}                   @ restore the old values
-    mul     r9, r11, r8                 @ modulate for the right channel
-    mul     r10, r12, r8                @ modulate the odd samples
-    ldmia   r1, {r11-r12}               @ load the right buffer
-    add     r11, r11, r9                @ add the even samples
-    add     r12, r12, r10               @ add the odd samples
-    stmia   r1!, {r11-r12}              @ store the right buffer back
+    ldmia   r1, {r9-r10}                @ load the left buffer
+    mla     r9, r11, r7, r9             @ modulate and add the left even samples
+    mla     r10, r12, r7, r10           @ modulate and add the left odd samples
+    stmia   r1!, {r9-r10}               @ store the left buffer back
+    ldmia   r1, {r9-r10}                @ load the right buffer
+    mla     r9, r11, r8, r9             @ modulate and add the right even samples
+    mla     r10, r12, r8, r10           @ modulate and add the right odd samples
+    stmia   r1!, {r9-r10}               @ store the right buffer back
     pop     {r0, r2}                    @ pop the registers
     mov     r12, #0                     @ move zero to r12
     str     r12, [r0, #-20]             @ zero out the pointer
