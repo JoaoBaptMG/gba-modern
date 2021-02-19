@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------
 // wobblingEnemies.hpp
 //--------------------------------------------------------------------------------
-// Provides a script for the first wobbling enemies on level 1
+// Provides a script for the first wobbling enemies on stage 1
 //--------------------------------------------------------------------------------
 #include "wobblingEnemies.hpp"
 

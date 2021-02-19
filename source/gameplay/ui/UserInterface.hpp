@@ -12,7 +12,7 @@
 #include "text/TextWriter.hpp"
 
 #include "MsgBox.hpp"
-#include "LevelSign.hpp"
+#include "StageSign.hpp"
 
 class GameScene;
 
@@ -23,7 +23,7 @@ class UserInterface final
     TextWriter<Tile4bppGlyphWriter> scoreWriter;
     u16 clearAlpha, reloadAlpha;
 
-    using Signs = std::variant<std::monostate, LevelSign>;
+    using Signs = std::variant<std::monostate, StageSign>;
     Signs sign;
 
 public:
@@ -34,5 +34,5 @@ public:
 
     MsgBox msgBox;
 
-    void displayLevel(int level) { sign.emplace<LevelSign>(level); }
+    void displayStage(int stage) { sign.emplace<StageSign>(stage); }
 };

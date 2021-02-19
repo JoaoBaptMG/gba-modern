@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------
-// LevelSign.hpp
+// StageSign.hpp
 //--------------------------------------------------------------------------------
-// Provides an animated introduction to the current level
+// Provides an animated introduction to the current stage
 //--------------------------------------------------------------------------------
 #pragma once
 
@@ -9,7 +9,7 @@
 
 constexpr auto SignHeight = 48;
 
-class LevelSign final
+class StageSign final
 {
     u16 newBlendRegs[2];
     u16 restoreBlendRegister;
@@ -17,7 +17,7 @@ class LevelSign final
     u32 newDmaRegs[3];
     u32 restoreDmaRegister;
     s16 hofsUpdates[SignHeight + 1];
-    s16 levelOffset;
+    s16 stageOffset;
 
     s16 newVofsRegister;
     s16 restoreVofsRegister;
@@ -25,8 +25,8 @@ class LevelSign final
     int numFrames;
 
 public:
-    LevelSign(int level);
-    ~LevelSign();
+    StageSign(int stage);
+    ~StageSign();
 
     void vblank();
     void update();

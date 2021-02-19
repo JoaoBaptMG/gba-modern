@@ -1,13 +1,13 @@
 //--------------------------------------------------------------------------------
 // GameScene.hpp
 //--------------------------------------------------------------------------------
-// The main scene of the game - provides the necessary plumbing to display a level
+// The main scene of the game - provides the necessary plumbing to display a stage
 //--------------------------------------------------------------------------------
 #pragma once
 
 #include "scenes/IScene.hpp"
 #include "Player.hpp"
-#include "Level.hpp"
+#include "Stage.hpp"
 #include "ui/UserInterface.hpp"
 #include "Background.hpp"
 #include "util/UnorderedIterableList.hpp"
@@ -27,7 +27,7 @@ public:
     virtual ~GameScene() {}
 
     Player player;
-    Level level;
+    Stage stage;
     UserInterface userInterface;
     Background background;
     Projectiles projectiles;

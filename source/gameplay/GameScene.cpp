@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------------
 // GameScene.cpp
 //--------------------------------------------------------------------------------
-// The main scene of the game - provides the necessary plumbing to display a level
+// The main scene of the game - provides the necessary plumbing to display a stage
 //--------------------------------------------------------------------------------
 #include "GameScene.hpp"
 
@@ -9,9 +9,9 @@
 #include "graphics/graphics.hpp"
 #include "colors.hpp"
 
-#include "data/backgrounds/level1.hpp"
+#include "data/backgrounds/stage1.hpp"
 
-void level1(LevelContext& level);
+void stage1(StageContext& stage);
 
 GameScene::GameScene()
 {
@@ -22,7 +22,7 @@ GameScene::GameScene()
 
     // Initialize the background
     background.init();
-    background.load(data::backgrounds::level1.png);
+    background.load(data::backgrounds::stage1.png);
 
     // Initialize the player
     player.init(PlayerWidth + 8, SCREEN_HEIGHT/2);
@@ -37,9 +37,9 @@ GameScene::GameScene()
     // Initialize the userInterface
     userInterface.init();
 
-    // Initialize the level runner
-    level.playLevel(level1);
-    userInterface.displayLevel(1);
+    // Initialize the stage runner
+    stage.playStage(stage1);
+    userInterface.displayStage(1);
 }
 
 void GameScene::vblank()
@@ -53,7 +53,7 @@ void GameScene::update()
 {
     // Update everything
     player.update();
-    level.update();
+    stage.update();
     userInterface.update();
 
     // Update the enemies

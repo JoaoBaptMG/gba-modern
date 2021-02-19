@@ -1,11 +1,10 @@
 //--------------------------------------------------------------------------------
-// wobblingEnemies.hpp
+// wavingEnemy.hpp
 //--------------------------------------------------------------------------------
-// Provides a script for the first wobbling enemies on level 1
+// Script for the waving enemies at stage 1
 //--------------------------------------------------------------------------------
 #pragma once
 
 #include "gameplay/Enemy.hpp"
 
-void wobblingEnemyUp(Enemy& enemy, GameScene& gameScene);
-void wobblingEnemyDown(Enemy& enemy, GameScene& gameScene);
+void wavingEnemy(Enemy& enemy, GameScene& gameScene, u32 frameToShoot);

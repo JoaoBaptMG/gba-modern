@@ -1,9 +1,9 @@
 //--------------------------------------------------------------------------------
-// LevelSign.cpp
+// StageSign.cpp
 //--------------------------------------------------------------------------------
-// Provides an animated introduction to the current level
+// Provides an animated introduction to the current stage
 //--------------------------------------------------------------------------------
-#include "LevelSign.hpp"
+#include "StageSign.hpp"
 
 #include <tonc.h>
 #include "graphics/graphics.hpp"
@@ -16,7 +16,7 @@ constexpr auto FadeInFrames = 128;
 constexpr auto FadeOutFrames = 16;
 constexpr auto MaxAlpha = 13;
 
-constexpr auto MarkerWidthSpacing = 8 * (uidefs::LevelMarkerTileWidth + uidefs::LevelSignTileSpacing);
+constexpr auto MarkerWidthSpacing = 8 * (uidefs::StageMarkerTileWidth + uidefs::StageSignTileSpacing);
 
 template <typename T, std::size_t N>
 constexpr auto makeOffsets(const std::array<T, N>& numberWidths)
@@ -27,14 +27,14 @@ constexpr auto makeOffsets(const std::array<T, N>& numberWidths)
     return offsets;
 }
 
-constexpr static const auto LevelOffsets = makeOffsets(std::array{ 28, 32 });
+constexpr static const auto StageOffsets = makeOffsets(std::array{ 28, 32 });
 
 constexpr static const auto WobbleTable = generateTable<64>([](std::size_t i)
 {
     return s16f<6>(gcem_d::sin(i * 360.0 / 18.0));
 });
 
-struct LevelSignData
+struct StageSignData
 {
     u32 tileDataSize;
     const void* tiles;
@@ -43,28 +43,28 @@ struct LevelSignData
 };
 
 #define BUILD_SIGN(v) { sizeof(v.tiles), v.tiles, v.scrEntries, v.palettes }
-static const LevelSignData LevelSigns[] =
+static const StageSignData StageSigns[] =
 {
-    BUILD_SIGN(data::backgrounds::level_numbers::_1.png),
-    BUILD_SIGN(data::backgrounds::level_numbers::_2.png),
-    BUILD_SIGN(data::backgrounds::level_numbers::_3.png),
-    BUILD_SIGN(data::backgrounds::level_numbers::_4.png),
-    BUILD_SIGN(data::backgrounds::level_numbers::_5.png),
-    BUILD_SIGN(data::backgrounds::level_numbers::_6.png),
-    BUILD_SIGN(data::backgrounds::level_numbers::_7.png),
-    BUILD_SIGN(data::backgrounds::level_numbers::_8.png),
-    BUILD_SIGN(data::backgrounds::level_numbers::_9.png),
+    BUILD_SIGN(data::backgrounds::stage_numbers::_1.png),
+    BUILD_SIGN(data::backgrounds::stage_numbers::_2.png),
+    BUILD_SIGN(data::backgrounds::stage_numbers::_3.png),
+    BUILD_SIGN(data::backgrounds::stage_numbers::_4.png),
+    BUILD_SIGN(data::backgrounds::stage_numbers::_5.png),
+    BUILD_SIGN(data::backgrounds::stage_numbers::_6.png),
+    BUILD_SIGN(data::backgrounds::stage_numbers::_7.png),
+    BUILD_SIGN(data::backgrounds::stage_numbers::_8.png),
+    BUILD_SIGN(data::backgrounds::stage_numbers::_9.png),
 };
 
-LevelSign::LevelSign(int level)
+StageSign::StageSign(int stage)
 {
-    const auto& curLevelSign = LevelSigns[level - 1];
+    const auto& curStageSign = StageSigns[stage - 1];
 
     // Transfer the tiles to their designated space
-    data::copyTiles(&UI_TILE_BANK[uidefs::SignTiles], data::backgrounds::level_mark.png);
-    memcpy32(&UI_SIGN_PALETTE, curLevelSign.palettes, sizeof(PALBANK)/sizeof(u32));
-    memcpy32(&UI_TILE_BANK[uidefs::SignTiles + uidefs::NumLevelTextTiles],
-        curLevelSign.tiles, curLevelSign.tileDataSize / sizeof(u32));
+    data::copyTiles(&UI_TILE_BANK[uidefs::SignTiles], data::backgrounds::stage_mark.png);
+    memcpy32(&UI_SIGN_PALETTE, curStageSign.palettes, sizeof(PALBANK)/sizeof(u32));
+    memcpy32(&UI_TILE_BANK[uidefs::SignTiles + uidefs::NumStageTextTiles],
+        curStageSign.tiles, curStageSign.tileDataSize / sizeof(u32));
 
     // Set the number of frames
     numFrames = MaxNumFrames;
@@ -77,7 +77,7 @@ LevelSign::LevelSign(int level)
 
     // Set the last update
     hofsUpdates[SignHeight] = 4;
-    levelOffset = LevelOffsets[level != 1];
+    stageOffset = StageOffsets[stage != 1];
 
     // Set alpha-blending
     newBlendRegs[0] = BLD_BOT(BLD_BACKDROP | BLD_OBJ | BLD_BG3 | BLD_BG2 | BLD_BG1) | BLD_TOP(BLD_BG0) | BLD_STD;
@@ -91,30 +91,30 @@ LevelSign::LevelSign(int level)
 
     // Set the appropriate values
     u32 tileId = 0;
-    for (u32 y = 0; y < uidefs::LevelSignTileHeight; y++)
-        for (u32 x = 0; x < uidefs::LevelMarkerTileWidth; x++)
+    for (u32 y = 0; y < uidefs::StageSignTileHeight; y++)
+        for (u32 x = 0; x < uidefs::StageMarkerTileWidth; x++)
             UI_SCREEN[uidefs::SignTileBase + uidefs::TilePos(x, y)] = 
-                data::backgrounds::level_mark.png.scrEntries[tileId++] + uidefs::SignTiles;
+                data::backgrounds::stage_mark.png.scrEntries[tileId++] + uidefs::SignTiles;
         
     tileId = 0;
-    for (u32 y = 0; y < uidefs::LevelSignTileHeight; y++)
-        for (u32 x = 0; x < uidefs::LevelNumberTileWidth; x++)
+    for (u32 y = 0; y < uidefs::StageSignTileHeight; y++)
+        for (u32 x = 0; x < uidefs::StageNumberTileWidth; x++)
         {
-            u32 xx = uidefs::LevelMarkerTileWidth + uidefs::LevelSignTileSpacing + x;
+            u32 xx = uidefs::StageMarkerTileWidth + uidefs::StageSignTileSpacing + x;
             UI_SCREEN[uidefs::SignTileBase + uidefs::TilePos(xx, y)] =
-                curLevelSign.scrEntries[tileId++] + uidefs::SignTiles + uidefs::NumLevelTextTiles;
+                curStageSign.scrEntries[tileId++] + uidefs::SignTiles + uidefs::NumStageTextTiles;
         }
 }
 
-LevelSign::~LevelSign()
+StageSign::~StageSign()
 {
     // Clear everything
     constexpr auto TileId = SE_PALBANK(15) | (uidefs::UserInterfaceTiles - 1);
     memset32(&UI_SCREEN[uidefs::SignTileBase], TileId | (TileId << 16), 
-        32 * uidefs::LevelSignTileHeight * sizeof(SCR_ENTRY) / sizeof(u32));
+        32 * uidefs::StageSignTileHeight * sizeof(SCR_ENTRY) / sizeof(u32));
 }
 
-void LevelSign::update()
+void StageSign::update()
 {
     // Set the corresponding alpha
     u32 alpha = MaxAlpha;
@@ -128,9 +128,9 @@ void LevelSign::update()
             for (u32 i = 0; i < SignHeight; i++)
             {
                 u32 val = (FadeInFrames - frames) * (FadeInFrames - frames) / FadeInFrames / 4;
-                hofsUpdates[i] = levelOffset + val * WobbleTable[(i + frames) % WobbleTable.size()];
+                hofsUpdates[i] = stageOffset + val * WobbleTable[(i + frames) % WobbleTable.size()];
             }
-        else memset32(hofsUpdates, levelOffset | (levelOffset << 16), SignHeight * sizeof(s16) / sizeof(u32));
+        else memset32(hofsUpdates, stageOffset | (stageOffset << 16), SignHeight * sizeof(s16) / sizeof(u32));
     }
     else if (numFrames < FadeOutFrames)
         alpha = MaxAlpha * numFrames / FadeOutFrames;

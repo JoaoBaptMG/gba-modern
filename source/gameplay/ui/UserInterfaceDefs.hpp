@@ -8,30 +8,30 @@
 #include <tonc.h>
 #include <algorithm>
 #include "data/sprites/user-interface.hpp"
-#include "data/backgrounds/level-mark.hpp"
+#include "data/backgrounds/stage-mark.hpp"
 
-#include "data/backgrounds/level-numbers/_1.hpp"
-#include "data/backgrounds/level-numbers/_2.hpp"
-#include "data/backgrounds/level-numbers/_3.hpp"
-#include "data/backgrounds/level-numbers/_4.hpp"
-#include "data/backgrounds/level-numbers/_5.hpp"
-#include "data/backgrounds/level-numbers/_6.hpp"
-#include "data/backgrounds/level-numbers/_7.hpp"
-#include "data/backgrounds/level-numbers/_8.hpp"
-#include "data/backgrounds/level-numbers/_9.hpp"
+#include "data/backgrounds/stage-numbers/_1.hpp"
+#include "data/backgrounds/stage-numbers/_2.hpp"
+#include "data/backgrounds/stage-numbers/_3.hpp"
+#include "data/backgrounds/stage-numbers/_4.hpp"
+#include "data/backgrounds/stage-numbers/_5.hpp"
+#include "data/backgrounds/stage-numbers/_6.hpp"
+#include "data/backgrounds/stage-numbers/_7.hpp"
+#include "data/backgrounds/stage-numbers/_8.hpp"
+#include "data/backgrounds/stage-numbers/_9.hpp"
 
 constexpr auto getMaxNumberDataSize()
 {
     return std::max({ 
-        sizeof(data::backgrounds::level_numbers::_1.png.tiles),
-        sizeof(data::backgrounds::level_numbers::_2.png.tiles),
-        sizeof(data::backgrounds::level_numbers::_3.png.tiles),
-        sizeof(data::backgrounds::level_numbers::_4.png.tiles),
-        sizeof(data::backgrounds::level_numbers::_5.png.tiles),
-        sizeof(data::backgrounds::level_numbers::_6.png.tiles),
-        sizeof(data::backgrounds::level_numbers::_7.png.tiles),
-        sizeof(data::backgrounds::level_numbers::_8.png.tiles),
-        sizeof(data::backgrounds::level_numbers::_9.png.tiles),
+        sizeof(data::backgrounds::stage_numbers::_1.png.tiles),
+        sizeof(data::backgrounds::stage_numbers::_2.png.tiles),
+        sizeof(data::backgrounds::stage_numbers::_3.png.tiles),
+        sizeof(data::backgrounds::stage_numbers::_4.png.tiles),
+        sizeof(data::backgrounds::stage_numbers::_5.png.tiles),
+        sizeof(data::backgrounds::stage_numbers::_6.png.tiles),
+        sizeof(data::backgrounds::stage_numbers::_7.png.tiles),
+        sizeof(data::backgrounds::stage_numbers::_8.png.tiles),
+        sizeof(data::backgrounds::stage_numbers::_9.png.tiles),
     });
 }
 
@@ -49,16 +49,16 @@ namespace uidefs
     constexpr auto NumScoreTiles = 5;
     constexpr auto ScoreTiles = TileEnd - NumScoreTiles;
 
-    constexpr auto NumLevelTextTiles = sizeof(data::backgrounds::level_mark.png.tiles) / sizeof(TILE);
-    constexpr auto NumLevelNumberTiles = getMaxNumberDataSize()/sizeof(TILE);
-    constexpr auto NumLevelSignTiles = NumLevelTextTiles + NumLevelNumberTiles;
+    constexpr auto NumStageTextTiles = sizeof(data::backgrounds::stage_mark.png.tiles) / sizeof(TILE);
+    constexpr auto NumStageNumberTiles = getMaxNumberDataSize()/sizeof(TILE);
+    constexpr auto NumStageSignTiles = NumStageTextTiles + NumStageNumberTiles;
 
-    constexpr auto LevelMarkerTileWidth = data::backgrounds::level_mark.png.SeWidth;
-    constexpr auto LevelNumberTileWidth = data::backgrounds::level_numbers::_1.png.SeWidth;
-    constexpr auto LevelSignTileHeight = data::backgrounds::level_mark.png.SeHeight;
-    constexpr auto LevelSignTileSpacing = 1;
+    constexpr auto StageMarkerTileWidth = data::backgrounds::stage_mark.png.SeWidth;
+    constexpr auto StageNumberTileWidth = data::backgrounds::stage_numbers::_1.png.SeWidth;
+    constexpr auto StageSignTileHeight = data::backgrounds::stage_mark.png.SeHeight;
+    constexpr auto StageSignTileSpacing = 1;
 
-    constexpr auto NumSignTiles = std::max(NumLevelSignTiles, std::size_t());
+    constexpr auto NumSignTiles = std::max(NumStageSignTiles, std::size_t());
     constexpr auto SignTiles = ScoreTiles - NumSignTiles;
 
     constexpr auto MsgBoxTileWidth = 25, MsgBoxTileHeight = 6;
