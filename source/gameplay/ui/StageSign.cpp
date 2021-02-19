@@ -11,6 +11,7 @@
 #include "math/gcem-degrees.hpp"
 #include "UserInterfaceDefs.hpp"
 
+constexpr auto Offset = -4;
 constexpr auto MaxNumFrames = 240;
 constexpr auto FadeInFrames = 128;
 constexpr auto FadeOutFrames = 16;
@@ -68,6 +69,7 @@ StageSign::StageSign(int stage)
 
     // Set the number of frames
     numFrames = MaxNumFrames;
+    curStage = stage;
 
     // Set the DMA registers
     newDmaRegs[0] = (u32)hofsUpdates;
@@ -84,10 +86,19 @@ StageSign::StageSign(int stage)
 
     // Set the blend register back to its place
     restoreBlendRegister = BLD_TOP(BLD_BACKDROP | BLD_OBJ | BLD_BG3 | BLD_BG2 | BLD_BG1) | BLD_BLACK;
+}
 
-    // Set the vertical offset
-    newVofsRegister = 0;
-    restoreVofsRegister = 4;
+StageSign::~StageSign()
+{
+    // Clear everything
+    constexpr auto TileId = SE_PALBANK(15) | (uidefs::UserInterfaceTiles - 1);
+    memset32(&UI_SCREEN[uidefs::SignTileBase], TileId | (TileId << 16), 
+        32 * uidefs::StageSignTileHeight * sizeof(SCR_ENTRY) / sizeof(u32));
+}
+
+void StageSign::setStageScreenEntries()
+{
+    const auto& curStageSign = StageSigns[curStage - 1];
 
     // Set the appropriate values
     u32 tileId = 0;
@@ -106,16 +117,11 @@ StageSign::StageSign(int stage)
         }
 }
 
-StageSign::~StageSign()
-{
-    // Clear everything
-    constexpr auto TileId = SE_PALBANK(15) | (uidefs::UserInterfaceTiles - 1);
-    memset32(&UI_SCREEN[uidefs::SignTileBase], TileId | (TileId << 16), 
-        32 * uidefs::StageSignTileHeight * sizeof(SCR_ENTRY) / sizeof(u32));
-}
-
 void StageSign::update()
 {
+    // Set the screen entries only before
+    if (numFrames == MaxNumFrames - 1) setStageScreenEntries();
+
     // Set the corresponding alpha
     u32 alpha = MaxAlpha;
     if (numFrames >= MaxNumFrames - FadeInFrames)
@@ -137,17 +143,16 @@ void StageSign::update()
 
     newBlendRegs[1] = BLD_EVA(alpha) | BLD_EVB(16 - alpha);
 
-    // Set the appropriate place for the register offset
-    graphics::hblankEffects.add32((SCREEN_HEIGHT - SignHeight) / 2 - 1, newDmaRegs, (void*)&REG_DMA0SAD, 3);
-    graphics::hblankEffects.add32((SCREEN_HEIGHT + SignHeight) / 2, &restoreDmaRegister, (void*)&REG_DMA0CNT, 1);
+    constexpr auto TopVal = (SCREEN_HEIGHT - SignHeight) / 2 + Offset;
+    constexpr auto BotVal = (SCREEN_HEIGHT + SignHeight) / 2 + Offset;
 
-    // Set the vertical offset register
-    graphics::hblankEffects.add16((SCREEN_HEIGHT - SignHeight) / 2 - 4, &newVofsRegister, (void*)&REG_BG0VOFS, 1);
-    graphics::hblankEffects.add16((SCREEN_HEIGHT + SignHeight) / 2 + 2, &restoreVofsRegister, (void*)&REG_BG0VOFS, 1);
+    // Set the appropriate place for the register offset
+    graphics::hblankEffects.add32(TopVal - 1, newDmaRegs, (void*)&REG_DMA0SAD, 3);
+    graphics::hblankEffects.add32(BotVal, &restoreDmaRegister, (void*)&REG_DMA0CNT, 1);
 
     // Set the blend register
-    graphics::hblankEffects.add32((SCREEN_HEIGHT - SignHeight) / 2, newBlendRegs, (void*)&REG_BLDCNT, 1);
-    graphics::hblankEffects.add16((SCREEN_HEIGHT + SignHeight) / 2 + 1, &restoreBlendRegister, (void*)&REG_BLDCNT, 1);
+    graphics::hblankEffects.add32(TopVal, newBlendRegs, (void*)&REG_BLDCNT, 1);
+    graphics::hblankEffects.add16(BotVal + 1, &restoreBlendRegister, (void*)&REG_BLDCNT, 1);
 
     numFrames--;
 }

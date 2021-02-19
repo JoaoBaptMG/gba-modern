@@ -19,10 +19,9 @@ class StageSign final
     s16 hofsUpdates[SignHeight + 1];
     s16 stageOffset;
 
-    s16 newVofsRegister;
-    s16 restoreVofsRegister;
+    s16 numFrames, curStage;
 
-    int numFrames;
+    void setStageScreenEntries();
 
 public:
     StageSign(int stage);
