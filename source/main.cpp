@@ -70,6 +70,14 @@ int main()
 
         graphics::postUpdate();
 
+        // Standard soft reset procedure (remembering that keyinput is active-low)
+        // so REG_KEYINPUT & (KEY_SELECT|KEY_START|KEY_A|KEY_B) being zero means that all keys were pressed
+        if (!(REG_KEYINPUT & (KEY_SELECT|KEY_START|KEY_A|KEY_B)))
+        {
+            REG_RESET_DST = 0;
+            SoftReset();
+        }
+
         if (mgba::isEnabled())
         {
             auto vcount = REG_VCOUNT;

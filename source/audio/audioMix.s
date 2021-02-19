@@ -273,16 +273,16 @@ audioMix:
     b       .fillInTheRest1             @ fill in what is needed
 
     @ now, lr = -2
-    ldrh    r5, [r4, #-2]               @ load a halfword
-    sub     r4, r4, r12                 @ subtract the current pointer by the loop length
-    b       .fillInTheRest2             @ fill in what is needed
-    mov     r0, r0                      @ padding
+    ldrh    r5, [r4, #-2]                   @ load a halfword
+    sub     r4, r4, r12                     @ subtract the current pointer by the loop length
+    b       .fillInTheRest2                 @ fill in what is needed
+    mov     r0, r0                          @ padding
 
     @ finally, lr = -3
-    ldrb    r5, [r4, #-1]               @ load a byte
-    sub     r4, r4, r12                 @ subtract the current pointer by the loop length
+    ldrb    r5, [r4, #-1]                   @ load a byte
+    sub     r4, r4, r12                     @ subtract the current pointer by the loop length
 
-.fillInTheRest3:
+    @ now fill in from the new place
     ldrb    r2, [r4], #1                    @ load a single byte
     orr     r5, r5, r2, lsl #8              @ place it on the correct place
 .fillInTheRest2:
