@@ -135,7 +135,7 @@ public:
     using Pointer = FrameStorePointer<Png, Size>;
 
     FrameAnimator(FrameStore<Png, Size>& store, u16 frameTime)
-        : pointer(store, false), base(store.getFrameStore(), Png.png.animationFrames, frameTime) {}
+        : pointer(store, false), base(store.getFrameStore(), Png.animationFrames, frameTime) {}
 
     // Sets an animation pose
     void setAnimationPose(const AnimationPose& pose) { base.setAnimationPose(pose); }

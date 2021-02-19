@@ -20,9 +20,7 @@ class StreamAnimator final
     // The pointer to the frame data
     const AnimationFrame* animationFrames;
     // The size of the sprite requested, used in the calculations
-    u16 logNumBlocks:15;
-    // Whether it should clear or not the animation at the end
-    u16 clearAnimation:1;
+    u16 logNumBlocks;
     // The number of GBA frames to wait between each animation frame
     u16 frameTime;
     // The GBA count, and important properties of the animation
@@ -44,10 +42,7 @@ public:
         : StreamAnimator(png.tiles, png.animationFrames, spriteSize, frameTime) {}
 
     // Sets an animation pose
-    void setAnimationPose(const AnimationPose& pose, bool clearAnim = false);
-
-    // Clears all animation poses
-    void clearAnimationPose();
+    void setAnimationPose(const AnimationPose& pose);
 
     // Update the animation
     void update();
