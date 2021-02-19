@@ -31,7 +31,7 @@ void bigLurker(Enemy& enemy, GameScene& gameScene, s32f16 y)
     enemy.shape = CollisionShape::Bitmask;
     enemy.bitmask = &data::sprites::big_lurker.png.bitmask;
     enemy.sprSize = SpriteSize::s32x32_4bpp;
-    enemy.imagePtr = StillImagePointer(image);
+    enemy.animationHolder.assign<StillImageHandle>(image);
     enemy.palPtr = SinglePalettePointer(palette);
     enemy.health = 32;
 

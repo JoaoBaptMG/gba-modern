@@ -31,7 +31,7 @@ void wavingEnemy(Enemy& enemy, GameScene& gameScene, u32 frameToShoot)
     enemy.shape = CollisionShape::Bitmask;
     enemy.bitmask = &data::sprites::waving_enemy.png.bitmask;
     enemy.sprSize = SpriteSize::s16x16_4bpp;
-    enemy.imagePtr = StillImagePointer(image);
+    enemy.animationHolder.assign<StillImageHandle>(image);
     enemy.palPtr = SinglePalettePointer(palette);
     enemy.health = 5;
 

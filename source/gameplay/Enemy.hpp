@@ -11,7 +11,7 @@
 #include "util/TrivialStaticFunction.hpp"
 #include "graphics/SpriteSize.hpp"
 #include "graphics/PalettePointer.hpp"
-#include "graphics/StillImagePointer.hpp"
+#include "graphics/AnimationHolder.hpp"
 
 #include "collision.hpp"
 
@@ -39,7 +39,7 @@ public:
         const BitmaskData* bitmask;
     };
     
-    StillImagePointer imagePtr;          // 4 bytes
+    AnimationHolder animationHolder;     // 32 bytes
     SinglePalettePointer palPtr;         // 4 bytes
     MovementFunction movementFunction;   // 16 bytes
 

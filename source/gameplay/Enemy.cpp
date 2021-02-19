@@ -57,6 +57,7 @@ void Enemy::update()
         else curCtx = context_switch(curCtx);
     }
 
+    animationHolder->update();
     movementFunction(*this);
 
     // Update the invCounter
@@ -68,7 +69,7 @@ void Enemy::updateGraphics()
     // Push the sprite, but only if the invCounter is not active
     auto dp = vec2<int>(pos) - SizeUtils::pixelSize(sprSize)/2;
     if (!invCounter)
-        oamHandle.setRegular(dp, sprSize, imagePtr.getTileId(), palPtr.getPalette(), 1, EnemyPriority);
+        oamHandle.setRegular(dp, sprSize, animationHolder->getTileId(), palPtr.getPalette(), 1, EnemyPriority);
     else oamHandle.setHidden();
 }
 
