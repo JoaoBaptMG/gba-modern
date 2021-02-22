@@ -13,7 +13,12 @@ This project consists in a toolkit written in C++17 to generate assembly files f
 Screenshots and Videos
 ======================
 
-[Working video](videos/video-0.mp4)
+[Working video](videos/video.mp4) | [Bitmask test video](videos/bitmask.mp4)
+
+![Image 1](screenshots/game-0.png)
+![Image 2](screenshots/game-1.png)
+![Image 3](screenshots/game-2.png)
+![Image 4](screenshots/game-3.png)
 
 Contributing
 ============
