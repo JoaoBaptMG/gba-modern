@@ -45,7 +45,7 @@ __aeabi_idiv:
     @ Test the old sign bits
     tst     r12, #1 << 30
     rsbne   r0, r0, #0
-    rsbne   r1, r0, #0
+    rsbne   r1, r1, #0
     tst     r12, #1 << 31
     rsbne   r0, r0, #0
 
