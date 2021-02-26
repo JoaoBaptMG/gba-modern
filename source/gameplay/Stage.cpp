@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 #include "Stage.hpp"
 
-#include "GameScene.hpp"
+#include "scenes/GameScene.hpp"
 #include "util/gba-assert.hpp"
 context_t stageContext(context_t ctx, void* arg);
 

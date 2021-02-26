@@ -5,15 +5,16 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "scenes/IScene.hpp"
-#include "Player.hpp"
-#include "Stage.hpp"
-#include "ui/UserInterface.hpp"
-#include "Background.hpp"
+#include "IScene.hpp"
+
+#include "gameplay/Player.hpp"
+#include "gameplay/Stage.hpp"
+#include "gameplay/ui/UserInterface.hpp"
+#include "gameplay/Background.hpp"
+#include "gameplay/Enemy.hpp"
+#include "gameplay/Projectiles.hpp"
+#include "gameplay/Explosions.hpp"
 #include "util/UnorderedIterableList.hpp"
-#include "Enemy.hpp"
-#include "Projectiles.hpp"
-#include "Explosions.hpp"
 
 constexpr int NumEnemies = 64;
 constexpr int UserInterfaceHeight = 16;

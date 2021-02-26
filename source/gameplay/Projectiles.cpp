@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 #include "Projectiles.hpp"
 
-#include "GameScene.hpp"
+#include "scenes/GameScene.hpp"
 #include <algorithm>
 #include "collision.hpp"
 

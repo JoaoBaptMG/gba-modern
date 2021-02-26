@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 #include "Enemy.hpp"
 #include "util/UnorderedList.hpp"
-#include "GameScene.hpp"
+#include "scenes/GameScene.hpp"
 #include <array>
 #include <cstddef>
 

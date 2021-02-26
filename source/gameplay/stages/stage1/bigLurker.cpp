@@ -9,7 +9,7 @@
 #include "graphics/StillImagePointer.hpp"
 #include "graphics/PalettePointer.hpp"
 
-#include "gameplay/GameScene.hpp"
+#include "scenes/GameScene.hpp"
 #include "gameplay/vecUtils.hpp"
 #include "util/generateTable.hpp"
 

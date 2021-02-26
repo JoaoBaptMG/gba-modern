@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 #include "UserInterface.hpp"
 
-#include "../GameScene.hpp"
+#include "scenes/GameScene.hpp"
 #include "data/fonts/monogram_extended.hpp"
 #include "util/uintDigits.h"
 

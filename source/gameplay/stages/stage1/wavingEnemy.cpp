@@ -11,7 +11,7 @@
 
 #include "math/fixedmath.hpp"
 #include "math/gcem-degrees.hpp"
-#include "gameplay/GameScene.hpp"
+#include "scenes/GameScene.hpp"
 #include "util/generateTable.hpp"
 
 #include "audio/audio.hpp"

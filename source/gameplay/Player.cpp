@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 #include "Player.hpp"
 
-#include "GameScene.hpp"
+#include "scenes/GameScene.hpp"
 #include "data/sprites/player.hpp"
 #include "math/gcem-degrees.hpp"
 

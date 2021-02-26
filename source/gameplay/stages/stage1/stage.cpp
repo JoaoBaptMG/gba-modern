@@ -4,7 +4,7 @@
 // A stage script
 //--------------------------------------------------------------------------------
 #include "gameplay/Stage.hpp"
-#include "gameplay/GameScene.hpp"
+#include "scenes/GameScene.hpp"
 
 #include "wobblingEnemies.hpp"
 #include "wavingEnemy.hpp"

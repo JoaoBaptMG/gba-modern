@@ -10,7 +10,7 @@
 #include "graphics/PalettePointer.hpp"
 
 #include "gameplay/vecUtils.hpp"
-#include "gameplay/GameScene.hpp"
+#include "scenes/GameScene.hpp"
 
 #include "audio/audio.hpp"
 #include "data/sounds/enemy-shot1.hpp"

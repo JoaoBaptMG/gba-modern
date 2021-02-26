@@ -6,7 +6,7 @@
 #include <tonc.h>
 
 #include "scenes/IScene.hpp"
-#include "gameplay/GameScene.hpp"
+#include "scenes/GameScene.hpp"
 #include "graphics/graphics.hpp"
 #include "math/fixed.hpp"
 #include "memory/allocator.hpp"

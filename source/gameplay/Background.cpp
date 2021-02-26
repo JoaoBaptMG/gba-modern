@@ -6,7 +6,7 @@
 #include "Background.hpp"
 
 #include <tonc.h>
-#include "GameScene.hpp"
+#include "scenes/GameScene.hpp"
 
 // Initialize the background
 void Background::init()
