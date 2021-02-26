@@ -18,12 +18,12 @@ struct State
         std::uint16_t sz = chars.size();
         chars.push_back(character);
 
-        // Add all 4 reversions of the character
+        // Add all 4 flips of the character
         // If the character is symmetric, the respective reversion will not be added
         charIndices.emplace(character, sz);
-        charIndices.emplace(reverseCharacter(character, Reverse::Horizontal), sz | 0x400);
-        charIndices.emplace(reverseCharacter(character, Reverse::Vertical), sz | 0x800);
-        charIndices.emplace(reverseCharacter(character, Reverse::HorizontalVertical), sz | 0xC00);
+        charIndices.emplace(flipCharacter(character, Flip::Horizontal), sz | 0x400);
+        charIndices.emplace(flipCharacter(character, Flip::Vertical), sz | 0x800);
+        charIndices.emplace(flipCharacter(character, Flip::HorizontalVertical), sz | 0xC00);
 
         return sz;
     }

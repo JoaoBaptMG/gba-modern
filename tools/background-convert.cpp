@@ -201,7 +201,7 @@ ConversionResult convertBackgroundTo4bpp(const State<Character8bpp>& state8bpp,
 
                 // Compose the old flags with the new correspondent tile index
                 // This is done as a bitwise-XOR operation because the
-                // reversal flags behave as a XOR (reversed with reversed = normal)
+                // flip flags behave as a XOR (flipped with flipped = normal)
                 auto newId = charCorrespondences[charId];
                 state.screenEntries(i, j) ^= newId;
 

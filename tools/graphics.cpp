@@ -187,12 +187,12 @@ Bitmask generateImageBitmask(const Image8bpp& image)
     return bitmask;
 }
 
-Character4bpp reverseCharacter(Character4bpp ch, Reverse reverse)
+Character4bpp flipCharacter(Character4bpp ch, Flip flip)
 {
-    if (reverse == Reverse::None) return ch;
+    if (flip == Flip::None) return ch;
 
-    bool h = reverse == Reverse::Horizontal || reverse == Reverse::HorizontalVertical;
-    bool v = reverse == Reverse::Vertical || reverse == Reverse::HorizontalVertical;
+    bool h = flip == Flip::Horizontal || flip == Flip::HorizontalVertical;
+    bool v = flip == Flip::Vertical || flip == Flip::HorizontalVertical;
 
     Character4bpp rev;
 
@@ -211,12 +211,12 @@ Character4bpp reverseCharacter(Character4bpp ch, Reverse reverse)
     return rev;
 }
 
-Character8bpp reverseCharacter(Character8bpp ch, Reverse reverse)
+Character8bpp flipCharacter(Character8bpp ch, Flip flip)
 {
-    if (reverse == Reverse::None) return ch;
+    if (flip == Flip::None) return ch;
 
-    bool h = reverse == Reverse::Horizontal || reverse == Reverse::HorizontalVertical;
-    bool v = reverse == Reverse::Vertical || reverse == Reverse::HorizontalVertical;
+    bool h = flip == Flip::Horizontal || flip == Flip::HorizontalVertical;
+    bool v = flip == Flip::Vertical || flip == Flip::HorizontalVertical;
 
     Character8bpp rev;
 
