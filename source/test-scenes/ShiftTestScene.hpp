@@ -1,20 +1,20 @@
 //--------------------------------------------------------------------------------
-// DivTestScene.hpp
+// ShiftTestScene.hpp
 //--------------------------------------------------------------------------------
-// A scene to test signed division results
+// <insert description here>
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "IScene.hpp"
+#include "scenes/IScene.hpp"
 
 #include "text/TextWriter.hpp"
 #include "text/Mode3GlyphWriter.hpp"
 
-class DivTestScene final : public IScene
+class ShiftTestScene final : public IScene
 {
     TextWriter<Mode3GlyphWriter> writer;
 
 public:
-    DivTestScene();
+    ShiftTestScene();
     virtual void update() override {}
 };

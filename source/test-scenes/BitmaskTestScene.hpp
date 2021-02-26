@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "IScene.hpp"
+#include "scenes/IScene.hpp"
 
 #include <tonc.h>
 #include "math/stdfixed.hpp"

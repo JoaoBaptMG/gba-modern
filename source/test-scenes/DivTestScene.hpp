@@ -1,20 +1,20 @@
 //--------------------------------------------------------------------------------
-// IsrOverheadTestScene.hpp
+// DivTestScene.hpp
 //--------------------------------------------------------------------------------
-// Measures the overhead of the current interrupt service routine
+// A scene to test signed division results
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "IScene.hpp"
+#include "scenes/IScene.hpp"
 
 #include "text/TextWriter.hpp"
 #include "text/Mode3GlyphWriter.hpp"
 
-class IsrOverheadTestScene final : public IScene
+class DivTestScene final : public IScene
 {
     TextWriter<Mode3GlyphWriter> writer;
 
 public:
-    IsrOverheadTestScene();
-    virtual void update() override;
+    DivTestScene();
+    virtual void update() override {}
 };

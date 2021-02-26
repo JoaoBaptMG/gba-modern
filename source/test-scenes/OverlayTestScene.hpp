@@ -1,20 +1,20 @@
 //--------------------------------------------------------------------------------
-// ShiftTestScene.hpp
+// OverlayTestScene.hpp
 //--------------------------------------------------------------------------------
-// <insert description here>
+// A scene to test the use of overlays
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "IScene.hpp"
+#include "scenes/IScene.hpp"
 
 #include "text/TextWriter.hpp"
 #include "text/Mode3GlyphWriter.hpp"
 
-class ShiftTestScene final : public IScene
+class OverlayTestScene final : public IScene
 {
     TextWriter<Mode3GlyphWriter> writer;
 
 public:
-    ShiftTestScene();
+    OverlayTestScene();
     virtual void update() override {}
 };

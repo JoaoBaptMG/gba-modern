@@ -1,20 +1,20 @@
 //--------------------------------------------------------------------------------
-// OverlayTestScene.hpp
+// IsrOverheadTestScene.hpp
 //--------------------------------------------------------------------------------
-// A scene to test the use of overlays
+// Measures the overhead of the current interrupt service routine
 //--------------------------------------------------------------------------------
 #pragma once
 
-#include "IScene.hpp"
+#include "scenes/IScene.hpp"
 
 #include "text/TextWriter.hpp"
 #include "text/Mode3GlyphWriter.hpp"
 
-class OverlayTestScene final : public IScene
+class IsrOverheadTestScene final : public IScene
 {
     TextWriter<Mode3GlyphWriter> writer;
 
 public:
-    OverlayTestScene();
-    virtual void update() override {}
+    IsrOverheadTestScene();
+    virtual void update() override;
 };
