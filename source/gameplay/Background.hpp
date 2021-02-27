@@ -22,9 +22,9 @@ struct DynamicBackgroundData
 
 template <std::size_t DataSize, bool Is8bpp, std::size_t SeWidth, std::size_t SeHeight, std::size_t PaletteCount>
 DynamicBackgroundData getDynamicBackgroundData(
-    const BackgroundData<DataSize, Is8bpp, SeWidth, SeHeight, PaletteCount>& background)
+    const BackgroundData<DataSize, Is8bpp, SeWidth, SeHeight, false, PaletteCount>& background)
 {
-    return { DataSize, SeWidth, SeHeight, PaletteCount, Is8bpp, 
+    return { DataSize, SeWidth, SeHeight, PaletteCount, Is8bpp,
         background.tiles, background.scrEntries, background.palettes };
 }
 
@@ -39,7 +39,7 @@ public:
     void vblank();
 
     template <std::size_t DataSize, bool Is8bpp, std::size_t SeWidth, std::size_t SeHeight, std::size_t PaletteCount>
-    void load(const BackgroundData<DataSize, Is8bpp, SeWidth, SeHeight, PaletteCount>& background)
+    void load(const BackgroundData<DataSize, Is8bpp, SeWidth, SeHeight, false, PaletteCount>& background)
     { load(getDynamicBackgroundData(background)); }
 
     vec2<s32f8> offset;

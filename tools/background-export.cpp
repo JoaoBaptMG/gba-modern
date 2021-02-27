@@ -6,6 +6,7 @@ struct Offset { int x, y; };
 struct GlobalState
 {
     bool exportPalettes = true;
+    bool isAffine = false;
     std::size_t groupWidth = 1;
     std::size_t groupHeight = 1;
 };
@@ -39,12 +40,16 @@ int backgroundExport(int argc, char **argv)
         nlohmann::json j;
         inf >> j;
         if (j.contains("is8bpp")) j.at("is8bpp").get_to(is8bpp);
+        if (j.contains("is-affine")) j.at("is-affine").get_to(gstate.isAffine);
         if (j.contains("export-palettes")) j.at("export-palettes").get_to(gstate.exportPalettes);
         if (j.contains("group-width")) j.at("group-width").get_to(gstate.groupWidth);
         if (j.contains("group-height")) j.at("group-height").get_to(gstate.groupHeight);
         if (j.contains("preserve-order")) j.at("preserve-order").get_to(preserveOrder);
         if (preserveOrder && j.contains("remap-palettes")) j.at("remap-palettes").get_to(remapPalettes);
     }
+
+    if (!is8bpp && gstate.isAffine)
+        throw std::logic_error("Affine backgrounds can only be exported as 8bpp!");
 
     // Load the image
     auto image = convertImageToCharacters8bpp(loadPngToImage(in), 256, preserveOrder);
@@ -56,10 +61,10 @@ int backgroundExport(int argc, char **argv)
     // Add all the screenblock entries to the state
     for (std::size_t j = 0; j < height; j++)
         for (std::size_t i = 0; i < width; i++)
-            state.screenEntries(i, j) = state.addCharacter(image.chars(i, j));
+            state.screenEntries(i, j) = state.addCharacter(image.chars(i, j), gstate.isAffine);
 
     // Check validity
-    std::size_t maxSize = is8bpp ? 512 : 1024;
+    std::size_t maxSize = gstate.isAffine ? 256 : is8bpp ? 512 : 1024;
     if (state.chars.size() > maxSize)
         throw std::out_of_range("Maximum number of generated characters exceeded (" + std::to_string(maxSize) + ").");
 
@@ -135,7 +140,8 @@ int backgroundExport(int argc, char **argv)
         hof << "{" << std::endl;
         hof << "    extern const BackgroundHandle<" << characterSize;
         hof << (is8bpp ? ", true, " : ", false, ") << seWidth << ", " << seHeight;
-        hof << ", " << paletteCount << "> " << name.fileName << ';' << std::endl;
+        hof << (gstate.isAffine ? ", true, " : ", false, ");
+        hof << paletteCount << "> " << name.fileName << ';' << std::endl;
         hof << "}" << std::endl;
     }
 
@@ -175,9 +181,9 @@ void writeBackground(std::ostream& of, const SpecialName& name, const State<Char
             std::size_t cellHeight = std::min(state.screenEntries.height() - j, gstate.groupHeight);
             for (const auto& tile : state.screenEntries.make_view(i, j, cellWidth, cellHeight))
             {
-                if (id % 8 == 0) of << std::endl << "    .hword ";
+                if (id % 8 == 0) of << std::endl << (gstate.isAffine ? "    .byte " : "    .hword ");
                 else of << ", ";
-                of << toHex(tile, 4);
+                of << toHex(tile, gstate.isAffine ? 2 : 4);
                 id++;
             }
         }

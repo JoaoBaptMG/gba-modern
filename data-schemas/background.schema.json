@@ -8,7 +8,8 @@
     "properties":
     {
         "$schema": {"type": "string", "description": "The schema to validate this json for" },
-        "is8bpp": { "type": "boolean", "description": "Whether to export this sprite as 8bpp characters" },
+        "is8bpp": { "type": "boolean", "description": "Whether to export this background as 8bpp characters" },
+        "is-affine": { "type": "boolean", "description": "Whether to export this background with affine screen entries. Requires is8bpp" },
         "group-width": { "type": "integer", "description": "The width of the 'block' in which to regroup this image in tiles" },
         "group-height": { "type": "integer", "description": "The height of the 'block' in which to regroup this image in tiles" },
         "preserve-order": { "type": "boolean", "description": "If true, the colors will not be rearranged and the palettes must form groups of 16." },

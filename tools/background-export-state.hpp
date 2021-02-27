@@ -10,7 +10,7 @@ struct State
     std::map<Character, std::uint16_t> charIndices;
     util::grid<std::uint16_t> screenEntries;
 
-    auto addCharacter(const Character& character)
+    auto addCharacter(const Character& character, bool affine = false)
     {
         auto it = charIndices.find(character);
         if (it != charIndices.end()) return it->second;
@@ -18,12 +18,16 @@ struct State
         std::uint16_t sz = chars.size();
         chars.push_back(character);
 
-        // Add all 4 flips of the character
-        // If the character is symmetric, the respective reversion will not be added
+        // Add the character
         charIndices.emplace(character, sz);
-        charIndices.emplace(flipCharacter(character, Flip::Horizontal), sz | 0x400);
-        charIndices.emplace(flipCharacter(character, Flip::Vertical), sz | 0x800);
-        charIndices.emplace(flipCharacter(character, Flip::HorizontalVertical), sz | 0xC00);
+        if (!affine)
+        {
+            // Add all 3 flips of the character if it's not affine
+            // If the character is symmetric, the respective flip will not be added
+            charIndices.emplace(flipCharacter(character, Flip::Horizontal), sz | 0x400);
+            charIndices.emplace(flipCharacter(character, Flip::Vertical), sz | 0x800);
+            charIndices.emplace(flipCharacter(character, Flip::HorizontalVertical), sz | 0xC00);
+        }
 
         return sz;
     }
