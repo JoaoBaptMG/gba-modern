@@ -1,5 +1,6 @@
 {
     "$schema": "../../data-schemas/background.schema.json",
     "is8bpp": true,
-    "is-affine": true
+    "is-affine": true,
+    "export-palettes": false
 }

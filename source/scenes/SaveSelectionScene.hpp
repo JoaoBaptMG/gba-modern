@@ -20,11 +20,14 @@ class SaveSelectionScene final : public IScene
 {
     u16 curAngle, targetAngle;
     u16 curFrame, flipFrame;
+    u16 paletteAnim;
 
     HBlankData hblankValues[2][SCREEN_HEIGHT];
 
-    void drawSavePanels();
+    void drawSavePanels(HBlankData* frame) IWRAM_CODE;
+    void transferPalette(bool selected);
 
+    u32 currentPanel() const;
 public:
     SaveSelectionScene();
     virtual void update() override;
