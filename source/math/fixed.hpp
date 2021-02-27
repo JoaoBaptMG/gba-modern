@@ -67,6 +67,32 @@ public:
         return *this;
     }
 
+    template <typename U>
+    constexpr std::enable_if_t<std::is_integral_v<U>, fixed&>
+    operator=(U v) { value = v << N; return *this; }
+
+    template <typename U>
+    constexpr std::enable_if_t<std::is_floating_point_v<U>, fixed&>
+    operator=(U v) { value = v * (1 << N); return *this; }
+
+    // volatile overload needed so the class can be used with hardware registers
+    template <typename Ty2, std::size_t M>
+    constexpr void operator=(fixed<Ty2, M> o) volatile
+    {
+        if constexpr (N == M) value = o.value;
+        if constexpr (N > M) value = o.value << (N - M);
+        if constexpr (N < M) value = o.value >> (M - N);
+    }
+
+    template <typename U>
+    constexpr std::enable_if_t<std::is_integral_v<U>, volatile fixed&>
+    operator=(U v) volatile { value = v << N; return *this; }
+
+    template <typename U>
+    constexpr std::enable_if_t<std::is_floating_point_v<U>, volatile fixed&>
+    operator=(U v) volatile { value = v * (1 << N); return *this; }
+
+    // Compound assignment operators
     template <typename Ty2, std::size_t M>
     constexpr fixed& operator+=(fixed<Ty2, M> o)
     {
