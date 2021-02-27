@@ -122,6 +122,15 @@ void graphics::romCopyCommand32(void* dst, const void* src, u16 count)
     romCopyCount++;
 }
 
+void graphics::romCopyCommand16(void* dst, const void* src, u16 count)
+{
+    ASSERT(romCopyCount < MaxCopyWords);
+    romCopyBuffer[romCopyCount].dst = dst;
+    romCopyBuffer[romCopyCount].src = src;
+    romCopyBuffer[romCopyCount].countCtl = count | DMA_16NOW | DMA_ENABLE;
+    romCopyCount++;
+}
+
 void graphics::resetObjectsAndPalettes()
 {
     palettesUsed = 0;

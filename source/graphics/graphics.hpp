@@ -38,6 +38,9 @@ namespace graphics
     // Schedule a DMA copy from the ROM
     void romCopyCommand32(void* dst, const void* src, u16 count);
 
+    // Schedule a DMA copy from the ROM (16 bits)
+    void romCopyCommand16(void* dst, const void* src, u16 count);
+
     // Resets the object allocation stack
     void resetObjectsAndPalettes();
 
