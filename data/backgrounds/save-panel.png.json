@@ -1,0 +1,5 @@
+{
+    "$schema": "../../data-schemas/background.schema.json",
+    "is8bpp": true,
+    "is-affine": true
+}
