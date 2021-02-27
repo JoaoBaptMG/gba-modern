@@ -8,6 +8,9 @@
 #include "IScene.hpp"
 #include <tonc.h>
 #include "math/stdfixed.hpp"
+#include "graphics/StillImagePointer.hpp"
+#include "graphics/OamManager.hpp"
+#include "graphics/PalettePointer.hpp"
 
 struct HBlankData
 {
@@ -20,9 +23,12 @@ class SaveSelectionScene final : public IScene
 {
     u16 curAngle, targetAngle;
     u16 curFrame, flipFrame;
-    u16 paletteAnim;
+    u16 paletteAnim, arrowAnim;
 
     HBlankData hblankValues[2][SCREEN_HEIGHT];
+    StillImagePointer arrowPtr;
+    SinglePalettePointer palPtr;
+    UniqueOamHandle arrowUp, arrowDown;
 
     void drawSavePanels(HBlankData* frame) IWRAM_CODE;
     void transferPalette(bool selected);

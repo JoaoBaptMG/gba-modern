@@ -66,15 +66,13 @@ void SaveSelectionScene::drawSavePanels(HBlankData* frame)
         ymini = std::clamp(ymini, -SCREEN_HEIGHT/2, SCREEN_HEIGHT/2-1);
         ymaxi = std::clamp(ymaxi, -SCREEN_HEIGHT/2, SCREEN_HEIGHT/2-1);
 
-        frame[SCREEN_HEIGHT/2 + ymini].bgcnt = BG_PRIO(0) | BG_CBB(0) | BG_8BPP | BG_SBB(FirstSBlock+i) | BG_AFF_16x16;
+        frame[SCREEN_HEIGHT/2 + ymini].bgcnt = BG_PRIO(1) | BG_CBB(0) | BG_8BPP | BG_SBB(FirstSBlock+i) | BG_AFF_16x16;
 
         // Precompute some stuff
         auto mult = yp[in] * zp[i] - zp[in] * yp[i];
         auto yif = yp[i] * FocalDistance;
         auto dyif = (yp[in] - yp[i]) * FocalDistance;
         auto dzi = zp[in] - zp[i];
-
-        mgba::log(mgba::Log::Info, i, ": mult = ", int(mult), " / ymini = ", ymini, " / ymaxi = ", ymaxi);
 
         // Now, compute for each scanline the necessary lines to be drawn
         for (int ys = ymini; ys <= ymaxi; ys++)
@@ -86,8 +84,6 @@ void SaveSelectionScene::drawSavePanels(HBlankData* frame)
             frame[j].pa = z / FocalDistance;
         }
     }
-
-    mgba::log(mgba::Log::Info, "--------");
 
     flipFrame = true;
 }

@@ -1,0 +1,5 @@
+{
+    "$schema": "../../data-schemas/background.schema.json",
+    "preserve-order": true,
+    "remap-palettes": [15]
+}
