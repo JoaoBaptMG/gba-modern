@@ -10,6 +10,7 @@
 #include "math/fixedmath.hpp"
 #include "util/generateTable.hpp"
 #include "text/mGBADebugging.hpp"
+#include "util/profile.hpp"
 
 // Details for the perspective transform
 constexpr s32 FocalDistance = 196;
@@ -79,9 +80,15 @@ void SaveSelectionScene::drawSavePanels(HBlankData* frame)
         {
             u32 j = SCREEN_HEIGHT/2 + ys;
             frame[j].y = -(PanelHeight * (yif - zp[i] * ys) / (dyif - dzi * ys));
-            fdata z = FocalDistance * (mult / (dyif - dzi * ys));
+
+            /*fdata z = FocalDistance * (mult / (dyif - dzi * ys));
             frame[j].x = (PanelWidth - z * SCREEN_WIDTH / FocalDistance) / 2;
-            frame[j].pa = z / FocalDistance;
+            frame[j].pa = z / FocalDistance;*/
+
+            // This is an optimized version that computes z / FocalDistance instead of z
+            fdata zdivf = mult / (dyif - dzi * ys);
+            frame[j].x = (PanelWidth - zdivf * SCREEN_WIDTH) / 2;
+            frame[j].pa = zdivf;
         }
     }
 
