@@ -51,8 +51,22 @@ struct is_explicitly_convertible
 template <typename U, typename T>
 static constexpr bool is_explicitly_convertible_v = is_explicitly_convertible<U, T>::value;
 
-template <template<typename> typename Pred, typename... Ts>
-constexpr bool all_of_pred = (Pred<Ts>::value && ...);
+namespace detail
+{
+    template <typename T>
+    struct type_container { using type = T; };
+}
 
-template <template<typename> typename Pred, typename... Ts>
-constexpr bool any_of_pred = (Pred<Ts>::value && ...);
+// First type, SFINAE-friendly (the type doesn't exist)
+template <template<typename> typename Pred, typename... Types>
+struct first_of;
+
+template <template<typename> typename Pred>
+struct first_of<Pred> {};
+
+template <template<typename> typename Pred, typename T, typename... Rest>
+struct first_of<Pred, T, Rest...> : std::conditional_t<Pred<T>::value,
+    detail::type_container<T>, first_of<Pred, Rest...>> {};
+
+template <template<typename> typename Pred, typename... Types>
+using first_of_t = typename first_of<Pred, Types...>::type;

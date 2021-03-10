@@ -30,7 +30,7 @@ namespace detail::font
     template <std::size_t _VerticalStride, typename... GlyphIntervals>
     struct Font
     {
-        static_assert(all_of_pred<IsGlyphInterval, GlyphIntervals...>,
+        static_assert((IsGlyphInterval<GlyphIntervals>::value && ...),
             "All types in the parameter pack must be GlyphIntervals!");
         
         constexpr static const auto VerticalStride = _VerticalStride;
