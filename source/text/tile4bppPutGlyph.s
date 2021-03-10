@@ -26,7 +26,7 @@
     .type tile4bppPutGlyph STT_FUNC
 tile4bppPutGlyph:
     push    {r4-r10}                @ Get necessary workspace for our function
-    ldr     r9, =0x01010101         @ Preload the auxiliary mask used in the loop down there
+    ldr     r10, =0x01010101        @ Preload the auxiliary mask used in the loop down there
     ldmia   r2, {r4, r5}            @ Load the config words
     tst     r4, #255                @ Quick check to see if height is 0
     beq     .end
@@ -51,7 +51,6 @@ tile4bppPutGlyph:
     @ r2: pixelHeight, r3: color, r4: height, r5: buffer, r6: x%8, r12: buffer
 
     @ so, we'll put a spare of the buffer in r0 and the character row in r1
-
     mov     r0, r12                 @ since r0 is not necessary anymore
     tst     r4, #1 << 31            @ check the attr flag
     and     r4, r4, #0xff           @ keep only the height
@@ -65,14 +64,13 @@ tile4bppPutGlyph:
     and     r7, r1, #255            @ Take the next byte
     orr     r7, r7, r7, lsl #12     @ Shift the higher nibbles into their place...
     orr     r7, r7, r7, lsl #6      @ ...in order to be able to apply the mask
-    and     r8, r7, r9, lsl #1      @ Pick up the even bits
-    and     r7, r7, r9              @ Pick up the odd bits
+    and     r8, r7, r10, lsl #1     @ Pick up the even bits
+    and     r7, r7, r10             @ Pick up the odd bits
     orr     r7, r7, r8, lsl #3      @ Combine them into a single 4-bit unpacked value 
     mul     r8, r7, r3              @ Multiply by the color
-    orr     r10, r7, r7, lsl #1     @ Or with shifted once...
-    orr     r10, r10, r10, lsl #2   @ ...and twice, essentially multiplying the bitmask by 7
+    rsb     r9, r7, r7, lsl #4      @ Multiply by F so it can be used as a mask
     ldr     r7, [r12]               @ Load the older value
-    bic     r7, r7, r10             @ Clear the area that should be filled
+    bic     r7, r7, r9              @ Clear the area that should be filled
     orr     r7, r7, r8              @ Fill the area with the pixel color
     str     r7, [r12], r2, lsl #2   @ Advance by the pixel height (x4 for the byte height)
 
@@ -98,14 +96,13 @@ tile4bppPutGlyph:
     and     r7, r1, #255            @ Take the next byte
     orr     r7, r7, r7, lsl #12     @ Shift the higher nibbles into their place...
     orr     r7, r7, r7, lsl #6      @ ...in order to be able to apply the mask
-    and     r8, r7, r9, lsl #1      @ Pick up the even bits
-    and     r7, r7, r9              @ Pick up the odd bits
+    and     r8, r7, r10, lsl #1     @ Pick up the even bits
+    and     r7, r7, r10             @ Pick up the odd bits
     orr     r7, r7, r8, lsl #3      @ Combine them into a single 4-bit unpacked value 
     mul     r8, r7, r3              @ Multiply by the color
-    orr     r10, r7, r7, lsl #1     @ Or with shifted once...
-    orr     r10, r10, r10, lsl #2   @ ...and twice, essentially multiplying the bitmask by 7
+    rsb     r9, r7, r7, lsl #4      @ Multiply by F so it can be used as a mask
     ldr     r7, [r12]               @ Load the older value
-    bic     r7, r7, r10             @ Clear the area that should be filled
+    bic     r7, r7, r9              @ Clear the area that should be filled
     orr     r7, r7, r8              @ Fill the area with the pixel color
     str     r7, [r12], r2, lsl #2   @ Advance by the pixel height (x4 for the byte height)
 
