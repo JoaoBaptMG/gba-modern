@@ -3,7 +3,8 @@
 @--------------------------------------------------------------------------------
 @ Provides the required vblank to the player
 @--------------------------------------------------------------------------------
-    .section .iwram, "ax", %progbits
+#include "SaveSelectionScene.hpp"
+    .section IWRAM_OVERLAY(SAVE_SELECTION_OVERLAY), "ax", %progbits
     .align 2
     .arm
     .global saveSelectionHblankIrq

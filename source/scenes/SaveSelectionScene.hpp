@@ -5,13 +5,19 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
+#if !__ASSEMBLER__
 #include "IScene.hpp"
 #include <tonc.h>
 #include "math/stdfixed.hpp"
 #include "graphics/StillImagePointer.hpp"
 #include "graphics/OamManager.hpp"
 #include "graphics/PalettePointer.hpp"
+#endif
 
+#include "memory/overlay.hpp"
+#define SAVE_SELECTION_OVERLAY 1
+
+#if !__ASSEMBLER__
 struct HBlankData
 {
     s32f8 x, y;
@@ -30,7 +36,7 @@ class SaveSelectionScene final : public IScene
     SinglePalettePointer palPtr;
     UniqueOamHandle arrowUp, arrowDown;
 
-    void drawSavePanels(HBlankData* frame) IWRAM_CODE;
+    void drawSavePanels(HBlankData* frame) IWRAM_OVERLAY_CODE(SAVE_SELECTION_OVERLAY);
     void transferPalette(bool selected);
 
     u32 currentPanel() const;
@@ -40,3 +46,4 @@ public:
     virtual void vblank() override;
     virtual ~SaveSelectionScene();
 };
+#endif

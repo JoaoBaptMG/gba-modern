@@ -41,6 +41,9 @@ constexpr int NumArrowAnimationFrames = 64;
 SaveSelectionScene::SaveSelectionScene() : IScene(), curAngle(0), targetAngle(0), curFrame(0), flipFrame(false),
     paletteAnim(0), arrowAnim(0), arrowPtr(image), palPtr(palette)
 {
+    // Load the corresponding IWRAM overlay
+    OVERLAY_LOAD(SAVE_SELECTION_OVERLAY);
+
     // Set the background mode to 1 and enable background 2
     REG_DISPCNT = DCNT_MODE1 | DCNT_BG0 | DCNT_BG2 | DCNT_OBJ;
 
