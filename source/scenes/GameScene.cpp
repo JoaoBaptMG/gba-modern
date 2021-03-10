@@ -15,6 +15,9 @@ void stage1(StageContext& stage);
 
 GameScene::GameScene()
 {
+    // Load the game overlay
+    OVERLAY_LOAD(GAME_OVERLAY);
+
     // Set the display registers
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D;
 

@@ -5,6 +5,7 @@
 //--------------------------------------------------------------------------------
 #pragma once
 
+#if !__ASSEMBLER__
 #include "IScene.hpp"
 
 #include "gameplay/Player.hpp"
@@ -15,7 +16,12 @@
 #include "gameplay/Projectiles.hpp"
 #include "gameplay/Explosions.hpp"
 #include "util/UnorderedIterableList.hpp"
+#endif
 
+#include "memory/overlay.hpp"
+#define GAME_OVERLAY 0
+
+#if !__ASSEMBLER__
 constexpr int NumEnemies = 64;
 constexpr int UserInterfaceHeight = 16;
 
@@ -36,3 +42,4 @@ public:
 
     UnorderedIterableList<Enemy, NumEnemies> enemies;
 };
+#endif
