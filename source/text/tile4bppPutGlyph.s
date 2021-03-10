@@ -25,7 +25,7 @@
     .global tile4bppPutGlyph
     .type tile4bppPutGlyph STT_FUNC
 tile4bppPutGlyph:
-    push    {r4-r9}                 @ Get necessary workspace for our function
+    push    {r4-r10}                @ Get necessary workspace for our function
     ldr     r9, =0x01010101         @ Preload the auxiliary mask used in the loop down there
     ldmia   r2, {r4, r5}            @ Load the config words
     tst     r4, #255                @ Quick check to see if height is 0
@@ -41,8 +41,8 @@ tile4bppPutGlyph:
     mov     r0, r0, lsr #3          @ now r0 = x/8
 
     @ Calculate the first position in space
-    ldr     r12, [sp, #24]          @ Load the buffer in r12
-    ldr     r2, [sp, #28]           @ Load the pixel height in r2
+    ldr     r12, [sp, #28]          @ Load the buffer in r12
+    ldr     r2, [sp, #32]           @ Load the pixel height in r2
     mla     r1, r0, r2, r1          @ y + pixelHeight*tileX
     add     r12, r12, r1, lsl #2    @ now buffer is &buffer[y + pixelHeight*tileX]
 
@@ -69,8 +69,11 @@ tile4bppPutGlyph:
     and     r7, r7, r9              @ Pick up the odd bits
     orr     r7, r7, r8, lsl #3      @ Combine them into a single 4-bit unpacked value 
     mul     r8, r7, r3              @ Multiply by the color
+    orr     r10, r7, r7, lsl #1     @ Or with shifted once...
+    orr     r10, r10, r10, lsl #2   @ ...and twice, essentially multiplying the bitmask by 7
     ldr     r7, [r12]               @ Load the older value
-    orr     r7, r7, r8              @ Or both
+    bic     r7, r7, r10             @ Clear the area that should be filled
+    orr     r7, r7, r8              @ Fill the area with the pixel color
     str     r7, [r12], r2, lsl #2   @ Advance by the pixel height (x4 for the byte height)
 
     @ Finally, shift the bytes in r1 to keep going
@@ -85,10 +88,10 @@ tile4bppPutGlyph:
 
 .wordsize:
     @ Load the next 1bpp word
-    push    {r10}
+    push    {r11}
     ldr     r1, [r5], #4            @ r1 = *(u32*)r5++
     rsb     r6, r6, #32             @ r6 = 32 - r6
-    mov     r10, r1, lsr r6         @ now r10 has the remaining part
+    mov     r11, r1, lsr r6         @ now r11 has the remaining part
     rsb     r6, r6, #32             
     mov     r1, r1, lsl r6          @ shift the result by the stride
 .putglyphword:
@@ -99,8 +102,11 @@ tile4bppPutGlyph:
     and     r7, r7, r9              @ Pick up the odd bits
     orr     r7, r7, r8, lsl #3      @ Combine them into a single 4-bit unpacked value 
     mul     r8, r7, r3              @ Multiply by the color
+    orr     r10, r7, r7, lsl #1     @ Or with shifted once...
+    orr     r10, r10, r10, lsl #2   @ ...and twice, essentially multiplying the bitmask by 7
     ldr     r7, [r12]               @ Load the older value
-    orr     r7, r7, r8              @ Or both
+    bic     r7, r7, r10             @ Clear the area that should be filled
+    orr     r7, r7, r8              @ Fill the area with the pixel color
     str     r7, [r12], r2, lsl #2   @ Advance by the pixel height (x4 for the byte height)
 
     @ Finally, shift the bytes in r1 to keep going
@@ -108,16 +114,16 @@ tile4bppPutGlyph:
     bne     .putglyphword
 
     @ Put the remaining bits into r1 and jump only if required
-    movs    r1, r10
+    movs    r1, r11
     bne     .putglyphword
 
     add     r0, r0, #4              @ update the buffer
     mov     r12, r0
     subs    r4, r4, #1              @ subtract 1 from the height
     bne     .wordsize               @ next iteration
-    pop     {r10}
+    pop     {r11}
 
 .end:
-    pop     {r4-r9}
+    pop     {r4-r10}
     bx      lr
 
