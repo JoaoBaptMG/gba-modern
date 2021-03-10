@@ -114,7 +114,7 @@ bin/game.elf: build/data/audio-settings.hpp $(OFILES) | download-deps gcc-check
 
 build/data/%.o: build/data/%.s gcc | gcc-check
 	@mkdir -p $(@D)
-	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
+	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) $(INCLUDE) -c $< -o $@
 
 build/data/sprites/%.s build/data/sprites/%.hpp: data/sprites/%.png tools/tools | build-tools
 	@mkdir -p $(@D)
@@ -161,7 +161,7 @@ build/%.o: %.c gcc tonc | gcc-check $(RSRC_HFILES)
 
 build/%.o: %.s gcc tonc | gcc-check $(RSRC_HFILES)
 	@mkdir -p $(@D)
-	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) -c $< -o $@
+	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) $(INCLUDE) -c $< -o $@
 
 download-deps: gcc tonc libsamplerate
 
