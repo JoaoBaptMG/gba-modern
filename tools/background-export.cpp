@@ -91,9 +91,6 @@ int backgroundExport(int argc, char **argv)
             std::copy_n(image.palette.begin() + 16*i, numColors, palettes[i].begin());
         }
 
-        // Set the first color to zero
-        palettes[0][0] = 0;
-
         // And write the file
         writeBackground(of, name, state, palettes, gstate);
         
