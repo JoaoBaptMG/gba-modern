@@ -172,7 +172,7 @@ tonc: tonc.zip
 tonc.zip:
 	wget $(TONC_URL) -O tonc.zip
 
-gcc-check:
+gcc-check: gcc
 ifneq ($(GCC_VERSION),$(shell $(ARMCC) -dumpversion))
 	$(error "Wrong/out of date version of gcc! Please run `rm -rf gcc*` then `make` to redownload GCC")
 endif
