@@ -1,7 +1,7 @@
 @--------------------------------------------------------------------------------
-@ udiv.s
+@ udiv32.s
 @--------------------------------------------------------------------------------
-@ Provides an implementation of unsigned division
+@ Provides an implementation of 32-bit/32-bit unsigned division
 @--------------------------------------------------------------------------------
 
 @ Source code taken from https://www.chiark.greenend.org.uk/~theom/riscos/docs/ultimate/a252div.txt
@@ -66,11 +66,11 @@ udiv32pastzero:
 
     @ here, r0 = num << (r3 + 1), r1 = num >> (32-r3), r2 = -denom
     @ now, the real iteration part
-    .global divIteration
-divIteration:
+    .global div32Iteration
+div32Iteration:
     .rept 32
     adcs    r1, r2, r1, lsl #1
-    sublo   r1, r1, r2
+    subcc   r1, r1, r2
     adcs    r0, r0, r0
     .endr
 
@@ -88,10 +88,10 @@ divIteration:
 ureciprocal32:
     @ check if r0 is 0 or 1, because it will overflow or divide by 0
     cmp     r0, #1
-    bxls    lr
+    bls     __aeabi_idiv0
 
     @ move r0 = 0, r1 = 1 (so r0:r1 = 1 << 32) and r2 = -x
     rsb     r2, r0, #0
     mov     r1, #1
     movs    r0, r1, lsr #32 @ so r0 = 0, and clear the carry flag at the same time
-    b       divIteration    @ the iteration is the same as for an unsigned division
+    b       div32Iteration    @ the iteration is the same as for an unsigned division
