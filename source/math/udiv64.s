@@ -27,27 +27,60 @@ __aeabi_uldiv:
 
     .global udiv64pastzero
 udiv64pastzero:
-    @ Here it would be tricky to do the bit-detection mode, so I won't do it
-    @ Instead, the fact that r3 != 0 gives us a nice optimization
+    @ Check if the denominator is greater than the numerator and exit early if so
+    cmp     r1, r3
+    cmpeq   r0, r2
+    blo     .zeroQuotient
+
+    @ The fact that r3 != 0 gives us a nice optimization
     @ Since the quotient will then be 32-bit, we only need to use a
     @ 96-bit "numerator train", and it will finish nicely in 32 iterations
-    push    {r4}                    @ reserve space
+    push    {r4-r5}                 @ reserve space
     rsbs    r4, r2, #0              @ negate the denominator
     mov     r2, r1                  @ move the "numerator train" into place
     rsc     r1, r3, #0              @ negate with carry, to do the right task
-    mov     r3, #0                  @ zero out the numerator/remainder part
 
     @ Now, we have r0:r2:r3 (in that order) is the "numerator train", with the
     @ remainder arriving in r2:r3 and the quotient in r0
     @ r4:r1 (in that order) is the denominator
+    @ Build counter for optimization
+    mov     r5, #30                 @ first guess on difference
+    mov     r3, r2, lsr #2
 
-    @ bump r0 a first time
-    adds    r0, r0, r0
+    @ Iterate four times to get the counter up to 4-bit precision
+    cmn     r1, r3, lsr #14     @ if denom <= (r1 >> 12)
+    subge   r5, r5, #16         @ then -denom >= -(r1 >> 12)
+    movge   r3, r3, lsr #16
+
+    cmn     r1, r3, lsr #6
+    subge   r5, r5, #8
+    movge   r3, r3, lsr #8
+
+    cmn     r1, r3, lsr #2
+    subge   r5, r5, #4
+    movge   r3, r3, lsr #4
+
+    cmn     r1, r3
+    subge   r5, r5, #2
+    movge   r3, r3, lsr #2
+
+    @ shift the rest of the numerator by the counter
+    mov     r2, r2, lsl r5          @ r1 << r3
+    rsb     r5, r5, #32
+    orr     r2, r2, r0, lsr r5      @ r1 << r3 | (r0 >> (32-r3))
+    rsb     r5, r5, #32
+    mov     r0, r0, lsl r5          @ r0 << r3 - correctly set up
+    adds    r0, r0, r0              @ bump r0 a first time
+
+    @ dynamically jump to the exact copy of the iteration
+    add     r5, r5, r5, lsl #3      @ multiply by 9
+    add     pc, pc, r5, lsl #2      @ jump
+    mov     r0, r0                  @ pipelining issues
 
     .global div64Iteration
 div64Iteration:
-    .rept 32
-    adcs    r2, r2, r2
+    .rept 32                        @ any attempt at optimising those 9 instructions would be appreciated
+    adcs    r2, r2, r2              @ (don't forget to update the multiplier up there, if you do manage it)
     adc     r3, r3, r3              @ this should be uncoupled in two additions like that
     adds    r2, r2, r4              @ because we can have a double-carry problem
     adcs    r3, r3, r1
@@ -60,8 +93,16 @@ div64Iteration:
     .endr
 
     @ from here, r0 = quotient, r2:r3 = remainder
-    @ so it's just a matter of setting r1 = 1
-    pop     {r4}
+    @ so it's just a matter of setting r1 = 0
+    pop     {r4-r5}
+    mov     r1, #0
+    bx      lr
+
+.zeroQuotient:
+    @ n < d, so quot = 0 and rem = n
+    mov     r2, r0
+    mov     r3, r1
+    mov     r0, #0
     mov     r1, #0
     bx      lr
 
