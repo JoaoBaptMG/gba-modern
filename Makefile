@@ -11,7 +11,7 @@ ARCH := -mthumb -mthumb-interwork
 CFLAGS := -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto $(ARCH)
 CPPFLAGS := $(CFLAGS) -std=c++17 -fno-rtti -fno-exceptions
 ASFLAGS := -g $(ARCH)
-LDFLAGS	= -g $(ARCH) -Wl,--gc-sections -Wl,-Map,gba.map
+LDFLAGS	= -g $(ARCH) -Wl,--gc-sections -Wl,-Map,bin/gba.map
 
 # Libraries
 TONC := tonc/code/tonclib
@@ -75,10 +75,10 @@ LSRC_VERSION = 0.1.9
 LSRC_URL = http://www.mega-nerd.com/SRC/libsamplerate-$(LSRC_VERSION).tar.gz
 
 # Path to the tools used
-ARMCC := gcc/bin/arm-none-eabi-gcc
-ARMCPP := gcc/bin/arm-none-eabi-g++
-ARMOC := gcc/bin/arm-none-eabi-objcopy
-ARMOD := gcc/bin/arm-none-eabi-objdump
+ARMCC := arm-gcc/bin/arm-none-eabi-gcc
+ARMCPP := arm-gcc/bin/arm-none-eabi-g++
+ARMOC := arm-gcc/bin/arm-none-eabi-objcopy
+ARMOD := arm-gcc/bin/arm-none-eabi-objdump
 
 # Get the right linker
 ifeq ($(strip $(CPPFILES)),)
@@ -112,7 +112,7 @@ bin/game.elf: build/data/audio-settings.hpp $(OFILES) | download-deps gcc-check
 
 -include $(DFILES)
 
-build/data/%.o: build/data/%.s gcc | gcc-check
+build/data/%.o: build/data/%.s arm-gcc | gcc-check
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) $(INCLUDE) -c $< -o $@
 
@@ -139,31 +139,31 @@ build/data/sounds/%.s build/data/sounds/%.hpp: data/sounds/%.wav build/data/audi
 # Source files - those order-only prerequisites ensure that the resources are build *before* the sources
 # this is important because the .d files aren't generated yet, and they need to be so the source compilation
 # doesn't fail because the resource headers weren't yet compiled
-build/%.iwram.o: %.iwram.cpp gcc tonc | gcc-check $(RSRC_HFILES)
+build/%.iwram.o: %.iwram.cpp arm-gcc tonc | gcc-check $(RSRC_HFILES)
 	@mkdir -p $(@D)
 	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
 
-build/%.iwram.o: %.iwram.c gcc tonc | gcc-check $(RSRC_HFILES)
+build/%.iwram.o: %.iwram.c arm-gcc tonc | gcc-check $(RSRC_HFILES)
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -fno-lto -marm -mlong-calls -c $< -o $@
 
-build/%.ewram.o: %.ewram.cpp gcc tonc | gcc-check $(RSRC_HFILES)
+build/%.ewram.o: %.ewram.cpp arm-gcc tonc | gcc-check $(RSRC_HFILES)
 	@mkdir -p $(@D)
 	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -fno-lto -mlong-calls -c $< -o $@
 
-build/%.o: %.cpp gcc tonc | gcc-check $(RSRC_HFILES)
+build/%.o: %.cpp arm-gcc tonc | gcc-check $(RSRC_HFILES)
 	@mkdir -p $(@D)
 	$(ARMCPP) -MMD -MP -MF $(@:.o=.d) $(CPPFLAGS) $(INCLUDE) -c $< -o $@
 
-build/%.o: %.c gcc tonc | gcc-check $(RSRC_HFILES)
+build/%.o: %.c arm-gcc tonc | gcc-check $(RSRC_HFILES)
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-build/%.o: %.s gcc tonc | gcc-check $(RSRC_HFILES)
+build/%.o: %.s arm-gcc tonc | gcc-check $(RSRC_HFILES)
 	@mkdir -p $(@D)
 	$(ARMCC) -MMD -MP -MF $(@:.o=.d) -x assembler-with-cpp $(ASFLAGS) $(INCLUDE) -c $< -o $@
 
-download-deps: gcc tonc libsamplerate
+download-deps: arm-gcc tonc libsamplerate
 
 # Pull tonc
 tonc: tonc.zip
@@ -172,23 +172,24 @@ tonc: tonc.zip
 tonc.zip:
 	wget $(TONC_URL) -O tonc.zip
 
-gcc-check: gcc
-ifneq ($(GCC_VERSION),$(shell $(ARMCC) -dumpversion))
-	$(error "Wrong/out of date version of gcc! Please run `rm -rf gcc*` then `make` to redownload GCC")
-endif
+gcc-check: arm-gcc
+	@if [ "$(GCC_VERSION)" != `$(ARMCC) -dumpversion` ]; then \
+		echo 'ERROR: Wrong/out of date version of gcc! Please run `rm -rf arm-gcc*` then `make` to redownload GCC'; \
+		exit 1; \
+	fi
 
 # Pull gcc
-gcc: gcc.tar.bz2
+arm-gcc: arm-gcc.tar.bz2
 ifeq (,$(GCC_PLATFORM))
 	$(error "This platform does not have a prebuilt arm-none-eabi toolchain; download and compile GCC $(GCC_VERSION) from source and place it at the gcc folder!")
 endif
-	mkdir gcc && tar xjf gcc.tar.bz2 -C gcc --strip-components 1
+	mkdir arm-gcc && tar xjf arm-gcc.tar.bz2 -C arm-gcc --strip-components 1
 
-gcc.tar.bz2:
+arm-gcc.tar.bz2:
 ifeq (,$(GCC_PLATFORM))
 	$(error "This platform does not have a prebuilt arm-none-eabi toolchain; download and compile GCC $(GCC_VERSION) from source and place it at the gcc folder!")
 endif
-	wget $(GCC_URL) -O gcc.tar.bz2
+	wget $(GCC_URL) -O arm-gcc.tar.bz2
 
 # Pull libsamplerate
 libsamplerate: libsamplerate.tar.gz
@@ -212,4 +213,4 @@ clean-everything:
 
 clean-downloads:
 	$(MAKE) -C tools clean
-	rm -rf bin build tonc* gcc* libsamplerate*
+	rm -rf bin build tonc* arm-gcc* libsamplerate*
