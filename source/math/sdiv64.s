@@ -43,10 +43,16 @@ __aeabi_ldiv:
     rsc     r3, r3, #0
 
 .denominatorIsPositive:
+    @ Check if the high register of the denominator is zero
+    .extern udiv64x32pastzero
+    cmp     r3, #0
+    adreq   lr, .skipRoutinePastZero
+    beq     udiv64x32pastzero
+
     @ Call the unsigned division
-    .extern udiv64pastzero
     bl      udiv64pastzero
 
+.skipRoutinePastZero:
     @ This moves "numerator is negative" to overflow flag and
     @ "denominator is negative" to sign flag
     msr     cpsr_f, r12
