@@ -33,7 +33,8 @@ std::size_t UnionFind::find(std::size_t id) const
 bool UnionFind::doUnion(std::size_t i, std::size_t j)
 {
     checkBounds(i); checkBounds(j);
-    if (find(i) == find(j)) return false;
+    i = find(i); j = find(j);
+    if (i == j) return false;
 
     // The number of unique sets reduce every time a set is united
     uSets--;
