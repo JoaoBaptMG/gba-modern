@@ -1,3 +1,5 @@
+**WARNING: this is not a library or in a state to be reused right now. This is a toy project that I played with for some years, and most of the code is not in a reusable state. The project is also in a stale state, and will probably be archived.**
+
 gba-modern
 ==========
 The objective of this project is to aim to create a Game Boy Advance game using C++17, while employing generators to the assets of the game.
