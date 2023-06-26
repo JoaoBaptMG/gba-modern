@@ -8,7 +8,7 @@ rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subs
 
 # Compilation flags
 ARCH := -mthumb -mthumb-interwork
-CFLAGS := -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto $(ARCH)
+CFLAGS := -g -Wall -O3 -ffunction-sections -fdata-sections -mcpu=arm7tdmi -mtune=arm7tdmi -flto $(ARCH) -Wno-sizeof-array-div
 CPPFLAGS := $(CFLAGS) -std=c++17 -fno-rtti -fno-exceptions
 ASFLAGS := -g $(ARCH)
 LDFLAGS	= -g $(ARCH) -Wl,--gc-sections -Wl,-Map,bin/gba.map
@@ -53,11 +53,11 @@ TONC_URL := http://www.coranac.com/files/tonc-code.zip
 
 # Link to the GCC - use architecture to pull the right one
 UNAME_S := $(shell uname -s)
-	UNAME_P := $(shell uname -p)
-	ifeq ($(UNAME_P),x86_64)
+UNAME_P := $(shell uname -p)
+ifeq ($(UNAME_P),x86_64)
 	GCC_PLATFORM := x86_64
-	endif
-	ifneq ($(filter arm%,$(UNAME_P)),)
+endif
+ifneq ($(filter arm%,$(UNAME_P)),)
 	GCC_PLATFORM := aarch64
 endif
 ifeq ($(UNAME_S),Darwin)
@@ -183,11 +183,11 @@ ifeq (,$(GCC_PLATFORM))
 endif
 	mkdir arm-gcc && tar xf $(GCC_ARCHIVE) -C arm-gcc --strip-components 1 || rmdir arm-gcc
 
-arm-gcc.tar.bz2:
+$(GCC_ARCHIVE):
 ifeq (,$(GCC_PLATFORM))
 	$(error "This platform does not have a prebuilt arm-none-eabi toolchain; download and compile GCC $(GCC_VERSION) from source and place it at the arm-gcc folder!")
 endif
-	wget $(GCC_URL) -O arm-gcc.tar.bz2
+	wget $(GCC_URL) -O $(GCC_ARCHIVE)
 
 # Pull libsamplerate
 libsamplerate: libsamplerate.tar.gz
