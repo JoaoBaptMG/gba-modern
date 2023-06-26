@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <type_traits>
+#include <tuple>
 
 #include "data/BitmaskData.hpp"
 

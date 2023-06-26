@@ -53,22 +53,20 @@ TONC_URL := http://www.coranac.com/files/tonc-code.zip
 
 # Link to the GCC - use architecture to pull the right one
 UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Linux)
 	UNAME_P := $(shell uname -p)
 	ifeq ($(UNAME_P),x86_64)
-		GCC_PLATFORM := x86_64-linux
+	GCC_PLATFORM := x86_64
 	endif
 	ifneq ($(filter arm%,$(UNAME_P)),)
-		GCC_PLATFORM := aarch64-linux
-	endif
+	GCC_PLATFORM := aarch64
 endif
 ifeq ($(UNAME_S),Darwin)
-	GCC_PLATFORM := mac
+	GCC_PLATFORM := darwin-$(GCC_PLATFORM)
 endif
-GCC_VERSION := 10.2.1
-GCC_PREFIX := 10-2020q4
-GCC_NAME := gcc-arm-none-eabi-10-2020-q4-major
-GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu-rm/$(GCC_PREFIX)/$(GCC_NAME)-$(GCC_PLATFORM).tar.bz2
+GCC_VERSION := 12.2.1
+GCC_FOLDER := 12.2.mpacbti-rel1
+GCC_ARCHIVE := gcc.tar.xz
+GCC_URL := https://developer.arm.com/-/media/Files/downloads/gnu/$(GCC_FOLDER)/binrel/arm-gnu-toolchain-$(GCC_FOLDER)-$(GCC_PLATFORM)-arm-none-eabi.tar.xz
 
 # Link to libsamplerate
 LSRC_VERSION = 0.1.9
@@ -179,15 +177,15 @@ gcc-check: arm-gcc
 	fi
 
 # Pull gcc
-arm-gcc: arm-gcc.tar.bz2
+arm-gcc: $(GCC_ARCHIVE)
 ifeq (,$(GCC_PLATFORM))
-	$(error "This platform does not have a prebuilt arm-none-eabi toolchain; download and compile GCC $(GCC_VERSION) from source and place it at the gcc folder!")
+	$(error "This platform does not have a prebuilt arm-none-eabi toolchain; download and compile GCC $(GCC_VERSION) from source and place it at the arm-gcc folder!")
 endif
-	mkdir arm-gcc && tar xjf arm-gcc.tar.bz2 -C arm-gcc --strip-components 1
+	mkdir arm-gcc && tar xf $(GCC_ARCHIVE) -C arm-gcc --strip-components 1 || rmdir arm-gcc
 
 arm-gcc.tar.bz2:
 ifeq (,$(GCC_PLATFORM))
-	$(error "This platform does not have a prebuilt arm-none-eabi toolchain; download and compile GCC $(GCC_VERSION) from source and place it at the gcc folder!")
+	$(error "This platform does not have a prebuilt arm-none-eabi toolchain; download and compile GCC $(GCC_VERSION) from source and place it at the arm-gcc folder!")
 endif
 	wget $(GCC_URL) -O arm-gcc.tar.bz2
 

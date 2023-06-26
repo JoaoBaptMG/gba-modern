@@ -12,6 +12,6 @@ gba-modern.code-workspace
 bin
 gba.map
 tonc*
-gcc*
+arm-gcc*
 libsamplerate*
 test
